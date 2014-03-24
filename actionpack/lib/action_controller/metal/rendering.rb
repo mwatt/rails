@@ -1,3 +1,6 @@
+require 'active_support/deprecation'
+require 'active_support/core_ext/string/filters'
+
 module ActionController
   module Rendering
     extend ActiveSupport::Concern
@@ -73,6 +76,13 @@ module ActionController
     # Normalize both text and status options.
     def _normalize_options(options) #:nodoc:
       _normalize_text(options)
+
+      if options[:text]
+        ActiveSupport::Deprecation.warn <<-warning.squish
+          `render :text` is deprecated because of ambiguous response content type. Please use
+          `:plain`, `:html`, or `:body` option.
+        warning
+      end
 
       if options[:html]
         options[:html] = ERB::Util.html_escape(options[:html])

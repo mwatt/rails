@@ -148,6 +148,8 @@ module ActionController
   class TestSession < Rack::Session::Abstract::SessionHash #:nodoc:
     DEFAULT_OPTIONS = Rack::Session::Abstract::ID::DEFAULT_OPTIONS
 
+    Unspecified = Object.new
+
     def initialize(session = {})
       super(nil, nil)
       @id = SecureRandom.hex(16)
@@ -169,6 +171,14 @@ module ActionController
 
     def destroy
       clear
+    end
+
+    def fetch(key, default = Unspecified, &block)
+      if default == Unspecified
+        @data.fetch(key, &block)
+      else
+        @data.fetch(key, default, &block)
+      end
     end
 
     private

@@ -1,3 +1,4 @@
+require 'active_support/core_ext/class/subclasses'
 require 'active_support/core_ext/hash/keys'
 
 module ActiveJob
@@ -7,8 +8,14 @@ module ActiveJob
 
     included do
       def before_setup
-        @old_queue_adapter = queue_adapter
-        ActiveJob::Base.queue_adapter = :test
+        test_adapter = ActiveJob::QueueAdapters::TestAdapter.new
+
+        @old_queue_adapters = (ActiveJob::Base.subclasses << ActiveJob::Base).map do |klass|
+          [klass, klass._queue_adapter].tap do
+            klass.queue_adapter = test_adapter
+          end
+        end
+
         clear_enqueued_jobs
         clear_performed_jobs
         super
@@ -16,7 +23,9 @@ module ActiveJob
 
       def after_teardown
         super
-        ActiveJob::Base.queue_adapter = @old_queue_adapter
+        @old_queue_adapters.each do |(klass, adapter)|
+          klass._queue_adapter = adapter
+        end
       end
 
       # Asserts that the number of enqueued jobs matches the given number.

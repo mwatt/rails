@@ -7,6 +7,8 @@ module ActiveModel
       extend ActiveSupport::Concern
       include ActiveModel::Serialization
 
+      SERIALIZATION_METHOD = :as_json
+
       included do
         extend ActiveModel::Naming
 
@@ -94,9 +96,9 @@ module ActiveModel
 
         if root
           root = model_name.element if root == true
-          { root => serializable_hash(options) }
+          { root => serializable_hash(options, SERIALIZATION_METHOD) }
         else
-          serializable_hash(options)
+          serializable_hash(options, SERIALIZATION_METHOD)
         end
       end
 

@@ -877,4 +877,27 @@ class PersistenceTest < ActiveRecord::TestCase
     assert_equal "Welcome to the weblog", post.title
     assert_not post.new_record?
   end
+
+  def test_reload_via_querycache
+    ActiveRecord::Base.connection.enable_query_cache!
+    ActiveRecord::Base.connection.clear_query_cache
+    assert ActiveRecord::Base.connection.query_cache_enabled, 'cache should be on'
+    parrot = Parrot.create(:name => "test_querycache_parrot")
+
+    # populate the cache with the SELECT result
+    found_parrot = Parrot.find(parrot.id)
+    assert_equal parrot.id, found_parrot.id
+
+    # Manually update the 'name' attribute in the DB directly
+    assert_equal 1, ActiveRecord::Base.connection.query_cache.length
+    assert_nothing_raised do
+      ActiveRecord::Base.connection.execute("UPDATE Parrots SET name='test_querycache_parrot_wrong_name' where id = #{parrot.id}")
+    end
+
+    # Now reload, and verify that it gets the DB version, and not the querycache version
+    found_parrot.reload
+    assert_equal "test_querycache_parrot_wrong_name", found_parrot.name
+  end
 end
+
+

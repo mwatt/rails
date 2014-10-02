@@ -367,7 +367,7 @@ module ActiveRecord
     #   # => #<Account id: 1, email: 'account@example.com'>
     #
     # Attributes are reloaded from the database, and caches busted, in
-    # particular the associations cache.
+    # particular the associations cache, and also the QueryCache.
     #
     # If the record no longer exists in the database <tt>ActiveRecord::RecordNotFound</tt>
     # is raised. Otherwise, in addition to the in-place modification the method
@@ -403,18 +403,20 @@ module ActiveRecord
     #   end
     #
     def reload(options = nil)
-      clear_aggregation_cache
-      clear_association_cache
+      self.class.connection.uncached do
+        clear_aggregation_cache
+        clear_association_cache
 
-      fresh_object =
-        if options && options[:lock]
-          self.class.unscoped { self.class.lock(options[:lock]).find(id) }
-        else
-          self.class.unscoped { self.class.find(id) }
-        end
+        fresh_object =
+            if options && options[:lock]
+              self.class.unscoped { self.class.lock(options[:lock]).find(id) }
+            else
+              self.class.unscoped { self.class.find(id) }
+            end
 
-      @attributes = fresh_object.instance_variable_get('@attributes')
-      @new_record = false
+        @attributes = fresh_object.instance_variable_get('@attributes')
+        @new_record = false
+      end
       self
     end
 

@@ -403,20 +403,20 @@ module ActiveRecord
     #   end
     #
     def reload(options = nil)
-      self.class.connection.uncached do
-        clear_aggregation_cache
-        clear_association_cache
+      clear_aggregation_cache
+      clear_association_cache
+      # This may seem heavy-handed, but this is done on every :update, :delete, :insert anyway.
+      self.class.connection.clear_query_cache
 
-        fresh_object =
-            if options && options[:lock]
-              self.class.unscoped { self.class.lock(options[:lock]).find(id) }
-            else
-              self.class.unscoped { self.class.find(id) }
-            end
+      fresh_object =
+          if options && options[:lock]
+            self.class.unscoped { self.class.lock(options[:lock]).find(id) }
+          else
+            self.class.unscoped { self.class.find(id) }
+          end
 
-        @attributes = fresh_object.instance_variable_get('@attributes')
-        @new_record = false
-      end
+      @attributes = fresh_object.instance_variable_get('@attributes')
+      @new_record = false
       self
     end
 

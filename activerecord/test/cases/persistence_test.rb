@@ -701,7 +701,7 @@ class PersistenceTest < ActiveRecord::TestCase
   end
 
   def test_update_attributes
-    topic = Topic.find(1)
+    topic = Topic.new("approved" => false, "title" => "The First Topic")
     assert !topic.approved?
     assert_equal "The First Topic", topic.title
 

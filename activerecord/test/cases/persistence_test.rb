@@ -890,8 +890,9 @@ class PersistenceTest < ActiveRecord::TestCase
 
     # Manually update the 'name' attribute in the DB directly
     assert_equal 1, ActiveRecord::Base.connection.query_cache.length
-    assert_nothing_raised do
-      ActiveRecord::Base.connection.execute("UPDATE Parrots SET name='test_querycache_parrot_wrong_name' where id = #{parrot.id}")
+    ActiveRecord::Base.uncached do
+      found_parrot.name = "test_querycache_parrot_wrong_name"
+      found_parrot.save
     end
 
     # Now reload, and verify that it gets the DB version, and not the querycache version

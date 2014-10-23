@@ -408,11 +408,11 @@ module ActiveRecord
       self.class.connection.clear_query_cache
 
       fresh_object =
-          if options && options[:lock]
-            self.class.unscoped { self.class.lock(options[:lock]).find(id) }
-          else
-            self.class.unscoped { self.class.find(id) }
-          end
+        if options && options[:lock]
+          self.class.unscoped { self.class.lock(options[:lock]).find(id) }
+        else
+          self.class.unscoped { self.class.find(id) }
+        end
 
       @attributes = fresh_object.instance_variable_get('@attributes')
       @new_record = false

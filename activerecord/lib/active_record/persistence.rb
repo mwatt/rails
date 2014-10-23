@@ -405,7 +405,6 @@ module ActiveRecord
     def reload(options = nil)
       clear_aggregation_cache
       clear_association_cache
-      # This may seem heavy-handed, but this is done on every :update, :delete, :insert anyway.
       self.class.connection.clear_query_cache
 
       fresh_object =

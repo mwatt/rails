@@ -898,7 +898,7 @@ class PersistenceTest < ActiveRecord::TestCase
     # Now reload, and verify that it gets the DB version, and not the querycache version
     found_parrot.reload
     assert_equal "test_querycache_parrot_wrong_name", found_parrot.name
+  ensure
+    ActiveRecord::Base.connection.disable_query_cache!
   end
 end
-
-

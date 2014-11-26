@@ -1,3 +1,16 @@
+*   Add `:unsigned` option support for MySQL numeric data types.
+
+    Example:
+
+        create_table :foos, id: :primary_key, unsigned: true do |t|
+          t.integer :unsigned_integer, unsigned: true
+          t.bigint  :unsigned_bigint,  unsigned: true
+          t.float   :unsigned_float,   unsigned: true
+          t.decimal :unsigned_decimal, unsigned: true, precision: 10, scale: 2
+        end
+
+    *Ryuta Kamizono*
+
 *   Allow single table inheritance instantiation to work when storing
     demodulized class names.
 

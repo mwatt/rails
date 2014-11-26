@@ -14,7 +14,7 @@ module ActiveRecord
       end
 
       class ColumnDefinition < ActiveRecord::ConnectionAdapters::ColumnDefinition
-        attr_accessor :charset
+        attr_accessor :charset, :unsigned
       end
 
       class TableDefinition < ActiveRecord::ConnectionAdapters::TableDefinition
@@ -27,6 +27,7 @@ module ActiveRecord
             column.type = :integer
             column.auto_increment = true
           end
+          column.unsigned ||= options[:unsigned]
           column.charset = options[:charset]
           column
         end
@@ -60,6 +61,11 @@ module ActiveRecord
           create_sql << "#{o.options}"
           create_sql << " AS #{@conn.to_sql(o.as)}" if o.as
           create_sql
+        end
+
+        def visit_ColumnDefinition(o)
+          o.sql_type = type_to_sql(o.type, o.limit, o.precision, o.scale, o.unsigned)
+          super
         end
 
         def visit_AddColumnDefinition(o)
@@ -114,6 +120,7 @@ module ActiveRecord
         spec = {}
         if column.auto_increment?
           spec[:id] = ':bigint' if column.bigint?
+          spec[:unsigned] = 'true' if column.unsigned?
           return if spec.empty?
         else
           spec[:id] = column.type.inspect
@@ -126,7 +133,12 @@ module ActiveRecord
         spec = super
         spec.delete(:precision) if /time/ === column.sql_type && column.precision == 0
         spec.delete(:limit)     if :boolean === column.type
+        spec[:unsigned] = 'true' if column.unsigned?
         spec
+      end
+
+      def migration_keys
+        super + [:unsigned]
       end
 
       def schema_collation(column)
@@ -162,6 +174,10 @@ module ActiveRecord
 
         def blob_or_text_column?
           sql_type =~ /blob/i || type == :text
+        end
+
+        def unsigned?
+          /unsigned/ === sql_type
         end
 
         def case_sensitive?
@@ -694,8 +710,8 @@ module ActiveRecord
       end
 
       # Maps logical Rails types to MySQL-specific data types.
-      def type_to_sql(type, limit = nil, precision = nil, scale = nil)
-        case type.to_s
+      def type_to_sql(type, limit = nil, precision = nil, scale = nil, unsigned = nil)
+        sql = case type.to_s
         when 'binary'
           case limit
           when 0..0xfff;           "varbinary(#{limit})"
@@ -721,8 +737,11 @@ module ActiveRecord
           else raise(ActiveRecordError, "No text type has character length #{limit}")
           end
         else
-          super
+          super(type, limit, precision, scale)
         end
+
+        sql << ' unsigned' if unsigned && type != :primary_key
+        sql
       end
 
       # SHOW VARIABLES LIKE 'name'

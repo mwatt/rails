@@ -1,3 +1,16 @@
+*   Add `:unsigned` option support for MySQL numeric data types.
+
+    Example:
+
+        create_table :foos, id: :primary_key, unsigned: true do |t|
+          t.integer :unsigned_integer, unsigned: true
+          t.bigint  :unsigned_bigint,  unsigned: true
+          t.float   :unsigned_float,   unsigned: true
+          t.decimal :unsigned_decimal, unsigned: true, precision: 10, scale: 2
+        end
+
+    *Ryuta Kamizono*
+
 *   Fixed a bug where uniqueness validations would error on out of range values,
     even if an validation should have prevented it from hitting the database.
 

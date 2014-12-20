@@ -1,3 +1,9 @@
+*   Allow `joins` to be unscoped.
+
+    Closes #13775.
+
+    *Takashi Kokubun*
+
 *   Increase pg gem version requirement to `~> 0.18`. Earlier versions of the
     pg gem are known to have problems with Ruby 2.2.
 

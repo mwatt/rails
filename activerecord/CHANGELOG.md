@@ -1,3 +1,9 @@
+*   Allow `joins` to be unscoped.
+
+    Closes #13775.
+
+    *Takashi Kokubun*
+
 *   Renaming `use_transactional_fixtures` to `use_transactional_tests` for clarity.
 
     Fixes #18864.

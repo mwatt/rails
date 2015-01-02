@@ -1,3 +1,8 @@
+*   Add a `hidden_field` on the `collection_radio_buttons` to avoid raise a error
+    when the only input on the form is the `collection_radio_buttons`.
+
+    *Mauro George*
+
 *   `translate` should accept nils as members of the `:default`
     parameter without raising a translation missing error.  Fixes a
     regression introduced 362557e.

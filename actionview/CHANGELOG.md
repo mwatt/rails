@@ -1,3 +1,8 @@
+*   Add a `hidden_field` on the `collection_radio_buttons` to avoid raise a error
+    when the only input on the form is the `collection_radio_buttons`.
+
+    *Mauro George*
+
 *   Remove `:rescue_format` option for `translate` helper since it's no longer
     supported by I18n.
 

@@ -87,6 +87,7 @@ module ActionMailer
     private
 
       def enqueue_delivery(delivery_method, options={})
+        options[:queue] ||= @mailer.deliver_later_queue_name
         args = @mailer.name, @mail_method.to_s, delivery_method.to_s, *@args
         ActionMailer::DeliveryJob.set(options).perform_later(*args)
       end

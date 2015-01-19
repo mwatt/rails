@@ -1,3 +1,8 @@
+*   Permit parameters when an array of hashes is passed against a key in a hash.
+    { '0' => {}, '1' => [{}, {}, {}] } => {'0' => {}, '1' => [{}, {}, {}] }
+
+    *Jaspreet Singh Anand*
+
 *   Default headers, removed in controller actions, are no longer reapplied on
     the test response.
 

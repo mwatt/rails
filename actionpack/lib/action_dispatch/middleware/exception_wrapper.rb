@@ -35,7 +35,7 @@ module ActionDispatch
       @env = env
       @exception = original_exception(exception)
 
-      expand_backtrace if exception.is_a?(SyntaxError) || exception.try(:original_exception).try(:is_a?, SyntaxError)
+      expand_backtrace if exception.is_a?(SyntaxError) || exception.cause.is_a?(SyntaxError)
     end
 
     def rescue_template
@@ -104,15 +104,11 @@ module ActionDispatch
     end
 
     def original_exception(exception)
-      if registered_original_exception?(exception)
-        exception.original_exception
+      if @@rescue_responses.has_key?(exception.cause.class.name)
+        exception.cause
       else
         exception
       end
-    end
-
-    def registered_original_exception?(exception)
-      exception.respond_to?(:original_exception) && @@rescue_responses.has_key?(exception.original_exception.class.name)
     end
 
     def clean_backtrace(*args)

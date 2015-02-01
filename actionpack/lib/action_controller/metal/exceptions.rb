@@ -3,14 +3,21 @@ module ActionController
   end
 
   class BadRequest < ActionControllerError #:nodoc:
-    attr_reader :original_exception
-
     def initialize(type = nil, e = nil)
-      return super() unless type && e
+      if e
+        ActiveSupport::Deprecation.warn("Passing #original_exception is deprecated and has no effect. " \
+                                        "Exceptions will automatically capture the original exception.", caller)
+      end
 
-      super("Invalid #{type} parameters: #{e.message}")
-      @original_exception = e
-      set_backtrace e.backtrace
+      return super() unless type && $!
+
+      super("Invalid #{type} parameters: #{$!.message}")
+      set_backtrace $!.backtrace
+    end
+
+    def original_exception
+      ActiveSupport::Deprecation.warn("#original_exception is deprecated. Use #cause instead.", caller)
+      cause
     end
   end
 

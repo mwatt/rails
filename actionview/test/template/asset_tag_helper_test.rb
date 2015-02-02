@@ -179,8 +179,11 @@ class AssetTagHelperTest < ActionView::TestCase
   ImageLinkToTag = {
     %(image_tag("xml.png")) => %(<img alt="Xml" src="/images/xml.png" />),
     %(image_tag("rss.gif", :alt => "rss syndication")) => %(<img alt="rss syndication" src="/images/rss.gif" />),
+    %(image_tag("gold.png", :height => "100", :width => "200")) => %(<img alt="Gold" height="100" src="/images/gold.png" width="200" />),
     %(image_tag("gold.png", :size => "20")) => %(<img alt="Gold" height="20" src="/images/gold.png" width="20" />),
     %(image_tag("gold.png", :size => "45x70")) => %(<img alt="Gold" height="70" src="/images/gold.png" width="45" />),
+    %(image_tag("gold.png", :height => "100", :width => "200", :size => "45x70")) => %(<img alt="Gold" height="70" src="/images/gold.png" width="45" />),
+    %(image_tag("gold.png", :height => "100", :width => "200", :size => "square")) => %(<img alt="Gold" height="100" src="/images/gold.png" width="200" />),
     %(image_tag("gold.png", "size" => "45x70")) => %(<img alt="Gold" height="70" src="/images/gold.png" width="45" />),
     %(image_tag("error.png", "size" => "45 x 70")) => %(<img alt="Error" src="/images/error.png" />),
     %(image_tag("error.png", "size" => "x")) => %(<img alt="Error" src="/images/error.png" />),

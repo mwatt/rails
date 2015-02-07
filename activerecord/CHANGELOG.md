@@ -1,3 +1,10 @@
+*   Add `config.active_record.warn_on_records_fetched_greater_than` option
+
+    When set to an integer, a warning will be logged whenever a result set
+    larger than the specified size is returned by a query. Fixes #16463
+
+    *Jason Nochlin*
+
 *   Increase pg gem version requirement to `~> 0.18`. Earlier versions of the
     pg gem are known to have problems with Ruby 2.2.
 

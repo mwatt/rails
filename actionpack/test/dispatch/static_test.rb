@@ -2,6 +2,10 @@ require 'abstract_unit'
 require 'zlib'
 
 module StaticTests
+  DummyApp = lambda { |env|
+    [200, {"Content-Type" => "text/plain"}, ["Hello, World!"]]
+  }
+
   def test_serves_dynamic_content
     assert_equal "Hello, World!", get("/nofile").body
   end
@@ -11,7 +15,11 @@ module StaticTests
   end
 
   def test_sets_cache_control
-    response = get("/index.html")
+    app = assert_deprecated do
+      ActionDispatch::Static.new(DummyApp, @root, "public, max-age=60")
+    end
+    response = Rack::MockRequest.new(app).request("GET", "/index.html")
+
     assert_html "/index.html", response
     assert_equal "public, max-age=60", response.headers["Cache-Control"]
   end
@@ -143,6 +151,21 @@ module StaticTests
     assert_equal default_response.headers['Content-Type'], response.headers['Content-Type']
   end
 
+  def test_serves_files_with_headers
+    headers = {
+      "Access-Control-Allow-Origin" => 'http://rubyonrails.org',
+      "Cache-Control"               => 'public, max-age=60',
+      "X-Custom-Header"             => "I'm a teapot"
+    }
+
+    app      = ActionDispatch::Static.new(DummyApp, @root, headers: headers)
+    response = Rack::MockRequest.new(app).request("GET", "/foo/bar.html")
+
+    assert_equal 'http://rubyonrails.org', response.headers["Access-Control-Allow-Origin"]
+    assert_equal 'public, max-age=60',     response.headers["Cache-Control"]
+    assert_equal "I'm a teapot",           response.headers["X-Custom-Header"]
+  end
+
   # Windows doesn't allow \ / : * ? " < > | in filenames
   unless RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
     def test_serves_static_file_with_colon
@@ -193,13 +216,9 @@ module StaticTests
 end
 
 class StaticTest < ActiveSupport::TestCase
-  DummyApp = lambda { |env|
-    [200, {"Content-Type" => "text/plain"}, ["Hello, World!"]]
-  }
-
   def setup
     @root = "#{FIXTURE_LOAD_PATH}/public"
-    @app = ActionDispatch::Static.new(DummyApp, @root, "public, max-age=60")
+    @app = ActionDispatch::Static.new(DummyApp, @root, headers: {'Cache-Control' => "public, max-age=60"})
   end
 
   def public_path
@@ -228,7 +247,7 @@ end
 class StaticEncodingTest < StaticTest
   def setup
     @root = "#{FIXTURE_LOAD_PATH}/公共"
-    @app = ActionDispatch::Static.new(DummyApp, @root, "public, max-age=60")
+    @app = ActionDispatch::Static.new(DummyApp, @root, headers: {'Cache-Control' => "public, max-age=60"})
   end
 
   def public_path

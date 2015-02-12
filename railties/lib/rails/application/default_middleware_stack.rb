@@ -18,7 +18,7 @@ module Rails
           middleware.use ::Rack::Sendfile, config.action_dispatch.x_sendfile_header
 
           if config.serve_static_files
-            middleware.use ::ActionDispatch::Static, paths["public"].first, config.static_cache_control
+            middleware.use ::ActionDispatch::Static, paths["public"].first, headers: config.public_file_server.headers
           end
 
           if rack_cache = load_rack_cache

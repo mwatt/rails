@@ -10,6 +10,22 @@ module ActiveRecord
           options[:auto_increment] = true if type == :bigint
           super
         end
+
+        def unsigned_integer(*args, **options)
+          args.each { |name| column(name, :unsigned_integer, options) }
+        end
+
+        def unsigned_bigint(*args, **options)
+          args.each { |name| column(name, :unsigned_bigint, options) }
+        end
+
+        def unsigned_float(*args, **options)
+          args.each { |name| column(name, :unsigned_float, options) }
+        end
+
+        def unsigned_decimal(*args, **options)
+          args.each { |name| column(name, :unsigned_decimal, options) }
+        end
       end
 
       class ColumnDefinition < ActiveRecord::ConnectionAdapters::ColumnDefinition
@@ -25,6 +41,9 @@ module ActiveRecord
           when :primary_key
             column.type = :integer
             column.auto_increment = true
+          when /\Aunsigned_(?<type>.+)\z/
+            column.type = $~[:type].to_sym
+            column.unsigned = true
           end
           column.unsigned ||= options[:unsigned]
           column.charset = options[:charset]

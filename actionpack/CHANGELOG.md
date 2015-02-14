@@ -1,3 +1,17 @@
+*   Provide friendlier access to request variants.
+
+        request.variant = :phone
+        request.variant.phone?  # true
+        request.variant.tablet? # false
+
+        request.variant = [:phone, :tablet]
+        request.variant.phone?                  # true
+        request.variant.desktop?                # false
+        request.variant.any?(:phone, :desktop)  # true
+        request.variant.any?(:desktop, :watch)  # false
+
+    *George Claghorn*
+
 *   Drop request class from RouteSet constructor.
  
     If you would like to use a custom request class, please subclass and implemet
@@ -8,6 +22,7 @@
 *   Fallback to `ENV['RAILS_RELATIVE_URL_ROOT']` in `url_for`.
 
     Fixed an issue where the `RAILS_RELATIVE_URL_ROOT` environment variable is not
+
     prepended to the path when `url_for` is called. If `SCRIPT_NAME` (used by Rack)
     is set, it takes precedence.
 

@@ -42,6 +42,16 @@ class UnsignedTypeTest < ActiveRecord::TestCase
     end
   end
 
+  test "schema definition can use unsigned_integer type" do
+    @connection.change_table("unsigned_types") do |t|
+      t.unsigned_integer :unsigned_number
+    end
+
+    column = @connection.columns("unsigned_types").find { |c| c.name == 'unsigned_number' }
+    assert_equal :integer, column.type
+    assert column.unsigned?
+  end
+
   test "schema dump includes unsigned option" do
     schema = dump_table_schema "unsigned_types"
     assert_match %r{t.integer\s+"unsigned_integer",\s+limit: 4,\s+unsigned: true$}, schema

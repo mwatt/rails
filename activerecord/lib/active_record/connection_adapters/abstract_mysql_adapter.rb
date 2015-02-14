@@ -11,6 +11,10 @@ module ActiveRecord
           options[:auto_increment] = true if type == :bigint
           super
         end
+
+        def unsigned_integer(*args, **options)
+          args.each { |name| column(name, :unsigned_integer, options) }
+        end
       end
 
       class ColumnDefinition < ActiveRecord::ConnectionAdapters::ColumnDefinition
@@ -26,6 +30,9 @@ module ActiveRecord
           when :primary_key
             column.type = :integer
             column.auto_increment = true
+          when :unsigned_integer
+            column.type = :integer
+            column.unsigned = true
           end
           column.unsigned ||= options[:unsigned]
           column.charset = options[:charset]

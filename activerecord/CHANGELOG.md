@@ -9,6 +9,12 @@
           t.decimal :unsigned_decimal, unsigned: true, precision: 10, scale: 2
         end
 
+    In the case of `unsigned_integer`, it can be used as the type:
+
+        create_table :foos do |t|
+          t.unsigned_integer :unsigned_number
+        end
+
     *Ryuta Kamizono*
 
 *   MySQL: `:charset` and `:collation` support for string and text columns.

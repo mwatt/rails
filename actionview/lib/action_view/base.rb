@@ -175,6 +175,15 @@ module ActionView #:nodoc:
         ActionView::Resolver.caching = value
       end
 
+      def eager_load_templates
+        ActionView::TemplateEagerLoader.eager_load_templates?
+      end
+
+      def eager_load_templates=(value)
+        raise "To eager load view templates config.eager_load should be true" unless !value || Rails.application.config.eager_load
+        ActionView::TemplateEagerLoader.eager_load_templates = value
+      end
+
       def xss_safe? #:nodoc:
         true
       end

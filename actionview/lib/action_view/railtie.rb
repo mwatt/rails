@@ -48,10 +48,10 @@ module ActionView
       end
     end
 
-    initializer "cache_templates" do
+    initializer "action_view.eager_load_templates" do |app|
       ActiveSupport.on_load(:action_controller) do
-        if Rails.env.production? && app.config.eager_load_templates
-          ActionView::TemplateEagerLoader.new(_view_paths).cache_templates
+        if app.config.action_view.eager_load_templates
+          ActionView::TemplateEagerLoader.new(_view_paths).eager_load
         end
       end
     end

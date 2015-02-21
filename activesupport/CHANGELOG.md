@@ -1,3 +1,7 @@
+*   `ActiveSupport::Callbacks#skip_callback` now raises an `ArgumentError` if
+    an unrecognized callback is removed.
+
+    *Iain Beeston*
 *   Added `#without` on `Enumerable` and `Array` to return a copy of an
     enumerable without the specified elements.
 

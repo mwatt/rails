@@ -1,3 +1,8 @@
+*   `ActiveSupport::Callbacks#skip_callback` now raises an `ArgumentError` if
+    an unrecognized callback is removed.
+
+    *Iain Beeston*
+
 *   Take DST into account when locating TimeZone from Numeric.
 
     When given a specific offset, use the first result found where the

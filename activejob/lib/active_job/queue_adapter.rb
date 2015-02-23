@@ -6,24 +6,21 @@ module ActiveJob
   # The <tt>ActiveJob::QueueAdapter</tt> module is used to load the
   # correct adapter. The default queue adapter is the :inline queue.
   module QueueAdapter #:nodoc:
-    extend ActiveSupport::Concern
-
-    included do
-      class_attribute :_queue_adapter, instance_accessor: false, instance_predicate: false
-      self.queue_adapter = :inline
+    # We can't use ActiveSupport::Concern here because we need to `prepend`
+    # ClassMethods rather than `extend`ing it.
+    def self.included(klass)
+      klass.class_attribute :queue_adapter, instance_accessor: false, instance_predicate: false
+      klass.singleton_class.prepend(ClassMethods)
+      klass.queue_adapter = :inline
     end
 
     # Includes the setter method for changing the active queue adapter.
     module ClassMethods
-      def queue_adapter
-        _queue_adapter
-      end
-
       # Specify the backend queue provider. The default queue adapter
       # is the :inline queue. See QueueAdapters for more
       # information.
       def queue_adapter=(name_or_adapter)
-        self._queue_adapter = interpret_adapter(name_or_adapter)
+        super(interpret_adapter(name_or_adapter))
       end
 
       private

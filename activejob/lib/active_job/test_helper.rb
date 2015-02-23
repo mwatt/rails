@@ -9,9 +9,9 @@ module ActiveJob
     included do
       def before_setup
         @old_queue_adapters = (ActiveJob::Base.subclasses << ActiveJob::Base).select do |klass|
-          klass.respond_to?(:_queue_adapter)
+          klass.respond_to?(:queue_adapter)
         end.map do |klass|
-          [klass, klass._queue_adapter].tap do
+          [klass, klass.queue_adapter].tap do
             klass.queue_adapter = :test
           end
         end
@@ -27,7 +27,7 @@ module ActiveJob
       def after_teardown
         super
         @old_queue_adapters.each do |(klass, adapter)|
-          klass._queue_adapter = adapter
+          klass.queue_adapter = adapter
         end
       end
 

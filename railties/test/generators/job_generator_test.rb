@@ -4,11 +4,6 @@ require 'rails/generators/job/job_generator'
 class JobGeneratorTest < Rails::Generators::TestCase
   include GeneratorsTestHelper
 
-  def test_first_run_should_create_base_class
-    run_generator ["refresh_counters"]
-    assert_file "app/jobs/application_job.rb"
-  end
-
   def test_job_skeleton_is_created
     run_generator ["refresh_counters"]
     assert_file "app/jobs/refresh_counters_job.rb" do |job|

@@ -18,13 +18,6 @@ module Rails
       def create_job_file
         template 'job.rb', File.join('app/jobs', class_path, "#{file_name}_job.rb")
       end
-
-      def create_base_job_file
-        unless File.exist?(File.join('app/jobs', class_path, 'application_job.rb'))
-          template 'base.rb', File.join('app/jobs', class_path, 'application_job.rb')
-        end
-      end
-
     end
   end
 end

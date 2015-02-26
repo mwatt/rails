@@ -1,7 +1,7 @@
 module ActiveRecord
   class Relation
     module RecordFetchWarning
-      # When this module is prepended to `ActiveRecord::Relation` and
+      # When this module is prepended to ActiveRecord::Relation and
       # `config.active_record.warn_on_records_fetched_greater_than` is
       # set to an integer, if the number of records a query returns is
       # greater than the value of `warn_on_records_fetched_greater_than`,
@@ -10,7 +10,7 @@ module ActiveRecord
       # bloat.
       #
       # In most cases, fetching large number of records can be performed
-      # efficiently using the ActiveRecord::Relation::Batches methods.
+      # efficiently using the ActiveRecord::Batches methods.
       # See active_record/lib/relation/batches.rb for more information.
       def exec_queries
         QueryRegistry.reset

@@ -1,3 +1,12 @@
+*   Add `ActiveSupport::TimeZone#from_offset`
+
+    When given a specific offset, use the first result found where the
+    total current offset (including any periodic deviations such as DST)
+    from UTC is equal. Takes a time to use as context, or defaults to
+    the current local time.
+
+    *Yasyf Mohamedali*
+
 *   Added `#without` on `Enumerable` and `Array` to return a copy of an
     enumerable without the specified elements.
 

@@ -11,12 +11,12 @@ module Rails
                     :eager_load, :exceptions_app, :file_watcher, :filter_parameters,
                     :force_ssl, :helpers_paths, :logger, :log_formatter, :log_tags,
                     :railties_order, :relative_url_root, :secret_key_base, :secret_token,
-                    :serve_static_files, :ssl_options, :static_cache_control, :session_options,
+                    :serve_static_files, :ssl_options, :session_options,
                     :time_zone, :reload_classes_only_on_change,
                     :beginning_of_week, :filter_redirect, :x
 
       attr_writer :log_level
-      attr_reader :encoding
+      attr_reader :encoding, :static_cache_control
 
       def initialize(*)
         super
@@ -49,6 +49,14 @@ module Rails
         @secret_token                  = nil
         @secret_key_base               = nil
         @x                             = Custom.new
+      end
+
+      def static_cache_control=(value)
+        ActiveSupport::Deprecation.warn("static_cache_control is deprecated and will be removed in Rails 5.1. " \
+                                        "Please use `config.public_file_server.headers['Cache-Control'] = #{value} instead.")
+
+        @static_cache_control = value
+        public_file_server.headers['Cache-Control'.freeze] = value
       end
 
       def encoding=(value)

@@ -1,3 +1,19 @@
+*   Added `ActiveSupport::ArrayInquirer` and `Array#inquiry`.
+
+    Wrapping an array in an `ArrayInquirer` gives a friendlier way to check its
+    contents. For example, `request.variant` returns an +ArrayInquirer+ object.
+    To check a request's variants, you can call:
+
+        request.variant.phone?
+        request.variant.any?(:phone, :tablet)
+
+    ...instead of:
+
+        request.variant.include?(:phone)
+        request.variant.any? { |v| v.in?([:phone, :tablet]) }
+
+    *George Claghorn*
+
 *   Added `#without` on `Enumerable` and `Array` to return a copy of an
     enumerable without the specified elements.
 

@@ -1,3 +1,9 @@
+*   Renaming `use_transactional_fixtures` to `use_transactional_tests` for clarity.
+
+    Fixes #18864.
+
+    *Brandon Weiss*
+
 *   Correctly dump `serial` and `bigserial`.
 
     *Ryuta Kamizono*

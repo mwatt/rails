@@ -11,7 +11,7 @@ module ActionView
       @resolver = resolver
     end
 
-    # Compiles and caches all templates 
+    # Compiles and caches all templates
     def eager_load
       each_template(&:compile!)
     end
@@ -23,13 +23,11 @@ module ActionView
     # After finding and caching the templates, it will
     # yield them to the block.
     def each_template(&block)
-      prefixes.each do |prefix|
-        path_names(prefix).each do |name|
-          locales.each do |locale|
-            details, key, action, partial, locals = set_template_parameters(locale, name)
-            locals.each do |locals_array|
-              @resolver.find_all(action, prefix, partial, details, key, locals_array).each(&block)
-            end
+      views.each do |prefix, name|
+        locales.each do |locale|
+          details, key, action, partial, locals = set_template_parameters(locale, name)
+          locals.each do |locals_array|
+            @resolver.find_all(action, prefix, partial, details, key, locals_array).each(&block)
           end
         end
       end
@@ -46,11 +44,6 @@ module ActionView
     def name_parts_and_partial(name)
       name_parts = name.split('.')
       [name_parts, name_parts.first[0] == '_']
-    end
-
-    def prefixes
-      prefixes = view_paths.map { |name| name.split('app/views/').last }
-      prefixes.map { |prefix| prefix.split(File.basename prefix).first[0..-2] }.uniq
     end
 
     def details_and_key(locale, name, name_parts)
@@ -86,15 +79,23 @@ module ActionView
     end
 
     def view_paths
-      @view_paths ||= Dir.glob('app/views/**/*.*')
+      paths = []
+      @resolver.paths.map(&:to_path).each do |base_path|
+        Dir.glob("#{base_path}/**/*.*").each do |path|
+          paths << path.sub("#{base_path}/", '')
+        end
+      end
+      paths
     end
 
-    def path_names(prefix)
-      view_paths_for(prefix).map { |path| File.basename(path) }
-    end
-
-    def view_paths_for(prefix)
-      view_paths.select { |i| i.match(%r{\Aapp/views/#{prefix}/[^/]+\.+[^/]+\z}) }
+    def views
+      views = []
+      view_paths.each do |path|
+        name = path.split('/').last
+        prefix = path.split('/')[0..-2].join('/')
+        views << [prefix, name]
+      end
+      views
     end
 
     def variants(name_parts)
@@ -102,10 +103,6 @@ module ActionView
       name_parts.pop
       parts = name_parts.last.split(separator)
       parts.length > 1 ? [parts.last] : []
-    end
-
-    def variant_separator
-      Regexp.escape(ActionView::PathResolver::EXTENSIONS[:variants])
     end
 
     def all_formats

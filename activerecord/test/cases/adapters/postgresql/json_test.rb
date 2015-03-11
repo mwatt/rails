@@ -21,6 +21,7 @@ module PostgresqlJSONSharedTestCases
     rescue ActiveRecord::StatementInvalid
       skip "do not test on PostgreSQL without #{column_type} type."
     end
+    JsonDataType.reset_column_information
   end
 
   def teardown

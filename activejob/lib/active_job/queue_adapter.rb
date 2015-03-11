@@ -14,20 +14,26 @@ module ActiveJob
       # Specify the backend queue provider. The default queue adapter
       # is the :inline queue. See QueueAdapters for more
       # information.
-      def queue_adapter=(name_or_adapter)
-        @@queue_adapter = \
-          case name_or_adapter
-          when Symbol, String
-            load_adapter(name_or_adapter)
+      def queue_adapter=(name_or_adapter_or_class)
+        case name_or_adapter_or_class
+        when Symbol, String
+          self.queue_adapter = load_adapter_class(name_or_adapter_or_class)
+        else
+          @@queue_adapter = if name_or_adapter_or_class.respond_to?(:enqueue)
+            name_or_adapter_or_class
+          elsif name_or_adapter_or_class.is_a?(Class) && name_or_adapter_or_class.public_method_defined?(:enqueue)
+            name_or_adapter_or_class.new
           else
-            name_or_adapter if name_or_adapter.respond_to?(:enqueue)
+            raise ArgumentError
           end
+        end
       end
 
       private
-        def load_adapter(name)
-          "ActiveJob::QueueAdapters::#{name.to_s.camelize}Adapter".constantize
-        end
+
+      def load_adapter_class(name)
+        "ActiveJob::QueueAdapters::#{name.to_s.camelize}Adapter".constantize
+      end
     end
   end
 end

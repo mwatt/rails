@@ -1,32 +1,41 @@
 require 'active_job/queue_adapters/inline_adapter'
+require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/string/inflections'
 
 module ActiveJob
   # The <tt>ActiveJob::QueueAdapter</tt> module is used to load the
   # correct adapter. The default queue adapter is the :inline queue.
   module QueueAdapter #:nodoc:
-    extend ActiveSupport::Concern
+    # We can't use ActiveSupport::Concern here because we need to `prepend`
+    # ClassMethods rather than `extend`ing it.
+    def self.included(klass)
+      klass.class_attribute :queue_adapter, instance_accessor: false, instance_predicate: false
+      klass.singleton_class.prepend(ClassMethods)
+      klass.queue_adapter = :inline
+    end
 
     # Includes the setter method for changing the active queue adapter.
     module ClassMethods
-      mattr_reader(:queue_adapter) { ActiveJob::QueueAdapters::InlineAdapter }
-
       # Specify the backend queue provider. The default queue adapter
       # is the :inline queue. See QueueAdapters for more
       # information.
       def queue_adapter=(name_or_adapter_or_class)
+        super(interpret_adapter(name_or_adapter_or_class))
+      end
+
+      def interpret_adapter(name_or_adapter_or_class)
         case name_or_adapter_or_class
         when Symbol, String
-          self.queue_adapter = load_adapter(name_or_adapter_or_class)
+          load_adapter(name_or_adapter_or_class)
         else
-          @@queue_adapter = if queue_adapter?(name_or_adapter_or_class)
+          if queue_adapter?(name_or_adapter_or_class)
             name_or_adapter_or_class
           elsif queue_adapter_class?(name_or_adapter_or_class)
             ActiveSupport::Deprecation.warn "Passing an adapter class is deprecated " \
-            "and will be removed in Rails 5.1. Please pass an adapter name " \
-            "(.queue_adapter = :#{name_or_adapter_or_class.name.demodulize.remove('Adapter').underscore}) " \
-            "or an instance (.queue_adapter = #{name_or_adapter_or_class.name}.new) instead."
-            name_or_adapter_or_class.new
+              "and will be removed in Rails 5.1. Please pass an adapter name " \
+              "(.queue_adapter = :#{name_or_adapter_or_class.name.demodulize.remove('Adapter').underscore}) " \
+              "or an instance (.queue_adapter = #{name_or_adapter_or_class.name}.new) instead."
+              name_or_adapter_or_class.new
           else
             raise ArgumentError
           end

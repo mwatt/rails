@@ -45,11 +45,6 @@ module ActiveRecord
           all.scope_for_create
         end
 
-        # Are there default attributes associated with this scope?
-        def scope_attributes? # :nodoc:
-          current_scope || default_scopes.any?
-        end
-
         # Adds a class method for retrieving and querying objects. A \scope
         # represents a narrowing of a database query, such as
         # <tt>where(color: :red).select('shirts.*').includes(:washing_instructions)</tt>.

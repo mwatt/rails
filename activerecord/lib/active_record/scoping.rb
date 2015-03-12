@@ -17,6 +17,11 @@ module ActiveRecord
       def current_scope=(scope) #:nodoc:
         ScopeRegistry.set_value_for(:current_scope, self.to_s, scope)
       end
+
+      # Are there attributes associated with this scope?
+      def scope_attributes? # :nodoc:
+        current_scope
+      end
     end
 
     def populate_with_current_scope_attributes

@@ -48,5 +48,32 @@ module ActiveJob
     autoload :SneakersAdapter
     autoload :SuckerPunchAdapter
     autoload :TestAdapter
+
+    ADAPTER = 'Adapter'.freeze
+
+    class << self
+      def instance(name, *adapter_args, &block)
+        hash = ([name, block] << adapter_args).hash
+
+        return instances.fetch(hash) if instances.key?(hash)
+
+        mutex.synchronize do
+          return instances.fetch(hash) if instances.key?(hash)
+
+          @instances[hash] ||= lookup(name).new(*adapter_args, &block)
+        end
+      end
+
+      private
+
+      attr_accessor :mutex, :instances
+
+      def lookup(name)
+        const_get(name.to_s.camelize << ADAPTER)
+      end
+    end
+
+    self.mutex = Mutex.new
+    self.instances = {}
   end
 end

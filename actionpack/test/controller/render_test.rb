@@ -173,6 +173,11 @@ class TestController < ActionController::Base
     head :forbidden, :x_custom_header => "something"
   end
 
+  def head_and_return
+    head :ok and return
+    raise 'should not reach this line'
+  end
+
   def head_with_no_content
     # Fill in the headers with dummy data to make
     # sure they get removed during the testing
@@ -559,6 +564,11 @@ class HeadRenderTest < ActionController::TestCase
     assert_equal "Forbidden", @response.message
     assert_equal "something", @response.headers["X-Custom-Header"]
     assert_response :forbidden
+  end
+
+  def test_head_and_return
+    get :head_and_return
+    assert_equal 200, @response.response_code
   end
 end
 

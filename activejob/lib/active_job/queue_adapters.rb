@@ -53,20 +53,18 @@ module ActiveJob
 
     class << self
       def instance(name, *adapter_args, &block)
-        cache.compute_if_absent(([name, block] << adapter_args).hash) do
+        @cache.compute_if_absent(([name, block] << adapter_args).hash) do
           lookup(name).new(*adapter_args, &block)
         end
       end
 
       private
 
-      attr_accessor :cache
-
       def lookup(name)
         const_get(name.to_s.camelize << ADAPTER)
       end
     end
 
-    self.cache = ThreadSafe::Cache.new
+    @cache = ThreadSafe::Cache.new
   end
 end

@@ -49,6 +49,7 @@ module ActiveRecord
         @state = TransactionState.new
         @records = []
         @joinable = options.fetch(:joinable, true)
+        @run_callbacks = options.fetch(:run_callbacks, false)
       end
 
       def add_record(record)
@@ -75,18 +76,21 @@ module ActiveRecord
       end
 
       def before_commit_records
-        records.uniq.each(&:before_committed!)
+        records.uniq.each(&:before_committed!) if @run_callbacks
       end
 
       def commit_records
         ite = records.uniq
         while record = ite.shift
-          record.committed!
+          if @run_callbacks
+            record.committed!
+          else
+            # if not running callbacks, only adds the record to the parent transaction
+            record.add_to_transaction
+          end
         end
       ensure
-        ite.each do |i|
-          i.committed!(should_run_callbacks: false)
-        end
+        ite.each { |i| i.committed!(should_run_callbacks: false) }
       end
 
       def full_rollback?; true; end
@@ -147,6 +151,8 @@ module ActiveRecord
       end
 
       def begin_transaction(options = {})
+        options[:run_callbacks] ||= !current_transaction.joinable?
+
         transaction =
           if @stack.empty?
             RealTransaction.new(@connection, options)
@@ -159,18 +165,11 @@ module ActiveRecord
       end
 
       def commit_transaction
-        inner_transaction = @stack.pop
-
-        if current_transaction.joinable?
-          inner_transaction.commit
-          inner_transaction.records.each do |r|
-            r.add_to_transaction
-          end
-        else
-          inner_transaction.before_commit_records
-          inner_transaction.commit
-          inner_transaction.commit_records
-        end
+        transaction = @stack.last
+        transaction.before_commit_records
+        @stack.pop
+        transaction.commit
+        transaction.commit_records
       end
 
       def rollback_transaction(transaction = nil)

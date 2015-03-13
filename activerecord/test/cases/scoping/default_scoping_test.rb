@@ -362,8 +362,10 @@ class DefaultScopingTest < ActiveRecord::TestCase
   end
 
   def test_default_scope_with_joins
-    assert_equal 4,  Comment.joins(:special_post_with_default_scope).length
-    assert_equal 11, Comment.joins(:post).length
+    assert_equal Comment.where(post_id: SpecialPostWithDefaultScope.pluck(:id)).count,
+                 Comment.joins(:special_post_with_default_scope).count
+    assert_equal Comment.where(post_id: Post.pluck(:id)).count,
+                 Comment.joins(:post).count
   end
 
   def test_unscoped_with_joins_should_not_have_default_scope

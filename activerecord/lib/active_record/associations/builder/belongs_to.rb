@@ -75,9 +75,9 @@ module ActiveRecord::Associations::Builder
 
         if old_record
           if touch != true
-            old_record.touch touch
+            old_record.touch_later touch
           else
-            old_record.touch
+            old_record.touch_later
           end
         end
       end
@@ -85,9 +85,9 @@ module ActiveRecord::Associations::Builder
       record = o.send name
       if record && record.persisted?
         if touch != true
-          record.touch touch
+          record.touch_later touch
         else
-          record.touch
+          record.touch_later
         end
       end
     end

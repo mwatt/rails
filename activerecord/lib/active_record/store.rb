@@ -9,6 +9,10 @@ module ActiveRecord
   # of the model. This is very helpful for easily exposing store keys to a form or elsewhere that's
   # already built around just accessing attributes on the model.
   #
+  # Every accessor comes with dirty tracking methods (+key_changed?+, +key_was+ and +key_changes+).
+  #
+  # NOTE: There is no +key_will_change!+ method for accessor, use +store_will_change!+ instead.
+  #
   # Make sure that you declare the database column used for the serialized store as a text, so there's
   # plenty of room.
   #
@@ -38,6 +42,12 @@ module ActiveRecord
   #   u.settings[:country]  # => 'Denmark'
   #   u.settings['country'] # => 'Denmark'
   #
+  #   # Dirty tracking
+  #   u.color = 'green'
+  #   u.color_changed? # => true
+  #   u.color_was # => 'black'
+  #   u.color_changes # => ['black', 'red']
+  #
   #   # Add additional accessors to an existing store through store_accessor
   #   class SuperUser < User
   #     store_accessor :settings, :privileges, :servants
@@ -45,7 +55,7 @@ module ActiveRecord
   #
   # The stored attribute names can be retrieved using +stored_attributes+.
   #
-  #   User.stored_attributes[:settings] # [:color, :homepage]
+  #   User.stored_attributes[:settings] # ['color', 'homepage']
   #
   # == Overwriting default accessors
   #
@@ -82,7 +92,7 @@ module ActiveRecord
       end
 
       def store_accessor(store_attribute, *keys)
-        keys = keys.flatten
+        keys = keys.flatten.map(&:to_s)
 
         _store_accessors_module.module_eval do
           keys.each do |key|
@@ -92,6 +102,24 @@ module ActiveRecord
 
             define_method(key) do
               read_store_attribute(store_attribute, key)
+            end
+
+            define_method("#{key}_changed?") do
+              return false unless changes_include?(store_attribute)
+              prev_store, new_store = changes[store_attribute]
+              prev_store[key] != new_store[key]
+            end
+
+            define_method("#{key}_change") do
+              return unless changes_include?(store_attribute)
+              prev_store, new_store = changes[store_attribute]
+              [prev_store[key], new_store[key]]
+            end
+
+            define_method("#{key}_was") do
+              return unless changes_include?(store_attribute)
+              prev_store, _ = changes[store_attribute]
+              prev_store[key]
             end
           end
         end

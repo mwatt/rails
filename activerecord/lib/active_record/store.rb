@@ -82,7 +82,7 @@ module ActiveRecord
       end
 
       def store_accessor(store_attribute, *keys)
-        keys = keys.flatten
+        keys = keys.flatten.map(&:to_s)
 
         _store_accessors_module.module_eval do
           keys.each do |key|
@@ -92,6 +92,24 @@ module ActiveRecord
 
             define_method(key) do
               read_store_attribute(store_attribute, key)
+            end
+
+            define_method("#{key}_changed?") do
+              prev_store, new_store = changes[store_attribute]
+              return false if !prev_store && !new_store
+              prev_store[key] != new_store[key]
+            end
+
+            define_method("#{key}_change") do
+              prev_store, new_store = changes[store_attribute]
+              return if !prev_store && !new_store
+              [prev_store[key], new_store[key]]
+            end
+
+            define_method("#{key}_was") do
+              prev_store, new_store = changes[store_attribute]
+              return if !prev_store && !new_store
+              prev_store[key]
             end
           end
         end

@@ -57,6 +57,40 @@ class StoreTest < ActiveRecord::TestCase
     assert !@john.settings_changed?
   end
 
+  test "updating the store will mark accessor as changed" do
+    @john.color = 'red'
+    assert @john.color_changed?
+  end
+
+  test "new record and no accessors changes" do
+    user = Admin::User.new
+    assert_not user.color_changed?
+    assert_nil user.color_was
+    assert_nil user.color_change
+    user.color = 'red'
+    assert user.color_changed?
+    assert_nil user.color_was
+    assert_equal 'red', user.color_change[1]
+  end
+
+  test "updating the store won't mark accessor as changed if the whole store was updated" do
+    @john.settings = { color: @john.color, some: 'thing' }
+    assert @john.settings_changed?
+    assert_not @john.color_changed?
+  end
+
+  test "updating the store populates the accessor changed array correctly" do
+    @john.color = 'red'
+    assert_equal 'black', @john.color_was
+    assert_equal 'black', @john.color_change[0]
+    assert_equal 'red', @john.color_change[1]
+  end
+
+  test "updating the store won't mark accessor as changed if the value isn't changed" do
+    @john.color = @john.color
+    assert_not @john.color_changed?
+  end
+
   test "object initialization with not nullable column" do
     assert_equal true, @john.remember_login
   end
@@ -148,7 +182,7 @@ class StoreTest < ActiveRecord::TestCase
   end
 
   test "all stored attributes are returned" do
-    assert_equal [:color, :homepage, :favorite_food], Admin::User.stored_attributes[:settings]
+    assert_equal ['color', 'homepage', 'favorite_food'], Admin::User.stored_attributes[:settings]
   end
 
   test "stored_attributes are tracked per class" do
@@ -159,8 +193,8 @@ class StoreTest < ActiveRecord::TestCase
       store_accessor :data, :width, :height
     end
 
-    assert_equal [:color], first_model.stored_attributes[:data]
-    assert_equal [:width, :height], second_model.stored_attributes[:data]
+    assert_equal ['color'], first_model.stored_attributes[:data]
+    assert_equal ['width', 'height'], second_model.stored_attributes[:data]
   end
 
   test "stored_attributes are tracked per subclass" do
@@ -174,9 +208,9 @@ class StoreTest < ActiveRecord::TestCase
       store_accessor :data, :area, :volume
     end
 
-    assert_equal [:color], first_model.stored_attributes[:data]
-    assert_equal [:color, :width, :height], second_model.stored_attributes[:data]
-    assert_equal [:color, :area, :volume], third_model.stored_attributes[:data]
+    assert_equal ['color'], first_model.stored_attributes[:data]
+    assert_equal ['color', 'width', 'height'], second_model.stored_attributes[:data]
+    assert_equal ['color', 'area', 'volume'], third_model.stored_attributes[:data]
   end
 
   test "YAML coder initializes the store when a Nil value is given" do

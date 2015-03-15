@@ -1,3 +1,9 @@
+*   Cache `CollectionAssociation#reader` proxies separately when a different
+    current_scope is active. This prevents proxies from retaining `.scoping`
+    information after the `.scoping` block has been exited.
+
+    *Ben Woosley*
+
 *   Increase pg gem version requirement to `~> 0.18`. Earlier versions of the
     pg gem are known to have problems with Ruby 2.2.
 

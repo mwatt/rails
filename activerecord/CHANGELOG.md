@@ -1,3 +1,10 @@
+*   Add config.active_record.dump_schemas to fix db:structure:dump
+    when using schema_search_path and PostgreSQL extensions.
+
+    Fixes #17157.
+
+    *Ryan Wallace*
+
 *   Increase pg gem version requirement to `~> 0.18`. Earlier versions of the
     pg gem are known to have problems with Ruby 2.2.
 

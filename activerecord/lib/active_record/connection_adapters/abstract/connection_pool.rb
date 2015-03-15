@@ -436,7 +436,7 @@ module ActiveRecord
       end
 
       def current_connection_id #:nodoc:
-        Base.connection_id ||= Thread.current.object_id
+        Thread.current.object_id
       end
 
       def checkout_new_connection

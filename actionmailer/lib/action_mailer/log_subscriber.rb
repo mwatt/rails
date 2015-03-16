@@ -6,9 +6,16 @@ module ActionMailer
   class LogSubscriber < ActiveSupport::LogSubscriber
     # An email was delivered.
     def deliver(event)
-      info do
-        recipients = Array(event.payload[:to]).join(', ')
-        "\nSent mail to #{recipients} (#{event.duration.round(1)}ms)"
+      if exception = event.payload[:exception]
+        error do
+          recipients = Array(event.payload[:to]).join(', ')
+          "\n#{exception.first} was raised when sending mail to #{recipients} (#{event.duration.round(1)}ms)"
+        end
+      else
+        info do
+          recipients = Array(event.payload[:to]).join(', ')
+          "\nSent mail to #{recipients} (#{event.duration.round(1)}ms)"
+        end
       end
 
       debug { event.payload[:mail] }

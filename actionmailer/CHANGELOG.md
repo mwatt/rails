@@ -1,3 +1,7 @@
+*   Write log with level :error when an exception got raised when trying to deliver an email.
+
+    *Ignatius Reza Lesmana*
+
 *   Add `assert_enqueued_emails` and `assert_no_enqueued_emails`.
 
     Example:

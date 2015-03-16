@@ -15,13 +15,14 @@ module ActiveRecord
       @_touch_time = current_time_from_proper_timezone
 
       surreptitiously_touch @_defer_touch_attrs
-
       self.class.connection.add_transaction_record self
     end
 
-    def touch(*) # :nodoc:
-      @_defer_touch_attrs = nil
-      super
+    def touch(*names, time: nil) # :nodoc:
+      if has_defer_touch_attrs?
+        names = names.concat @_defer_touch_attrs
+      end
+      super(*(names.uniq), time: time)
     end
 
     private
@@ -31,9 +32,19 @@ module ActiveRecord
       end
 
       def touch_deferred_attributes
-        if defined?(@_defer_touch_attrs) && @_defer_touch_attrs.present? && persisted?
+        if has_defer_touch_attrs? && persisted?
+          @_disable_touch_later = true
           touch(*@_defer_touch_attrs, time: @_touch_time)
+          @_disable_touch_later, @_defer_touch_attrs, @_touch_time = nil, nil, nil
         end
+      end
+
+      def has_defer_touch_attrs?
+        defined?(@_defer_touch_attrs) && @_defer_touch_attrs.present?
+      end
+
+      def should_touch_association_later?
+        !(defined?(@_disable_touch_later) && @_disable_touch_later)
       end
   end
 end

@@ -195,21 +195,56 @@ module ActiveRecord
         'adapter'  => 'postgresql',
         'database' => 'my-app-db'
       }
+      @filename = "awesome-file.sql"
 
+      ActiveRecord::Base.dump_schemas = :schema_search_path
       ActiveRecord::Base.stubs(:connection).returns(@connection)
+      @connection.expects(:schema_search_path)
       ActiveRecord::Base.stubs(:establish_connection).returns(true)
       Kernel.stubs(:system)
     end
 
     def test_structure_dump
-      filename = "awesome-file.sql"
-      Kernel.expects(:system).with("pg_dump -i -s -x -O -f #{filename}  my-app-db").returns(true)
-      @connection.expects(:schema_search_path).returns("foo")
+      Kernel.expects(:system).with("pg_dump -i -s -x -O -f #{@filename}  my-app-db").returns(true)
 
-      ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, filename)
-      assert File.exist?(filename)
+      ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, @filename)
+      assert File.exist?(@filename)
     ensure
-      FileUtils.rm(filename)
+      FileUtils.rm_f(@filename)
+    end
+
+    def test_structure_dump_with_schema_search_path
+      @configuration['schema_search_path'] = 'foo,public'
+
+      Kernel.expects(:system).with("pg_dump -i -s -x -O -f #{@filename} --schema=foo --schema=public my-app-db").returns(true)
+
+      ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, @filename)
+      assert File.exist?(@filename)
+    ensure
+      FileUtils.rm_f(@filename)
+    end
+
+    def test_structure_dump_with_schema_search_path_and_dump_schemas_all
+      @configuration['schema_search_path'] = 'foo,public'
+      ActiveRecord::Base.dump_schemas = :all
+
+      Kernel.expects(:system).with("pg_dump -i -s -x -O -f #{@filename}  my-app-db").returns(true)
+
+      ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, @filename)
+      assert File.exist?(@filename)
+    ensure
+      FileUtils.rm_f(@filename)
+    end
+
+    def test_structure_dump_with_dump_schemas_string
+      ActiveRecord::Base.dump_schemas = 'test'
+
+      Kernel.expects(:system).with("pg_dump -i -s -x -O -f #{@filename} --schema=test my-app-db").returns(true)
+
+      ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, @filename)
+      assert File.exist?(@filename)
+    ensure
+      FileUtils.rm_f(@filename)
     end
   end
 

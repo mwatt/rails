@@ -49,12 +49,14 @@ module ActiveJob
     autoload :SuckerPunchAdapter
     autoload :TestAdapter
 
-    ADAPTER = 'Adapter'.freeze
-
     class << self
       def lookup(name)
         const_get(name.to_s.camelize << ADAPTER)
       end
     end
+
+    private
+
+    ADAPTER = 'Adapter'.freeze
   end
 end

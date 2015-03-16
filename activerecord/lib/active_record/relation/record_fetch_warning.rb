@@ -17,7 +17,7 @@ module ActiveRecord
 
         super.tap do
           if logger && warn_on_records_fetched_greater_than
-            if @records.length >= warn_on_records_fetched_greater_than
+            if @records.length > warn_on_records_fetched_greater_than
               logger.warn "Query fetched #{@records.size} #{@klass} records: #{QueryRegistry.queries.join(";")}"
             end
           end

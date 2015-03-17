@@ -609,15 +609,15 @@ class RespondToControllerTest < ActionController::TestCase
 
   def test_invalid_variant
     @request.variant = :invalid
-    assert_raises(ActionView::MissingTemplate) do
-      get :variant_with_implicit_rendering
-    end
+    get :variant_with_implicit_rendering
+    assert_equal 204, @response.status
+    assert_equal "", @response.body
   end
 
   def test_variant_not_set_regular_template_missing
-    assert_raises(ActionView::MissingTemplate) do
-      get :variant_with_implicit_rendering
-    end
+    get :variant_with_implicit_rendering
+    assert_equal 204, @response.status
+    assert_equal "", @response.body
   end
 
   def test_variant_with_implicit_rendering

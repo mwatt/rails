@@ -8,6 +8,8 @@ module ActionController
 
     def default_render(*args)
       render(*args)
+    rescue ActionView::MissingTemplate
+      head :no_content
     end
 
     def method_for_action(action_name)

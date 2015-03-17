@@ -2,8 +2,14 @@ module ActionController
   module ImplicitRender
     def send_action(method, *args)
       ret = super
-      default_render unless performed?
-      ret
+      return ret if performed?
+
+      if template_exists?(method, _prefixes, variants: request.variant)
+        default_render
+      else
+        logger.info "No template found for #{self.class.name}\##{action_name}, rendering head :no_content"
+        head :no_content
+      end
     end
 
     def default_render(*args)

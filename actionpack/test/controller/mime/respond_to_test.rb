@@ -608,10 +608,14 @@ class RespondToControllerTest < ActionController::TestCase
   end
 
   def test_invalid_variant
+    logger = ActiveSupport::LogSubscriber::TestHelper::MockLogger.new
+    ActionController::Base.logger = logger
+
     @request.variant = :invalid
     get :variant_with_implicit_rendering
     assert_equal 204, @response.status
     assert_equal "", @response.body
+    assert_equal 1, logger.logged(:info).select{ |s| s =~ /No template found/ }.size
   end
 
   def test_variant_not_set_regular_template_missing

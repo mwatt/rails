@@ -7,6 +7,7 @@ module ActionController
       if template_exists?(method, _prefixes)
         default_render
       else
+        logger.info "No template found for #{self.class.name}#{method}, rendering head :no_content"
         head :no_content
       end
     end

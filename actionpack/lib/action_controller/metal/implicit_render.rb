@@ -2,14 +2,17 @@ module ActionController
   module ImplicitRender
     def send_action(method, *args)
       ret = super
-      default_render unless performed?
-      ret
+      return ret if performed?
+
+      if template_exists?(method, _prefixes)
+        default_render
+      else
+        head :no_content
+      end
     end
 
     def default_render(*args)
       render(*args)
-    rescue ActionView::MissingTemplate
-      head :no_content
     end
 
     def method_for_action(action_name)

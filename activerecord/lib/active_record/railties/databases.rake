@@ -153,9 +153,12 @@ db_namespace = namespace :db do
     end
   end
 
-  desc 'Retrieves the current schema version number'
+  desc 'Prints the migration of current schema version number'
   task :version => [:environment, :load_config] do
-    puts "Current version: #{ActiveRecord::Migrator.current_version}"
+    current_version = ActiveRecord::Migrator.current_version.to_s
+    migration_file = Dir.glob("#{ActiveRecord::Migrator.migrations_path}/*.rb")
+                       .find { |migration| migration.include?(current_version) }
+    puts "Current version: #{migration_file}."
   end
 
   # desc "Raises an error if there are pending migrations"

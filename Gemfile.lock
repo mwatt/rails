@@ -87,6 +87,7 @@ PATH
     railties (5.0.0.alpha)
       actionpack (= 5.0.0.alpha)
       activesupport (= 5.0.0.alpha)
+      method_source
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
 
@@ -134,6 +135,7 @@ GEM
     loofah (2.0.1)
       nokogiri (>= 1.5.9)
     metaclass (0.0.4)
+    method_source (0.8.2)
     mime-types (2.4.3)
     mini_portile (0.6.2)
     minitest (5.3.3)

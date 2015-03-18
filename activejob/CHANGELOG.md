@@ -1,3 +1,7 @@
+*   Add job priorities to Active Job.
+
+    *wvengen*
+
 *   Add an `:only` option to `perform_enqueued_jobs` to filter jobs based on
     type.
 

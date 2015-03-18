@@ -1,3 +1,7 @@
+*   Add job priorities to Active Job.
+
+    *wvengen*
+
 *   Implement `provider_job_id` for `queue_classic` adapter. This requires the
     latest, currently unreleased, version of queue_classic.
 

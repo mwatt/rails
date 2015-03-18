@@ -623,6 +623,9 @@ module ActiveRecord
       # track any join tables we need to insert later
       rows = Hash.new { |h,table| h[table] = [] }
 
+      # ensure this table is loaded before any HABTM associations
+      rows[table_name] = nil
+
       rows[table_name] = fixtures.map do |label, fixture|
         row = fixture.to_hash
 

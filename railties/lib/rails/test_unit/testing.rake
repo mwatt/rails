@@ -4,9 +4,8 @@ task default: :test
 
 desc "Runs all tests in test folder"
 task :test do
-  $: << "test"
   args = ARGV[0] == "test" ? ARGV[1..-1] : []
-  Rails::TestRunner.run(args)
+  run_test_task(args)
 end
 
 namespace :test do
@@ -22,23 +21,25 @@ namespace :test do
 
   ["models", "helpers", "controllers", "mailers", "integration", "jobs"].each do |name|
     task name => "test:prepare" do
-      $: << "test"
-      Rails::TestRunner.run(["test/#{name}"])
+      run_test_task(["test/#{name}"])
     end
   end
 
   task :generators => "test:prepare" do
-    $: << "test"
-    Rails::TestRunner.run(["test/lib/generators"])
+    run_test_task(["test/lib/generators"])
   end
 
   task :units => "test:prepare" do
-    $: << "test"
-    Rails::TestRunner.run(["test/models", "test/helpers", "test/unit"])
+    run_test_task(["test/models", "test/helpers", "test/unit"])
   end
 
   task :functionals => "test:prepare" do
-    $: << "test"
-    Rails::TestRunner.run(["test/controllers", "test/mailers", "test/functional"])
+    run_test_task(["test/controllers", "test/mailers", "test/functional"])
   end
+end
+
+def run_test_task(args)
+  $: << 'test'
+  ENV['RUN_TESTS_AT_EXIT'] ||= 'false'
+  Rails::TestRunner.run(args)
 end

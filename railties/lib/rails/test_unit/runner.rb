@@ -86,7 +86,8 @@ module Rails
     def run
       $rails_test_runner = self
       ENV["RAILS_ENV"] = @options[:environment]
-      run_tests
+      load_tests
+      run_tests_now if ENV['RUN_TESTS_AT_EXIT'] == 'false'
     end
 
     def find_method
@@ -114,10 +115,16 @@ module Rails
     end
 
     private
-    def run_tests
+    def load_tests
       test_files.to_a.each do |file|
         require File.expand_path file
       end
+    end
+
+    def run_tests_now
+      exit_code = Minitest.run ARGV
+      Minitest::Runnable.reset
+      exit exit_code unless exit_code
     end
 
     def test_methods

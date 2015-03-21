@@ -560,7 +560,7 @@ module ActiveRecord
           simple_type = SqlTypeMetadata.new(
             sql_type: sql_type,
             type: cast_type.type,
-            limit: cast_type.limit,
+            limit: cast_type.try(:subtype).try(:limit) || cast_type.limit,
             precision: cast_type.precision,
             scale: cast_type.scale,
           )

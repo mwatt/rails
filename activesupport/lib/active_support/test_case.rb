@@ -9,6 +9,7 @@ require 'active_support/testing/isolation'
 require 'active_support/testing/constant_lookup'
 require 'active_support/testing/time_helpers'
 require 'active_support/testing/file_fixtures'
+require 'active_support/testing/filter_chain'
 require 'active_support/core_ext/kernel/reporting'
 
 module ActiveSupport
@@ -44,6 +45,13 @@ module ActiveSupport
         end
 
         test_order
+      end
+
+      def run(reporter, options = {})
+        chain = Testing::FilterChain.new(self, options[:filter], options[:patterns])
+        options[:filter] = chain if chain.any?
+
+        super
       end
     end
 

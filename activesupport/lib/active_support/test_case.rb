@@ -45,6 +45,41 @@ module ActiveSupport
 
         test_order
       end
+
+      def run(reporter, options = {})
+        if filter = line_filter_for(options[:patterns] || [])
+          options[:filter] = filter
+        end
+
+        super
+      end
+
+      private
+        def line_filter_for(patterns)
+          patterns.find do |file_and_line|
+            file, line = file_and_line.split(":")
+
+            if file && line
+              return FileAndLineFilter.new(self, File.expand_path(file), line.to_i)
+            end
+          end
+        end
+
+        class FileAndLineFilter < Struct.new(:klass, :file, :line)
+          def ===(method)
+            if klass.method_defined?(method)
+              test_file, test_range = definition_for(klass.instance_method(method))
+              test_file == file && test_range.include?(line)
+            end
+          end
+
+          def definition_for(method)
+            file, start_line = method.source_location
+            end_line = method.source.count("\n") + start_line - 1
+
+            return file, start_line..end_line
+          end
+        end
     end
 
     alias_method :method_name, :name

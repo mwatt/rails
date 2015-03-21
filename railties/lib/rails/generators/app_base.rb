@@ -5,6 +5,7 @@ require 'open-uri'
 require 'uri'
 require 'rails/generators'
 require 'active_support/core_ext/array/extract_options'
+require 'open3'
 
 module Rails
   module Generators
@@ -315,9 +316,9 @@ module Rails
         # its own vendored Thor, which could be a different version. Running both
         # things in the same process is a recipe for a night with paracetamol.
         #
-        # We use backticks and #print here instead of vanilla #system because it
-        # is easier to silence stdout in the existing test suite this way. The
-        # end-user gets the bundler commands called anyway, so no big deal.
+        # We use `Open3.popen2e` here instead of backticks so we can print the
+        # output from bundler as each line is available, rather than all at once
+        # at the end.
         #
         # We unset temporary bundler variables to load proper bundler and Gemfile.
         #
@@ -326,8 +327,14 @@ module Rails
 
         require 'bundler'
         Bundler.with_clean_env do
-          output = `"#{Gem.ruby}" "#{_bundle_command}" #{command}`
-          print output unless options[:quiet]
+          full_command = "\"#{Gem.ruby}\" \"#{_bundle_command}\" #{command}"
+          Open3.popen2e(full_command) do |_in, out_and_err, _thread|
+            unless options[:quiet]
+              out_and_err.each do |line|
+                puts line
+              end
+            end
+          end
         end
       end
 

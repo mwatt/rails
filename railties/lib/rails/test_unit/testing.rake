@@ -1,12 +1,12 @@
-require "rails/test_unit/runner"
-
 task default: :test
 
 desc "Runs all tests in test folder"
 task :test do
   $: << "test"
-  args = ARGV[0] == "test" ? ARGV[1..-1] : []
-  Rails::TestRunner.run(args)
+
+  ARGV.shift if ARGV[0] == "test"
+
+  Rails::TestRunner.run
 end
 
 namespace :test do

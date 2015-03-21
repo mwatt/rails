@@ -1,9 +1,10 @@
 require 'isolation/abstract_unit'
 require 'active_support/core_ext/string/strip'
+require 'env_helpers'
 
 module ApplicationTests
   class TestRunnerTest < ActiveSupport::TestCase
-    include ActiveSupport::Testing::Isolation
+    include ActiveSupport::Testing::Isolation, EnvHelpers
 
     def setup
       build_app
@@ -14,7 +15,7 @@ module ApplicationTests
       teardown_app
     end
 
-    def test_run_in_test_environment
+    def test_run_in_differing_environments
       app_file 'test/unit/env_test.rb', <<-RUBY
         require 'test_helper'
 
@@ -26,6 +27,8 @@ module ApplicationTests
       RUBY
 
       assert_match "Current Environment: test", run_test_command('test/unit/env_test.rb')
+      assert_match "Current Environment: development",
+        run_test_command('test/unit/env_test.rb -e development')
     end
 
     def test_run_single_file
@@ -187,7 +190,7 @@ module ApplicationTests
         end
       RUBY
 
-      run_test_command('-p rikka test/unit/chu_2_koi_test.rb').tap do |output|
+      run_test_command('-n /rikka/ test/unit/chu_2_koi_test.rb').tap do |output|
         assert_match "Rikka", output
         assert_no_match "Sanae", output
       end
@@ -249,6 +252,73 @@ module ApplicationTests
       assert_match "0 failures, 0 errors, 0 skips", run_test_command('')
     end
 
+    def test_run_multiple_folders
+      create_test_file :models, 'account'
+      create_test_file :controllers, 'accounts_controller'
+
+      run_test_command('test/models test/controllers').tap do |output|
+        assert_match 'AccountTest', output
+        assert_match 'AccountsControllerTest', output
+        assert_match '2 runs, 2 assertions, 0 failures, 0 errors, 0 skips', output
+      end
+    end
+
+    def test_run_multiple_files_and_run_one_file_by_line_only_runs_filter
+      create_test_file :models, 'account'
+      create_test_file :models, 'post'
+
+      run_test_command('test/models/account_test.rb test/models/post_test.rb:5').tap do |output|
+        assert_match '1 runs, 1 assertions', output
+      end
+    end
+
+    def test_multiple_line_filters_only_runs_the_first
+      create_test_file :models, 'account'
+      create_test_file :models, 'post'
+
+      run_test_command('test/models/account_test.rb:4 test/models/post_test.rb:4').tap do |output|
+        assert_match 'AccountTest', output
+      end
+    end
+
+    def test_line_filter_without_line_runs_all_tests
+      create_test_file :models, 'account'
+
+      run_test_command('test/models/account_test.rb:').tap do |output|
+        assert_match 'AccountTest', output
+      end
+    end
+
+    def test_shows_filtered_backtrace_by_default
+      create_backtrace_test
+
+      run_test_command('test/unit/backtrace_test.rb').tap do |output|
+        assert_match '1 runs, 1 assertions, 0 failures', output
+      end
+    end
+
+    def test_backtrace_option
+      create_backtrace_test
+
+      run_test_command('test/unit/backtrace_test.rb -b').tap do |output|
+        assert_match '1 runs, 1 assertions, 0 failures', output
+      end
+
+      run_test_command('test/unit/backtrace_test.rb --backtrace').tap do |output|
+        assert_match '1 runs, 1 assertions, 0 failures', output
+      end
+    end
+
+    def test_show_full_backtrace_using_backtrace_environment_variable
+      create_backtrace_test
+
+      switch_env 'BACKTRACE', 'true' do
+        run_test_command('test/unit/backtrace_test.rb').tap do |output|
+          assert_match '1 runs, 1 assertions, 0 failures', output
+        end
+      end
+    end
+
     private
       def run_test_command(arguments = 'test/unit/test_test.rb')
         Dir.chdir(app_path) { `bin/rails t #{arguments}` }
@@ -279,6 +349,18 @@ module ApplicationTests
           class #{name.camelize}Test < ActiveSupport::TestCase
             def test_fixture
               puts "\#{User.count} users (\#{__FILE__})"
+            end
+          end
+        RUBY
+      end
+
+      def create_backtrace_test
+        app_file 'test/unit/backtrace_test.rb', <<-RUBY
+          require 'test_helper'
+
+          class BacktraceTest < ActiveSupport::TestCase
+            def test_backtrace
+              assert_kind_of Rails.backtrace_cleaner.class, Minitest.backtrace_filter
             end
           end
         RUBY

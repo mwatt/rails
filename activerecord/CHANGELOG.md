@@ -1,3 +1,7 @@
+*   Ignore index name in `index_exists?` when not passed a name to check for.
+
+    *Grey Baker*
+
 *   Correctly persist a serialized attribute that has been returned to
     its default value by an in-place modification.
 

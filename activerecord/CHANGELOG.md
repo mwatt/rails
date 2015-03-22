@@ -1,3 +1,7 @@
+*   Ignore index name in `index_exists?` when not passed a name to check for.
+
+    *Grey Baker*
+
 *   Reuse the `CollectionAssociation#reader` cache when the foreign key is
     available prior to save.
 

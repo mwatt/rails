@@ -193,7 +193,7 @@ class PluginGeneratorTest < Rails::Generators::TestCase
   def test_generation_runs_bundle_install_with_full_and_mountable
     result = run_generator [destination_root, "--mountable", "--full", "--dev"]
     assert_match(/run  bundle install/, result)
-    assert $?.success?, "Command failed: #{result}"
+    assert_match(/Bundle complete!/, result)
     assert_file "#{destination_root}/Gemfile.lock" do |contents|
       assert_match(/bukkits/, contents)
     end

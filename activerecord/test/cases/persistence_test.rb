@@ -902,12 +902,12 @@ class PersistenceTest < ActiveRecord::TestCase
 
     def test_save_touch_false
       widget = Class.new(ActiveRecord::Base) do
-        connection.create_table :widgets, force: true do |t|
+        connection.create_table :new_widgets, force: true do |t|
           t.string :name
           t.timestamps null: false
         end
 
-        self.table_name = :widgets
+        self.table_name = :new_widgets
       end
 
       instance  = widget.create!({
@@ -924,7 +924,7 @@ class PersistenceTest < ActiveRecord::TestCase
       assert_equal instance.created_at, created_at
       assert_equal instance.updated_at, updated_at
     ensure
-      ActiveRecord::Base.connection.drop_table :widgets
+      ActiveRecord::Base.connection.drop_table widget.table_name
     end
   end
 end

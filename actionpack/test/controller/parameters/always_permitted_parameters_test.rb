@@ -14,7 +14,7 @@ class AlwaysPermittedParametersTest < ActiveSupport::TestCase
 
   test "shows deprecations warning on NEVER_UNPERMITTED_PARAMS" do
     assert_deprecated do
-       ActionController::Parameters::NEVER_UNPERMITTED_PARAMS
+      ActionController::Parameters::NEVER_UNPERMITTED_PARAMS
     end
   end
 

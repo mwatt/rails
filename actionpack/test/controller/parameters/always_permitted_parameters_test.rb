@@ -14,8 +14,25 @@ class AlwaysPermittedParametersTest < ActiveSupport::TestCase
 
   test "shows deprecations warning on NEVER_UNPERMITTED_PARAMS" do
     assert_deprecated do
-       ActionController::Parameters::NEVER_UNPERMITTED_PARAMS
+      ActionController::Parameters::NEVER_UNPERMITTED_PARAMS
     end
+  end
+
+  test "respects parent module's const_missing" do
+    module AutoloadingModule
+      # Mock autoloading.
+      def self.const_missing(const_name)
+        'Autoloaded'
+      end
+
+      class SomeParameters < ActionController::Parameters
+        def use_autoload
+          DefinedSomewhere
+        end
+      end
+    end
+
+    assert_equal 'Autoloaded', AutoloadingModule::SomeParameters.new.use_autoload
   end
 
   test "permits parameters that are whitelisted" do

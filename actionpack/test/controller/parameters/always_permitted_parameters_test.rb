@@ -14,8 +14,21 @@ class AlwaysPermittedParametersTest < ActiveSupport::TestCase
 
   test "shows deprecations warning on NEVER_UNPERMITTED_PARAMS" do
     assert_deprecated do
-       ActionController::Parameters::NEVER_UNPERMITTED_PARAMS
+      ActionController::Parameters::NEVER_UNPERMITTED_PARAMS
     end
+  end
+
+  test "respects constant resolution chain on const_missing" do
+    module ParentModule
+      def self.const_missing(const_name)
+        "parent"
+      end
+
+      class MyParameters < ActionController::Parameters
+      end
+    end
+
+    assert_equal "parent", ParentModule::MyParameters::NON_EXISTING_CONSTANT
   end
 
   test "permits parameters that are whitelisted" do

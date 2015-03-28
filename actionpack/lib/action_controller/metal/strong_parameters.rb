@@ -253,11 +253,11 @@ module ActionController
     #   ActionController::Parameters.new(person: {}).require(:person)
     #   # => ActionController::ParameterMissing: param is missing or the value is empty: person
     def require(key)
-      value = self[key]
-      if value.present? || value == false
-        value
+      if key.is_a?(Array)
+        keys.map &method(:require)
       else
-        raise ParameterMissing.new(key)
+        value = self[key]
+        (value.present? || value == false) ? value : raise(ParameterMissing.new(key))
       end
     end
 

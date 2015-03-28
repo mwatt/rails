@@ -48,4 +48,13 @@ class ParametersRequireTest < ActiveSupport::TestCase
       ActionController::Parameters.new(person: {}).require(:person)
     end
   end
+
+  test "require all params" do
+    required_params = [:first_name, :last_name]
+    assert_raises(ActionController::ParameterMissing) do
+      ActionController::Parameters.new(person: {first_name: 'Gaurish', title: 'Mjallo'})
+        .require(:person)
+        .require_all(required_params)
+    end
+  end
 end

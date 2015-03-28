@@ -98,7 +98,7 @@ module ActiveRecord::Associations::Builder
       touch       = reflection.options[:touch]
 
       callback = lambda { |record|
-        touch_method = should_touch_association_later? ? :touch_later : :touch
+        touch_method = touching_delayed_records? ? :touch : :touch_later
         BelongsTo.touch_record(record, foreign_key, n, touch, touch_method)
       }
 

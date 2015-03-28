@@ -20,9 +20,9 @@ module ActiveRecord
 
     def touch(*names, time: nil) # :nodoc:
       if has_defer_touch_attrs?
-        names = names.concat @_defer_touch_attrs
+        names |= @_defer_touch_attrs
       end
-      super(*(names.uniq), time: time)
+      super(*names, time: time)
     end
 
     private
@@ -33,9 +33,9 @@ module ActiveRecord
 
       def touch_deferred_attributes
         if has_defer_touch_attrs? && persisted?
-          @_disable_touch_later = true
+          @_touching_delayed_records = true
           touch(*@_defer_touch_attrs, time: @_touch_time)
-          @_disable_touch_later, @_defer_touch_attrs, @_touch_time = nil, nil, nil
+          @_touching_delayed_records, @_defer_touch_attrs, @_touch_time = nil, nil, nil
         end
       end
 
@@ -43,8 +43,8 @@ module ActiveRecord
         defined?(@_defer_touch_attrs) && @_defer_touch_attrs.present?
       end
 
-      def should_touch_association_later?
-        !(defined?(@_disable_touch_later) && @_disable_touch_later)
+      def touching_delayed_records?
+        defined?(@_touching_delayed_records) && @_touching_delayed_records
       end
   end
 end

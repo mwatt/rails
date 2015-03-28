@@ -252,6 +252,10 @@ module ActionController
     # Alias of #require.
     alias :required :require
 
+    def require_all(keys)
+      keys.each {|key| require key}
+    end
+
     # Returns a new <tt>ActionController::Parameters</tt> instance that
     # includes only the given +filters+ and sets the +permitted+ attribute
     # for the object to +true+. This is useful for limiting which attributes

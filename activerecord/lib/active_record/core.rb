@@ -142,6 +142,7 @@ module ActiveRecord
         return super if block_given? ||
                         primary_key.nil? ||
                         scope_attributes? ||
+                        respond_to?(:default_scope) ||
                         columns_hash.include?(inheritance_column) ||
                         ids.first.kind_of?(Array)
 
@@ -169,7 +170,10 @@ module ActiveRecord
       end
 
       def find_by(*args) # :nodoc:
-        return super if scope_attributes? || !(Hash === args.first) || reflect_on_all_aggregations.any?
+        return super if scope_attributes? ||
+                        respond_to?(:default_scope) ||
+                        !(Hash === args.first) ||
+                        reflect_on_all_aggregations.any?
 
         hash = args.first
 

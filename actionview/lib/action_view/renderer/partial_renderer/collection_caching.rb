@@ -30,8 +30,11 @@ module ActionView
       end
 
       def automatic_cache_eligible?
-        single_template_render? && !callable_cache_key? &&
+        if single_template_render?
           @template.eligible_for_collection_caching?(as: @options[:as])
+        else
+          true # We cache multiple templates after rendering
+        end
       end
 
       def single_template_render?
@@ -65,6 +68,14 @@ module ActionView
             end
           end
         end
+      end
+
+      def collection_cache_rendered_partial(content, cache_key:)
+        seed = callable_cache_key? ? @options[:cache] : ->(i) { i }
+        key  = expanded_cache_key(seed.call(cache_key))
+
+        cache_options = @options[:cache_options] || @locals[:cache_options] || {}
+        collection_cache.write(key, content, cache_options)
       end
   end
 end

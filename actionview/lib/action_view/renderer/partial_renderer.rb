@@ -439,6 +439,11 @@ module ActionView
 
         content = template.render(view, locals)
         content = layout.render(view, locals) { content } if layout
+
+        if template.eligible_for_collection_caching?(as: as)
+          collection_cache_rendered_partial(content, cache_key: object)
+        end
+
         partial_iteration.iterate!
         content
       end
@@ -461,6 +466,11 @@ module ActionView
 
         template = (cache[path] ||= find_template(path, keys + [as, counter]))
         content = template.render(view, locals)
+
+        if template.eligible_for_collection_caching?(as: as)
+          collection_cache_rendered_partial(content, cache_key: object)
+        end
+
         partial_iteration.iterate!
         content
       end

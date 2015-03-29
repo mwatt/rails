@@ -351,6 +351,9 @@ class ViewCacheDependencyTest < ActionController::TestCase
   end
 end
 
+class SupremeCustomer < Customer; end
+class UncachedCustomer < Customer; end
+
 class CollectionCacheController < ActionController::Base
   def index
     @customers = [Customer.new('david', params[:id] || 1)]
@@ -369,6 +372,16 @@ class CollectionCacheController < ActionController::Base
   def index_with_comment
     @customers = [Customer.new('david', 1)]
     render partial: 'customers/commented_customer', collection: @customers, as: :customer
+  end
+
+  def index_with_multiple_templates
+    @customers = [Customer.new('david', 1), SupremeCustomer.new('supreme david', 2)]
+    render 'index'
+  end
+
+  def index_mixing_eligibility
+    @customers = [Customer.new('david', 1), UncachedCustomer.new(params[:name] || 'bad david', 2)]
+    render 'index'
   end
 end
 
@@ -405,5 +418,26 @@ class AutomaticCollectionCacheTest < ActionController::TestCase
 
     ActionView::PartialRenderer.expects(:collection_with_template).never
     get :index_with_comment
+  end
+
+  def test_caching_works_with_collection_rendering_multiple_templates
+    get :index_with_multiple_templates
+
+    ActionView::PartialRenderer.expects(:collection_without_template).never
+    get :index_with_multiple_templates
+  end
+
+  def test_caching_multiple_templates_where_one_is_not_eligible
+    get :index_mixing_eligibility
+    assert_select ':root', /bad david/
+
+    ActionView::PartialRenderer.expects(:collection_without_template).never
+    get :index_mixing_eligibility
+
+    get :index_mixing_eligibility, params: { name: 'bust david' }
+    assert_select ':root', /bust david/
+
+    ActionView::PartialRenderer.expects(:collection_without_template).never
+    get :index_mixing_eligibility
   end
 end

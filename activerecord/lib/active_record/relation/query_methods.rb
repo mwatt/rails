@@ -53,7 +53,7 @@ module ActiveRecord
     Relation::MULTI_VALUE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{name}_values                    # def select_values
-          @values[:#{name}] || []             #   @values[:select] || []
+          @values[:#{name}] ||= []            #   @values[:select] ||= []
         end                                   # end
                                               #
         def #{name}_values=(values)           # def select_values=(values)
@@ -83,7 +83,7 @@ module ActiveRecord
     Relation::CLAUSE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{name}_clause                           # def where_clause
-          @values[:#{name}] || new_#{name}_clause    #   @values[:where] || new_where_clause
+          @values[:#{name}] ||= new_#{name}_clause   #   @values[:where] ||= new_where_clause
         end                                          # end
                                                      #
         def #{name}_clause=(value)                   # def where_clause=(value)
@@ -98,7 +98,7 @@ module ActiveRecord
     end
 
     def create_with_value # :nodoc:
-      @values[:create_with] || {}
+      @values[:create_with] ||= {}
     end
 
     alias extensions extending_values

@@ -29,11 +29,11 @@ module ApplicationTests
         "Rack::Lock",
         "ActiveSupport::Cache::Strategy::LocalCache",
         "Rack::Runtime",
+        "ActionDispatch::ShowExceptions",
+        "ActionDispatch::DebugExceptions",
         "Rack::MethodOverride",
         "ActionDispatch::RequestId",
         "Rails::Rack::Logger", # must come after Rack::MethodOverride to properly log overridden methods
-        "ActionDispatch::ShowExceptions",
-        "ActionDispatch::DebugExceptions",
         "ActionDispatch::RemoteIp",
         "ActionDispatch::Reloader",
         "ActionDispatch::Callbacks",

@@ -1,3 +1,9 @@
+*   Adds`Rack::Utils::ParameterTypeError` and `Rack::Utils::InvalidParameterError`
+    to the rescue_responses hash in `ExceptionWrapper` (Rack recommends
+    integrators serve 400s for both of these).
+
+    *Grey Baker*
+
 *   Add support for API only apps.
     Middleware stack was slimmed down and it has only the needed
     middleware for API apps & generators generates the right files,

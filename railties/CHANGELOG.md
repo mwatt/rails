@@ -1,3 +1,12 @@
+*   Move `ActionDispatch::ShowExceptions` and `ActionDispatch::DebugExceptions`
+    lower down the default middleware stack so they can catch Rack errors raised
+    from `Rack::MethodOverride`. Also adds the two errors Rack recommends
+    integrators serve 400s for (`Rack::Utils::ParameterTypeError` and
+    `Rack::Utils::InvalidParameterError`) to the rescue_responses hash in
+    `ExceptionWrapper`.
+
+    *Grey Baker*
+
 *   Respect `pluralize_table_names` when generating fixture file.
 
     Fixes #19519.

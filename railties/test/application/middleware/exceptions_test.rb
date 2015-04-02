@@ -80,6 +80,21 @@ module ApplicationTests
       assert_equal "HANDLED BY EXCEPTIONS APP", last_response.body
     end
 
+    test "serves a bad request for Rack exceptions" do
+      app.routes.draw do
+        post "/", to: 'omg#index'
+      end
+
+      class ::OmgController < ActionController::Base
+        def index
+          render text: ""
+        end
+      end
+
+      post "/", '(%bad-params%)' # Causes a Rack::Utils::InvalidParameterError in Rack::MethodOverride
+      assert_equal 400, last_response.status
+    end
+
     test "url generation error when action_dispatch.show_exceptions is set raises an exception" do
       controller :foo, <<-RUBY
         class FooController < ActionController::Base

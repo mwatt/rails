@@ -59,6 +59,27 @@ module ApplicationTests
       assert_equal "YOU FAILED BRO", last_response.body
     end
 
+    test "handles Rack exceptions early in the stack" do
+      add_to_config <<-RUBY
+        config.exceptions_app = lambda do |env|
+          [400, { "Content-Type" => "text/plain" }, ["HANDLED BY EXCEPTIONS APP"]]
+        end
+      RUBY
+
+      app.routes.draw do
+        post "/", to: 'omg#index'
+      end
+
+      class ::OmgController < ActionController::Base
+        def index
+          render text: ""
+        end
+      end
+
+      post "/", '(%bad-params%)' # Causes a Rack::Utils::InvalidParameterError in Rack::MethodOverride
+      assert_equal "HANDLED BY EXCEPTIONS APP", last_response.body
+    end
+
     test "url generation error when action_dispatch.show_exceptions is set raises an exception" do
       controller :foo, <<-RUBY
         class FooController < ActionController::Base

@@ -12,6 +12,7 @@ module ActiveRecord
       teardown do
         @connection.drop_table "testings", if_exists: true
         @connection.drop_table "testing_parents", if_exists: true
+        @connection.drop_table "testing", if_exists: true
       end
 
       test "foreign keys can be created with the table" do
@@ -104,6 +105,18 @@ module ActiveRecord
         assert_difference "@connection.foreign_keys('testings').size", -1 do
           @connection.remove_reference :testings, :testing_parent, foreign_key: true
         end
+      end
+
+      test "foreign key column can be added for singular table" do
+        ActiveRecord::Base.stubs(:pluralize_table_names).returns(false)
+        @connection.create_table :testing
+        @connection.change_table :testing_parents do |t|
+          t.references :testing, foreign_key: true
+        end
+
+        fk = @connection.foreign_keys("testing_parents").first
+        assert_equal "testing_parents", fk.from_table
+        assert_equal "testing", fk.to_table
       end
     end
   end

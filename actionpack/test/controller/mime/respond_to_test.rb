@@ -630,7 +630,7 @@ class RespondToControllerTest < ActionController::TestCase
     assert_response :no_content
   end
 
-  def test_variant_with_implicit_rendering
+  def test_variant_with_implicit_rendering_with_template
     @request.variant = :mobile
     get :variant_with_implicit_rendering
     assert_equal "text/html", @response.content_type

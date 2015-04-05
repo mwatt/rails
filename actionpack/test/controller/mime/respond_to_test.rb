@@ -609,19 +609,25 @@ class RespondToControllerTest < ActionController::TestCase
 
   def test_invalid_variant
     logger = ActiveSupport::LogSubscriber::TestHelper::MockLogger.new
-    ActionController::Base.logger = logger
+    old_logger, ActionController::Base.logger = ActionController::Base.logger, logger
 
     @request.variant = :invalid
     get :variant_with_implicit_rendering
-    assert_equal 204, @response.status
-    assert_equal "", @response.body
+    assert_response :no_content
     assert_equal 1, logger.logged(:info).select{ |s| s =~ /No template found/ }.size
+  ensure
+    ActionController::Base.logger = old_logger
   end
 
   def test_variant_not_set_regular_template_missing
     get :variant_with_implicit_rendering
-    assert_equal 204, @response.status
-    assert_equal "", @response.body
+    assert_response :no_content
+  end
+
+  def test_variant_with_implicit_rendering_no_template
+    @request.variant = :implicit
+    get :variant_with_implicit_rendering
+    assert_response :no_content
   end
 
   def test_variant_with_implicit_rendering

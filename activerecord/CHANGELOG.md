@@ -1,3 +1,8 @@
+*   Ignore index name in `index_exists?` and `remove_index` when not passed a
+    name to check for.
+
+    *Grey Baker*
+
 *   Reduce memory usage from loading types on pg.
 
     Fixes #19578.

@@ -19,6 +19,13 @@ GIT
       mime-types (>= 1.16, < 3)
 
 GIT
+  remote: git://github.com/rack/rack.git
+  revision: 6d978cbe995fc01fea87a6af6501c9ac0f524826
+  branch: master
+  specs:
+    rack (1.6.0)
+
+GIT
   remote: git://github.com/rails/arel.git
   revision: aac9da257f291ad8d2d4f914528881c240848bb2
   branch: master
@@ -47,7 +54,7 @@ PATH
     actionpack (5.0.0.alpha)
       actionview (= 5.0.0.alpha)
       activesupport (= 5.0.0.alpha)
-      rack (~> 1.6)
+      rack (~> 1.6.0.beta2)
       rack-test (~> 0.6.3)
       rails-dom-testing (~> 1.0, >= 1.0.5)
       rails-html-sanitizer (~> 1.0, >= 1.0.2)
@@ -153,7 +160,6 @@ GEM
     queue_classic (3.1.0)
       pg (>= 0.17, < 0.19)
     racc (1.4.12)
-    rack (1.6.0)
     rack-cache (1.2)
       rack (>= 0.4)
     rack-protection (1.5.3)
@@ -269,6 +275,7 @@ DEPENDENCIES
   que
   queue_classic
   racc (>= 1.4.6)
+  rack!
   rack-cache (~> 1.2)
   rails!
   rake (>= 10.3)

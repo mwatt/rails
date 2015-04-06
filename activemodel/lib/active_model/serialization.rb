@@ -97,7 +97,7 @@ module ActiveModel
     def serializable_hash(options = nil)
       options ||= {}
 
-      attribute_names = attributes.keys
+      attribute_names = attributes_for_serialization
       if only = options[:only]
         attribute_names &= Array(only).map(&:to_s)
       elsif except = options[:except]
@@ -139,6 +139,13 @@ module ActiveModel
       #     end
       #   end
       alias :read_attribute_for_serialization :send
+      
+      # Hook method for defining the set of available attribute names. Override
+      # this method in subclasses where, e.g., it is possible to know the names
+      # without having to make an attributes hash.
+      def attributes_for_serialization
+        attributes.keys
+      end
 
       # Add associations specified via the <tt>:include</tt> option.
       #

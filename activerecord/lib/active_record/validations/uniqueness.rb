@@ -16,10 +16,14 @@ module ActiveRecord
         table = finder_class.arel_table
         value = map_enum_attribute(finder_class, attribute, value)
 
-        relation = build_relation(finder_class, table, attribute, value)
-        relation = relation.where.not(finder_class.primary_key => record.id) if record.persisted?
-        relation = scope_relation(record, table, relation)
-        relation = relation.merge(options[:conditions]) if options[:conditions]
+        begin
+          relation = build_relation(finder_class, table, attribute, value)
+          relation = relation.where.not(finder_class.primary_key => record.id) if record.persisted?
+          relation = scope_relation(record, table, relation)
+          relation = relation.merge(options[:conditions]) if options[:conditions]
+        rescue RangeError # E.g. Integer field can be out of DB adapter range and be checked for uniqueness at the same time
+          relation = finder_class.none
+        end
 
         if relation.exists?
           error_options = options.except(:case_sensitive, :scope, :conditions)

@@ -34,6 +34,12 @@ class TopicWithUniqEvent < Topic
   validates :event, uniqueness: true
 end
 
+class BigIntTest < ActiveRecord::Base
+  PG_MAX_INTEGER = 2147483647
+  self.table_name = 'postgresql_numbers'
+  validates :four_bytes_int, uniqueness: true, inclusion: { in: 0..PG_MAX_INTEGER }
+end
+
 class UniquenessValidationTest < ActiveRecord::TestCase
   fixtures :topics, 'warehouse-things'
 
@@ -85,6 +91,14 @@ class UniquenessValidationTest < ActiveRecord::TestCase
     assert !t2.valid?
     assert t2.errors[:title]
   end
+
+  if current_adapter? :PostgreSQLAdapter
+    def test_validate_uniqueness_when_integer_out_of_range
+      entry = BigIntTest.create(four_bytes_int: (BigIntTest::PG_MAX_INTEGER + 1))
+      assert entry.errors[:four_bytes_int] , ['is not included in the list']
+    end
+  end
+
 
   def test_validates_uniqueness_with_newline_chars
     Topic.validates_uniqueness_of(:title, :case_sensitive => false)

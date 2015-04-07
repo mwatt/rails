@@ -1,6 +1,6 @@
 ActiveRecord::Schema.define do
 
-  %w(postgresql_times postgresql_oids defaults postgresql_timestamp_with_zones
+  %w(postgresql_times postgresql_numbers postgresql_oids defaults postgresql_timestamp_with_zones
       postgresql_partitioned_table postgresql_partitioned_table_parent).each do |table_name|
     drop_table table_name, if_exists: true
   end
@@ -40,6 +40,13 @@ _SQL
     id SERIAL PRIMARY KEY,
     time_interval INTERVAL,
     scaled_time_interval INTERVAL(6)
+  );
+_SQL
+
+  execute <<_SQL
+  CREATE TABLE postgresql_numbers (
+    id SERIAL PRIMARY KEY,
+    four_bytes_int integer
   );
 _SQL
 

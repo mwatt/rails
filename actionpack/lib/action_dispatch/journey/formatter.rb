@@ -39,9 +39,8 @@ module ActionDispatch
           return [route.format(parameterized_parts), params]
         end
 
-        # Merge duplicate parameters which duplicated with different formart, and make all keys as symbol
-        primarty_parameters = constraints.inject({}){|h,(k,v)| h[k.to_sym] = v; h}
-        message = "No route matches #{Hash[primarty_parameters.sort].inspect}"
+        # Merge duplicate parameters which duplicated with different formart, and make all keys as string
+        message = "No route matches #{Hash[constraints.with_indifferent_access.sort].inspect}"
         message << " missing required keys: #{missing_keys.sort.inspect}" unless missing_keys.empty?
 
         raise ActionController::UrlGenerationError, message

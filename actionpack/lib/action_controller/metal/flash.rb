@@ -6,7 +6,7 @@ module ActionController #:nodoc:
       class_attribute :_flash_types, instance_accessor: false
       self._flash_types = []
 
-      delegate :flash, to: :request
+      delegate :flash, to: :request, allow_nil: true
       add_flash_types(:alert, :notice)
     end
 

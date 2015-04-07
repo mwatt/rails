@@ -69,6 +69,13 @@ _SQL
 _SQL
 
   execute <<_SQL
+  CREATE TABLE postgresql_4byte_ints (
+    id SERIAL PRIMARY KEY,
+    number integer
+  );
+_SQL
+
+  execute <<_SQL
   CREATE TABLE postgresql_uuids (
     id SERIAL PRIMARY KEY,
     guid uuid,

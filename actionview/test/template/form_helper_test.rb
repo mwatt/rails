@@ -3269,6 +3269,34 @@ class FormHelperTest < ActionView::TestCase
     ActionView::Base.default_form_builder = old_default_form_builder
   end
 
+  def test_form_builder_override
+    controller.class.form_builder LabelledFormBuilder
+
+    output_buffer = fields_for(:post, @post) do |f|
+      concat f.text_field(:title)
+    end
+
+    expected = "<label for='title'>Title:</label> <input name='post[title]' type='text' id='post_title' value='Hello World' /><br/>"
+
+    assert_dom_equal expected, output_buffer
+  ensure
+    controller.class.form_builder nil
+  end
+
+  def test_lazy_loading_form_builder_override
+    controller.class.form_builder "FormHelperTest::LabelledFormBuilder"
+
+    output_buffer = fields_for(:post, @post) do |f|
+      concat f.text_field(:title)
+    end
+
+    expected = "<label for='title'>Title:</label> <input name='post[title]' type='text' id='post_title' value='Hello World' /><br/>"
+
+    assert_dom_equal expected, output_buffer
+  ensure
+    controller.class.form_builder nil
+  end
+
   def test_fields_for_with_labelled_builder
     output_buffer = fields_for(:post, @post, builder: LabelledFormBuilder) do |f|
       concat f.text_field(:title)

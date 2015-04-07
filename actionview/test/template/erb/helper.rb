@@ -14,7 +14,9 @@ module ERBTest
   class BlockTestCase < ActiveSupport::TestCase
     def render_content(start, inside)
       template = block_helper(start, inside)
-      ActionView::Template::Handlers::Erubis.new(template).evaluate(ViewContext.new)
+      context = ViewContext.new
+      context.controller = BasicController.new
+      ActionView::Template::Handlers::Erubis.new(template).evaluate(context)
     end
 
     def block_helper(str, rest)

@@ -1233,7 +1233,8 @@ module ActionView
         end
 
         def default_form_builder_class
-          builder = ActionView::Base.default_form_builder
+          builder = controller.form_builder if controller.respond_to?(:form_builder)
+          builder ||= ActionView::Base.default_form_builder
           builder.respond_to?(:constantize) ? builder.constantize : builder
         end
     end

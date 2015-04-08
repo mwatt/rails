@@ -34,6 +34,19 @@ class TopicWithUniqEvent < Topic
   validates :event, uniqueness: true
 end
 
+class BigIntTest < ActiveRecord::Base
+  PG_MAX_INTEGER = 2147483647
+  self.table_name = 'defaults'
+  validates :four_bytes_int, uniqueness: true, inclusion: { in: 0..PG_MAX_INTEGER }
+end
+
+class BigIntReverseTest < ActiveRecord::Base
+  PG_MAX_INTEGER = 2147483647
+  self.table_name = 'defaults'
+  validates :four_bytes_int, inclusion: { in: 0..PG_MAX_INTEGER }
+  validates :four_bytes_int, uniqueness: true
+end
+
 class UniquenessValidationTest < ActiveRecord::TestCase
   fixtures :topics, 'warehouse-things'
 
@@ -84,6 +97,18 @@ class UniquenessValidationTest < ActiveRecord::TestCase
     t2 = Topic.new('title' => 'abc')
     assert !t2.valid?
     assert t2.errors[:title]
+  end
+
+  if current_adapter? :PostgreSQLAdapter
+    def test_validate_uniqueness_when_integer_out_of_range
+      entry = BigIntTest.create(four_bytes_int: (BigIntTest::PG_MAX_INTEGER + 1))
+      assert_equal entry.errors[:four_bytes_int], ['is not included in the list']
+    end
+
+    def test_validate_uniqueness_when_integer_out_of_range_show_order_does_not_matter
+      entry = BigIntReverseTest.create(four_bytes_int: (BigIntTest::PG_MAX_INTEGER + 1))
+      assert_equal entry.errors[:four_bytes_int], ['is not included in the list']
+    end
   end
 
   def test_validates_uniqueness_with_newline_chars

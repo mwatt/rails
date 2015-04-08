@@ -19,6 +19,7 @@ ActiveRecord::Schema.define do
   execute <<_SQL
     CREATE TABLE defaults (
     id serial primary key,
+    four_bytes_int integer default 0,
     modified_date date default CURRENT_DATE,
     modified_date_function date default now(),
     fixed_date date default '2004-01-01',

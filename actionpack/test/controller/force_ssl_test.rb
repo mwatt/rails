@@ -323,9 +323,9 @@ class RedirectToSSLTest < ActionController::TestCase
   end
 
   def test_banana_redirects_to_https_if_not_https_and_disabled_flash
-    disable_flash
+    # disable_flash
     get :banana
-    enable_flash
+    # enable_flash
     assert_response 301
     assert_equal 'https://test.host/redirect_to_ssl/banana', redirect_to_url
   end

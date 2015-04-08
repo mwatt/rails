@@ -315,10 +315,34 @@ class RedirectToSSLTest < ActionController::TestCase
     assert_equal "https://secure.cheeseburger.host/redirect_to_ssl/cheeseburger", redirect_to_url
   end
 
-  def test_banana_does_not_redirect_if_already_https
+  def test_cheeseburgers_does_not_redirect_if_already_https
     request.env['HTTPS'] = 'on'
     get :cheeseburger
     assert_response 200
     assert_equal 'ihaz', response.body
+  end
+
+  def test_banana_redirects_to_https_if_not_https_and_disabled_flash
+    disable_flash
+    get :banana
+    enable_flash
+    assert_response 301
+    assert_equal 'https://test.host/redirect_to_ssl/banana', redirect_to_url
+  end
+
+  private
+
+  def disable_flash
+    ActionDispatch::TestRequest.class_eval do
+      alias_method :flash_origin, :flash
+      undef_method :flash
+    end
+  end
+
+  def enable_flash
+    ActionDispatch::TestRequest.class_eval do
+      alias_method :flash, :flash_origin
+      undef_method :flash_origin
+    end
   end
 end

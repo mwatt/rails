@@ -260,6 +260,7 @@ module ApplicationTests
 
       run_test_command('test/models/account_test.rb:4 test/models/post_test.rb:4').tap do |output|
         assert_match 'AccountTest', output
+        assert_match 'PostTest', output
       end
     end
 

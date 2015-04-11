@@ -25,7 +25,7 @@ module Minitest
     options[:patterns] = OptionParser.new(options[:args]).order!
     Rails::TestRequirer.require_files options[:patterns] if options[:patterns]
 
-    unless (options[:full_backtrace] || ENV["BACKTRACE"])
+    unless options[:full_backtrace] || ENV["BACKTRACE"]
       Minitest.backtrace_filter = Rails.backtrace_cleaner
     end
 

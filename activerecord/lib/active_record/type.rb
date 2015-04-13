@@ -62,5 +62,6 @@ module ActiveRecord
     register(:string, Type::String, override: false)
     register(:text, Type::Text, override: false)
     register(:time, Type::Time, override: false)
+    register(:unsigned_integer, Type::UnsignedInteger, override: false)
   end
 end

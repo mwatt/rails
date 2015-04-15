@@ -1,3 +1,12 @@
+*   Calling `destroy` on an object with `has_many dependent: :destroy` relations
+    will now call `destroy` and not `destroy!` on the related objects. If a 
+    `.replace` call fails due to a `before_destroy`, it will now raise
+    `ActiveRecord::RecordNotDestroyed`.
+
+    Fixes #19761
+
+    *Nate Collings*
+
 *   Fixed a bug where uniqueness validations would error on out of range values,
     even if an validation should have prevented it from hitting the database.
 

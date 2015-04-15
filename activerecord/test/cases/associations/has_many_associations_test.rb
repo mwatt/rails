@@ -2131,11 +2131,17 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
     car = Car.create!
     original_child = FailedBulb.create!(car: car)
 
-    assert_raise(ActiveRecord::RecordNotDestroyed) do
+    assert_raise(ActiveRecord::RecordNotSaved) do
       car.failed_bulbs = [FailedBulb.create!]
     end
 
     assert_equal [original_child], car.reload.failed_bulbs
+  end
+
+  test 'before_destroy gets called on the parent if a dependent child fails to destroy' do
+    car = UndestroyableCar.create! failed_bulbs: [FailedBulb.create!]
+    car.destroy
+    assert_equal car.errors.messages, {:base => ['I cannot be destroyed']}
   end
 
   test 'updates counter cache when default scope is given' do

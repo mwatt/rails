@@ -24,3 +24,12 @@ end
 class FastCar < Car
   default_scope { order('name desc') }
 end
+
+class UndestroyableCar < Car
+  before_destroy :cannot_destroy
+
+  def cannot_destroy
+    errors.add(:base, 'I cannot be destroyed')
+    throw(:abort)
+  end
+end

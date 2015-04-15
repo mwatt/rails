@@ -40,7 +40,7 @@ end
 
 class FunkyBulb < Bulb
   before_destroy do
-    raise "before_destroy was called"
+    throw(:abort)
   end
 end
 

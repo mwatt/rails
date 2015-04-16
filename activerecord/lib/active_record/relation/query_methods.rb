@@ -50,16 +50,17 @@ module ActiveRecord
       end
     end
 
+    FROZEN_EMPTY_ARRAY = [].freeze
     Relation::MULTI_VALUE_METHODS.each do |name|
       class_eval <<-CODE, __FILE__, __LINE__ + 1
-        def #{name}_values                    # def select_values
-          @values[:#{name}] || []             #   @values[:select] || []
-        end                                   # end
-                                              #
-        def #{name}_values=(values)           # def select_values=(values)
-          assert_mutability!                  #   assert_mutability!
-          @values[:#{name}] = values          #   @values[:select] = values
-        end                                   # end
+        def #{name}_values                        # def select_values
+          @values[:#{name}] || FROZEN_EMPTY_ARRAY #   @values[:select] || []
+        end                                       # end
+                                                  #
+        def #{name}_values=(values)               # def select_values=(values)
+          assert_mutability!                      #   assert_mutability!
+          @values[:#{name}] = values              #   @values[:select] = values
+        end                                       # end
       CODE
     end
 
@@ -97,8 +98,9 @@ module ActiveRecord
       from_clause.binds + arel.bind_values + where_clause.binds + having_clause.binds
     end
 
+    FROZEN_EMPTY_HASH = {}.freeze
     def create_with_value # :nodoc:
-      @values[:create_with] || {}
+      @values[:create_with] || FROZEN_EMPTY_HASH
     end
 
     alias extensions extending_values

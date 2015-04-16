@@ -477,11 +477,20 @@ module ActiveRecord
           changes[column] = write_attribute(column, time)
         end
 
-        changes[self.class.locking_column] = increment_lock if locking_enabled?
-
         clear_attribute_changes(changes.keys)
         primary_key = self.class.primary_key
-        self.class.unscoped.where(primary_key => self[primary_key]).update_all(changes) == 1
+
+        if locking_enabled?
+          lock_column = self.class.locking_column
+          lock_val = send(lock_column)
+          changes[lock_column] = increment_lock
+          if self.class.unscoped.where(primary_key => send(primary_key), lock_column => lock_val).update_all(changes) != 1
+            raise ActiveRecord::StaleObjectError.new(self, "touch")
+          end
+          true
+        else
+          self.class.unscoped.where(primary_key => send(primary_key)).update_all(changes) == 1
+        end
       else
         true
       end

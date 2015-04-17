@@ -112,17 +112,14 @@ see the API Documentation for [ActiveJob::QueueAdapters](http://api.rubyonrails.
 You can easily set your queueing backend:
 
 ```ruby
-# config/application.rb
-module YourApp
-  class Application < Rails::Application
-    # Be sure to have the adapter's gem in your Gemfile
-    # and follow the adapter's specific installation
-    # and deployment instructions.
-    config.active_job.queue_adapter = :sidekiq
-  end
+# app/jobs/application_job.rb
+class ApplicationJob < ActiveJob::Base
+  self.queue_adapter = :sidekiq
 end
 ```
 
+Be sure to have the adapter's gem in your Gemfile and follow the adapter's
+specific installation and deployment instructions.
 
 Queues
 ------

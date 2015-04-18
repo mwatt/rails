@@ -1,6 +1,7 @@
 require 'abstract_unit'
 require 'controller/fake_models'
 require 'pathname'
+require 'rails/engine'
 
 class TestControllerWithExtraEtags < ActionController::Base
   etag { nil  }
@@ -623,5 +624,25 @@ class HttpCacheForeverTest < ActionController::TestCase
 
     get :cache_me_forever, params: {version: 'v2'}
     assert_response :not_modified
+  end
+
+  def test_render_to_string_with_engine_path
+    with_routing do |set|
+      app = Class.new(Rails::Engine) do
+        def self.routes
+          @routes ||= ActionDispatch::Routing::RouteSet.new
+        end
+
+        routes.draw { get 'bar', to: lambda {} }
+
+        def self.call(*)
+        end
+      end
+
+      set.draw { mount app => '/foo', as: 'foo_app' }
+
+      rendered_string = ApplicationController.new.render_to_string inline: '<%= foo_app.bar_path %>'
+      assert_equal 'foo/bar', rendered_string
+    end
   end
 end

@@ -205,8 +205,8 @@ module ActionController
     end
 
     def assign_parameters(routes, controller_path, action, parameters = {})
-      parameters = parameters.symbolize_keys.merge(:controller => controller_path, :action => action)
-      extra_keys = routes.extra_keys(parameters)
+      parameters = parameters.symbolize_keys
+      extra_keys = routes.extra_keys(parameters.merge(:controller => controller_path, :action => action))
       non_path_parameters = get? ? query_parameters : request_parameters
       parameters.each do |key, value|
         if value.is_a?(Array) && (value.frozen? || value.any?(&:frozen?))
@@ -236,13 +236,7 @@ module ActionController
       # Clear the filter cache variables so they're not stale
       @filtered_parameters = @filtered_env = @filtered_path = nil
 
-      params = self.request_parameters.dup
-      %w(controller action only_path).each do |k|
-        params.delete(k)
-        params.delete(k.to_sym)
-      end
-      data = params.to_query
-
+      data = self.request_parameters.to_query
       @env['CONTENT_LENGTH'] = data.length.to_s
       @env['rack.input'] = StringIO.new(data)
     end
@@ -669,12 +663,10 @@ module ActionController
         @controller.request  = @request
         @controller.response = @response
 
-        build_request_uri(action, parameters)
-
-        name = @request.parameters[:action]
+        build_request_uri(controller_class_name, action, parameters)
 
         @controller.recycle!
-        @controller.process(name)
+        @controller.process(action)
 
         if cookies = @request.env['action_dispatch.cookies']
           unless @response.committed?
@@ -790,10 +782,11 @@ module ActionController
         end
       end
 
-      def build_request_uri(action, parameters)
+      def build_request_uri(controller_class_name, action, parameters)
         unless @request.env["PATH_INFO"]
           options = @controller.respond_to?(:url_options) ? @controller.__send__(:url_options).merge(parameters) : parameters
           options.update(
+            :controller => controller_class_name,
             :action => action,
             :relative_url_root => nil,
             :_recall => @request.path_parameters)

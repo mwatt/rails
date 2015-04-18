@@ -547,6 +547,12 @@ XML
     )
   end
 
+  def test_param_named_action
+    get :test_params, params: {action: 'my_action', some_param: 'foo'}
+    parsed_params = eval(@response.body)
+    assert_equal 'my_action', parsed_params['action']
+  end
+
   def test_kwarg_params_passing_with_session_and_flash
     get :test_params, params: {
       page: {

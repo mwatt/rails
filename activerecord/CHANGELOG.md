@@ -1,3 +1,9 @@
+*   Add `:prefix` option to `enum` definition.
+
+    Fixes #17511 and #17415
+
+    *Igor Kapkov*
+
 *   Autosave existing records on a has many through association when the parent
     is new.
 

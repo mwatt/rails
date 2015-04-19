@@ -75,6 +75,19 @@ module ActiveRecord
   #
   #   Conversation.where("status <> ?", Conversation.statuses[:archived])
   #
+  # You can use <tt>:prefix</tt> option then you need to define multiple enums
+  # with same values. If prefix is <tt>true</tt>, the methods are prefixed with
+  # the name of the enum.
+  #
+  #   class Invoice < ActiveRecord::Base
+  #     enum({verification: [:done, :fail]}, prefix: true)
+  #   end
+  #
+  # It is also possible to supply a custom prefix.
+  #
+  #   class Invoice < ActiveRecord::Base
+  #     enum({verification: [:done, :fail]}, prefix: 'verification_status')
+  #   end
 
   module Enum
     def self.extended(base) # :nodoc:
@@ -119,8 +132,9 @@ module ActiveRecord
       attr_reader :name, :mapping
     end
 
-    def enum(definitions)
+    def enum(definitions, options = {})
       klass = self
+      prefix = options[:prefix]
       definitions.each do |name, values|
         # statuses = { }
         enum_values = ActiveSupport::HashWithIndifferentAccess.new
@@ -138,19 +152,26 @@ module ActiveRecord
         _enum_methods_module.module_eval do
           pairs = values.respond_to?(:each_pair) ? values.each_pair : values.each_with_index
           pairs.each do |value, i|
+            value_prefix = \
+              if prefix
+                "#{prefix == true ? name : prefix}_"
+              else
+                ''
+              end
+            value_method_name = "#{value_prefix}#{value}"
             enum_values[value] = i
 
             # def active?() status == 0 end
-            klass.send(:detect_enum_conflict!, name, "#{value}?")
-            define_method("#{value}?") { self[name] == value.to_s }
+            klass.send(:detect_enum_conflict!, name, "#{value_method_name}?")
+            define_method("#{value_method_name}?") { self[name] == value.to_s }
 
             # def active!() update! status: :active end
-            klass.send(:detect_enum_conflict!, name, "#{value}!")
-            define_method("#{value}!") { update! name => value }
+            klass.send(:detect_enum_conflict!, name, "#{value_method_name}!")
+            define_method("#{value_method_name}!") { update! name => value }
 
             # scope :active, -> { where status: 0 }
-            klass.send(:detect_enum_conflict!, name, value, true)
-            klass.scope value, -> { klass.where name => value }
+            klass.send(:detect_enum_conflict!, name, value_method_name, true)
+            klass.scope value_method_name, -> { klass.where name => value }
           end
         end
         defined_enums[name.to_s] = enum_values

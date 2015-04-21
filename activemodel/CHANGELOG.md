@@ -1,8 +1,9 @@
 *   Add `ActiveModel::Dirty#[attr_name]_previously_changed?` and
-    `ActiveModel::Dirty#[attr_name]_previous_change` to improve access to
-    record changes after save.
+    `ActiveModel::Dirty#[attr_name]_previous_change` to improve access
+    to recorded changes after the model has been saved.
 
-    It provides the same syntactic sugar after save than before save.
+    It makes the dirty-attributes query methods consistent before and after
+    saving.
 
     *Fernando Tapia Rico*
 

@@ -223,6 +223,11 @@ module ActiveModel
         [changed_attributes[attr], __send__(attr)] if attribute_changed?(attr)
       end
 
+      # Handles <tt>*_previous_change</tt> for +method_missing+.
+      def attribute_previous_change(attr)
+        @previously_changed[attr] if attribute_previously_changed?(attr)
+      end
+
       # Handles <tt>*_will_change!</tt> for +method_missing+.
       def attribute_will_change!(attr)
         return if attribute_changed?(attr)

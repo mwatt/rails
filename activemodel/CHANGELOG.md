@@ -1,3 +1,11 @@
+*   Add `ActiveModel::Dirty#[attr_name]_previously_changed?` and
+    `ActiveModel::Dirty#[attr_name]_previous_change` to improve access to
+    record changes after save.
+
+    It provides the same syntactic sugar after save than before save.
+
+    *Fernando Tapia Rico*
+
 *   Deprecate the `:tokenizer` option for `validates_length_of`, in favor of
     plain Ruby.
 

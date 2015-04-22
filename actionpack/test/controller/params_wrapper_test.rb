@@ -33,6 +33,14 @@ class ParamsWrapperTest < ActionController::TestCase
 
   tests UsersController
 
+  def setup
+    @routes = ActionDispatch::Routing::RouteSet.new.tap do |r|
+      r.draw do
+        post ':controller(/:action(/:id))'
+      end
+    end
+  end
+
   def teardown
     UsersController.last_parameters = nil
   end
@@ -42,6 +50,22 @@ class ParamsWrapperTest < ActionController::TestCase
       @request.env['CONTENT_TYPE'] = 'application/json'
       post :parse, params: { 'username' => 'sikachu' }
       assert_equal @request.filtered_parameters, { 'controller' => 'params_wrapper_test/users', 'action' => 'parse', 'username' => 'sikachu', 'user' => { 'username' => 'sikachu' } }
+    end
+  end
+
+  def test_parameters_wrap_path_parameters
+    with_default_wrapper_options do
+      @request.env['CONTENT_TYPE'] = 'application/json'
+      post "parse", params: { 'username' => 'sonots', id: 1 }
+      assert_equal @request.parameters, { 'controller' => 'params_wrapper_test/users', 'action' => 'parse', 'id' => '1', 'username' => 'sonots', 'user' => { 'username' => 'sonots', 'id' => '1' } }
+    end
+  end
+
+  def test_request_parameters_do_not_wrap_path_parameters
+    with_default_wrapper_options do
+      @request.env['CONTENT_TYPE'] = 'application/json'
+      post :parse, params: { 'username' => 'sonots', id: 1 }
+      assert_equal @request.request_parameters, { 'username' => 'sonots', 'user' => { 'username' => 'sonots' } }
     end
   end
 

@@ -64,14 +64,13 @@ module ActiveModel
 
       def is_number?(raw_value)
         parsed_value = Kernel.Float(raw_value) if raw_value !~ /\A0[xX]/
-        parsed_value.present?
+        !parsed_value.nil?
       rescue ArgumentError, TypeError
         false
       end
 
       def is_integer?(raw_value)
-        parsed_value = raw_value.to_i if raw_value.to_s =~ /\A[+-]?\d+\z/
-        parsed_value.present?
+        /\A[+-]?\d+\z/ === raw_value.to_s
       end
 
       def filtered_options(value)

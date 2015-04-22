@@ -72,10 +72,20 @@ module ActiveModel
   module Serialization
     # Returns a serialized hash of your object.
     #
+    #   class Address
+    #     include ActiveModel::Serialization
+    #
+    #     attr_accessor :city, :street
+    #
+    #     def attributes
+    #       {'city' => nil, 'street' => nil}
+    #     end
+    #   end
+    #
     #   class Person
     #     include ActiveModel::Serialization
     #
-    #     attr_accessor :name, :age
+    #     attr_accessor :name, :age, :address
     #
     #     def attributes
     #       {'name' => nil, 'age' => nil}
@@ -89,11 +99,16 @@ module ActiveModel
     #   person = Person.new
     #   person.name = 'bob'
     #   person.age  = 22
+    #   person.address = Address.new
+    #   person.address.city = 'New York'
+    #   person.address.street = 'Main St'
     #   person.serializable_hash                # => {"name"=>"bob", "age"=>22}
     #   person.serializable_hash(only: :name)   # => {"name"=>"bob"}
     #   person.serializable_hash(except: :name) # => {"age"=>22}
     #   person.serializable_hash(methods: :capitalized_name)
     #   # => {"name"=>"bob", "age"=>22, "capitalized_name"=>"Bob"}
+    #   person.serializable_hash(include: { address: { only: 'city' }})
+    #   # => {"name"=>"bob", "age"=>22, "address"=>{"city"=>"New York"}}
     def serializable_hash(options = nil)
       options ||= {}
 

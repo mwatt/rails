@@ -70,8 +70,7 @@ module ActiveModel
       end
 
       def is_integer?(raw_value)
-        parsed_value = raw_value.to_i if raw_value.to_s =~ /\A[+-]?\d+\z/
-        parsed_value.present?
+        raw_value.to_s =~ /\A[+-]?\d+\z/
       end
 
       def filtered_options(value)

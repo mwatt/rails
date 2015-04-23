@@ -53,7 +53,7 @@ module ActiveJob
         when *TYPE_WHITELIST
           argument
         when GlobalID::Identification
-          { GLOBALID_KEY => argument.to_global_id.to_s }
+          convert_to_global_id_hash(argument)
         when Array
           argument.map { |arg| serialize_argument(arg) }
         when ActiveSupport::HashWithIndifferentAccess
@@ -68,6 +68,7 @@ module ActiveJob
         else
           raise SerializationError.new("Unsupported argument type: #{argument.class.name}")
         end
+
       end
 
       def deserialize_argument(argument)
@@ -139,6 +140,13 @@ module ActiveJob
             key
           end
         end
+      end
+
+      def convert_to_global_id_hash(argument)
+        { GLOBALID_KEY => argument.to_global_id.to_s }
+      rescue URI::GID::MissingModelIdError
+        raise ArgumentError, "Unable to serialize #{argument.class} without an id. " \
+          "(Maybe you forgot to call save?)"
       end
   end
 end

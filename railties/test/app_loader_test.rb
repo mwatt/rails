@@ -2,10 +2,10 @@ require 'tmpdir'
 require 'abstract_unit'
 require 'rails/app_rails_loader'
 
-class AppRailsLoaderTest < ActiveSupport::TestCase
+class AppLoaderTest < ActiveSupport::TestCase
   def loader
     @loader ||= Class.new do
-      extend Rails::AppRailsLoader
+      extend Rails::AppLoader
 
       def self.exec_arguments
         @exec_arguments
@@ -23,7 +23,7 @@ class AppRailsLoaderTest < ActiveSupport::TestCase
   end
 
   def expects_exec(exe)
-    assert_equal [Rails::AppRailsLoader::RUBY, exe], loader.exec_arguments
+    assert_equal [Rails::AppLoader::RUBY, exe], loader.exec_arguments
   end
 
   setup do

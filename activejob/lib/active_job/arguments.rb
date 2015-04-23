@@ -68,6 +68,8 @@ module ActiveJob
         else
           raise SerializationError.new("Unsupported argument type: #{argument.class.name}")
         end
+      rescue URI::InvalidComponentError
+        raise ArgumentError, "Can't serialize unsaved models for future jobs. Save your #{argument.class} first, and try again."
       end
 
       def deserialize_argument(argument)

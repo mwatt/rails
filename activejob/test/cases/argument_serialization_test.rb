@@ -88,6 +88,12 @@ class ArgumentSerializationTest < ActiveSupport::TestCase
     assert_equal "Job with argument: 2", JobBuffer.last_value
   end
 
+  test 'raises a friendly ArgumentError for unsaved records' do
+    assert_raises  ArgumentError, "Can't serialize unsaved models for future jobs. Save your Person first, and try again." do
+      ActiveJob::Arguments.serialize [Person.new]
+    end
+  end
+
   private
     def assert_arguments_unchanged(*args)
       assert_arguments_roundtrip args

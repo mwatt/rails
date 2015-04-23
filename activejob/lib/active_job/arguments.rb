@@ -14,13 +14,14 @@ module ActiveJob
     end
   end
 
-  # Raised when an unsupported argument type is being set as job argument. We
-  # currently support NilClass, Fixnum, Float, String, TrueClass, FalseClass,
-  # Bignum and object that can be represented as GlobalIDs (ex: Active Record).
-  # Also raised if you set the key for a Hash something else than a string or
-  # a symbol.
-  class SerializationError < ArgumentError
-  end
+  # Raised when an unsupported argument type is being set as job argument.
+  # We currently support the types in +ActiveJob::Arguments::TYPE_WHITELIST+,
+  # arrays, hashes, types that mixin +GlobalID::Identification+ (e.g.
+  # ActiveRecord models), Arrays and hashes must have serializable values,
+  # and hashes must also have string and symbol keys This error will also
+  # be raised when GlobalID fails to create an identifier for the argument as
+  # would happen if you tried to serialize an unpersisted ActiveRecord object.
+  class SerializationError < ArgumentError; end
 
   module Arguments
     extend self
@@ -53,7 +54,7 @@ module ActiveJob
         when *TYPE_WHITELIST
           argument
         when GlobalID::Identification
-          { GLOBALID_KEY => argument.to_global_id.to_s }
+          convert_to_global_id_hash(argument)
         when Array
           argument.map { |arg| serialize_argument(arg) }
         when ActiveSupport::HashWithIndifferentAccess
@@ -139,6 +140,13 @@ module ActiveJob
             key
           end
         end
+      end
+
+      def convert_to_global_id_hash(argument)
+        { GLOBALID_KEY => argument.to_global_id.to_s }
+      rescue URI::GID::MissingModelIdError
+        raise SerializationError, "Unable to serialize #{argument.class} " \
+          "without an id. (Maybe you forgot to call save?)"
       end
   end
 end

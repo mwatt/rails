@@ -2,7 +2,7 @@ require 'pathname'
 require 'rails/version'
 
 module Rails
-  module AppRailsLoader
+  module AppLoader
     extend self
 
     RUBY = Gem.ruby

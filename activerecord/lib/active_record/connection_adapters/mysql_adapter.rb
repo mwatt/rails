@@ -56,9 +56,9 @@ module ActiveRecord
     # * <tt>:password</tt> - Defaults to nothing.
     # * <tt>:database</tt> - The name of the database. No default, must be provided.
     # * <tt>:encoding</tt> - (Optional) Sets the client encoding by executing "SET NAMES <encoding>" after connection.
-    # * <tt>:reconnect</tt> - Defaults to false (See MySQL documentation: http://dev.mysql.com/doc/refman/5.0/en/auto-reconnect.html).
-    # * <tt>:strict</tt> - Defaults to true. Enable STRICT_ALL_TABLES. (See MySQL documentation: http://dev.mysql.com/doc/refman/5.0/en/server-sql-mode.html)
-    # * <tt>:variables</tt> - (Optional) A hash session variables to send as `SET @@SESSION.key = value` on each database connection. Use the value `:default` to set a variable to its DEFAULT value. (See MySQL documentation: http://dev.mysql.com/doc/refman/5.0/en/set-statement.html).
+    # * <tt>:reconnect</tt> - Defaults to false (See MySQL documentation: http://dev.mysql.com/doc/refman/5.6/en/auto-reconnect.html).
+    # * <tt>:strict</tt> - Defaults to true. Enable STRICT_ALL_TABLES. (See MySQL documentation: http://dev.mysql.com/doc/refman/5.6/en/sql-mode.html)
+    # * <tt>:variables</tt> - (Optional) A hash session variables to send as <tt>SET @@SESSION.key = value</tt> on each database connection. Use the value +:default+ to set a variable to its DEFAULT value. (See MySQL documentation: http://dev.mysql.com/doc/refman/5.6/en/set-statement.html).
     # * <tt>:sslca</tt> - Necessary to use MySQL with an SSL connection.
     # * <tt>:sslkey</tt> - Necessary to use MySQL with an SSL connection.
     # * <tt>:sslcert</tt> - Necessary to use MySQL with an SSL connection.
@@ -88,7 +88,7 @@ module ActiveRecord
         end
 
         def clear
-          cache.values.each do |hash|
+          cache.each_value do |hash|
             hash[:stmt].close
           end
           cache.clear
@@ -137,7 +137,9 @@ module ActiveRecord
         @connection.quote(string)
       end
 
+      #--
       # CONNECTION MANAGEMENT ====================================
+      #++
 
       def active?
         if @connection.respond_to?(:stat)
@@ -178,7 +180,9 @@ module ActiveRecord
         end
       end
 
+      #--
       # DATABASE STATEMENTS ======================================
+      #++
 
       def select_rows(sql, name = nil, binds = [])
         @connection.query_with_result = true
@@ -324,8 +328,8 @@ module ActiveRecord
 
       def initialize_type_map(m) # :nodoc:
         super
-        m.register_type %r(datetime)i, Fields::DateTime.new
-        m.register_type %r(time)i,     Fields::Time.new
+        register_class_with_precision m, %r(datetime)i, Fields::DateTime
+        register_class_with_precision m, %r(time)i,     Fields::Time
       end
 
       def exec_without_stmt(sql, name = 'SQL') # :nodoc:
@@ -391,11 +395,9 @@ module ActiveRecord
 
       def exec_stmt(sql, name, binds)
         cache = {}
-        type_casted_binds = binds.map { |col, val|
-          [col, type_cast(val, col)]
-        }
+        type_casted_binds = binds.map { |attr| type_cast(attr.value_for_database) }
 
-        log(sql, name, type_casted_binds) do
+        log(sql, name, binds) do
           if binds.empty?
             stmt = @connection.prepare(sql)
           else
@@ -406,7 +408,7 @@ module ActiveRecord
           end
 
           begin
-            stmt.execute(*type_casted_binds.map { |_, val| val })
+            stmt.execute(*type_casted_binds)
           rescue Mysql::Error => e
             # Older versions of MySQL leave the prepared statement in a bad
             # place when an error occurs. To support older MySQL versions, we
@@ -419,9 +421,7 @@ module ActiveRecord
 
           cols = nil
           if metadata = stmt.result_metadata
-            cols = cache[:cols] ||= metadata.fetch_fields.map { |field|
-              field.name
-            }
+            cols = cache[:cols] ||= metadata.fetch_fields.map(&:name)
             metadata.free
           end
 

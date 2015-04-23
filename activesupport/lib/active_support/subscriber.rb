@@ -10,18 +10,13 @@ module ActiveSupport
   #
   #   module ActiveRecord
   #     class StatsSubscriber < ActiveSupport::Subscriber
+  #       attach_to :active_record
+  #
   #       def sql(event)
   #         Statsd.timing("sql.#{event.payload[:name]}", event.duration)
   #       end
   #     end
   #   end
-  #
-  # And it's finally registered as:
-  #
-  #   ActiveRecord::StatsSubscriber.attach_to :active_record
-  #
-  # Since we need to know all instance methods before attaching the log
-  # subscriber, the line above should be called after your subscriber definition.
   #
   # After configured, whenever a "sql.active_record" notification is published,
   # it will properly dispatch the event (ActiveSupport::Notifications::Event) to
@@ -96,7 +91,7 @@ module ActiveSupport
       event.end = finished
       event.payload.merge!(payload)
 
-      method = name.split('.').first
+      method = name.split('.'.freeze).first
       send(method, event)
     end
 

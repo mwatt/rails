@@ -1,3 +1,5 @@
+**DO NOT READ THIS FILE ON GITHUB, GUIDES ARE PUBLISHED ON http://guides.rubyonrails.org.**
+
 Action View Overview
 ====================
 
@@ -7,7 +9,6 @@ After reading this guide, you will know:
 * How best to use templates, partials, and layouts.
 * What helpers are provided by Action View and how to make your own.
 * How to use localized views.
-* How to use Action View outside of Rails.
 
 --------------------------------------------------------------------------------
 
@@ -181,13 +182,29 @@ One way to use partials is to treat them as the equivalent of subroutines; a way
 
 <p>Here are a few of our fine products:</p>
 <% @products.each do |product| %>
-  <%= render partial: "product", locals: {product: product} %>
+  <%= render partial: "product", locals: { product: product } %>
 <% end %>
 
 <%= render "shared/footer" %>
 ```
 
 Here, the `_ad_banner.html.erb` and `_footer.html.erb` partials could contain content that is shared among many pages in your application. You don't need to see the details of these sections when you're concentrating on a particular page.
+
+#### `render` without `partial` and `locals` options
+
+In the above example, `render` takes 2 options: `partial` and `locals`. But if
+these are the only options you want to pass, you can skip using these options.
+For example, instead of:
+
+```erb
+<%= render partial: "product", locals: { product: @product } %>
+```
+
+You can also do:
+
+```erb
+<%= render "product", product: @product %>
+```
 
 #### The `as` and `object` options
 
@@ -200,7 +217,7 @@ By default `ActionView::Partials::PartialRenderer` has its object in a local var
 within product we'll get `@product` in the local variable `product`, as if we had written:
 
 ```erb
-<%= render partial: "product", locals: {product: @product} %>
+<%= render partial: "product", locals: { product: @product } %>
 ```
 
 With the `as` option we can specify a different name for the local variable. For example, if we wanted it to be `item` instead of `product` we would do:
@@ -214,7 +231,7 @@ The `object` option can be used to directly specify which object is rendered int
 For example, instead of:
 
 ```erb
-<%= render partial: "product", locals: {product: @item} %>
+<%= render partial: "product", locals: { product: @item } %>
 ```
 
 we would do:
@@ -287,7 +304,7 @@ In the `show` template, we'll render the `_article` partial wrapped in the `box`
 **articles/show.html.erb**
 
 ```erb
-<%= render partial: 'article', layout: 'box', locals: {article: @article} %>
+<%= render partial: 'article', layout: 'box', locals: { article: @article } %>
 ```
 
 The `box` layout simply wraps the `_article` partial in a `div`:
@@ -327,7 +344,7 @@ You can also render a block of code within a partial layout instead of calling `
 **articles/show.html.erb**
 
 ```html+erb
-<% render(layout: 'box', locals: {article: @article}) do %>
+<% render(layout: 'box', locals: { article: @article }) do %>
   <%= div_for(article) do %>
     <p><%= article.body %></p>
   <% end %>
@@ -339,7 +356,39 @@ Supposing we use the same `_box` partial from above, this would produce the same
 View Paths
 ----------
 
-TODO...
+When rendering the view for a request, the controller needs to resolve where to find each of the directories are located.
+
+We are able to modify the order these locations are resolved by using `prepend_view_path` and `append_view_path`.
+
+This allows us to add new paths to the beginning or end of the list used to resolve these paths.
+
+### Prepend view path
+
+This can be helpful for example, when we want to prepend a different directory for subdomains.
+
+We can do this by using:
+
+```prepend_view_path "app/views/#{request.subdomain}"```
+
+Then our list becomes something like:
+
+```
+[
+  ~/rails_app/app/views/<subdomain>,
+  ~/rails_app/app/views,
+  # ...
+]
+```
+
+This will put the subdomain path at the beginning of the list.
+
+### Append view path
+
+Similarly, we can append paths:
+
+```append_view_path "app/views/direct"```.
+
+This will add ```app/views/direct``` and the end of lookup paths for views.
 
 Overview of helpers provided by Action View
 -------------------------------------------
@@ -347,83 +396,6 @@ Overview of helpers provided by Action View
 WIP: Not all the helpers are listed here. For a full list see the [API documentation](http://api.rubyonrails.org/classes/ActionView/Helpers.html)
 
 The following is only a brief overview summary of the helpers available in Action View. It's recommended that you review the [API Documentation](http://api.rubyonrails.org/classes/ActionView/Helpers.html), which covers all of the helpers in more detail, but this should serve as a good starting point.
-
-### RecordTagHelper
-
-This module provides methods for generating container tags, such as `div`, for your record. This is the recommended way of creating a container for render your Active Record object, as it adds an appropriate class and id attributes to that container. You can then refer to those containers easily by following the convention, instead of having to think about which class or id attribute you should use.
-
-#### content_tag_for
-
-Renders a container tag that relates to your Active Record Object.
-
-For example, given `@article` is the object of `Article` class, you can do:
-
-```html+erb
-<%= content_tag_for(:tr, @article) do %>
-  <td><%= @article.title %></td>
-<% end %>
-```
-
-This will generate this HTML output:
-
-```html
-<tr id="article_1234" class="article">
-  <td>Hello World!</td>
-</tr>
-```
-
-You can also supply HTML attributes as an additional option hash. For example:
-
-```html+erb
-<%= content_tag_for(:tr, @article, class: "frontpage") do %>
-  <td><%= @article.title %></td>
-<% end %>
-```
-
-Will generate this HTML output:
-
-```html
-<tr id="article_1234" class="article frontpage">
-  <td>Hello World!</td>
-</tr>
-```
-
-You can pass a collection of Active Record objects. This method will loop through your objects and create a container for each of them. For example, given `@articles` is an array of two `Article` objects:
-
-```html+erb
-<%= content_tag_for(:tr, @articles) do |article| %>
-  <td><%= article.title %></td>
-<% end %>
-```
-
-Will generate this HTML output:
-
-```html
-<tr id="article_1234" class="article">
-  <td>Hello World!</td>
-</tr>
-<tr id="article_1235" class="article">
-  <td>Ruby on Rails Rocks!</td>
-</tr>
-```
-
-#### div_for
-
-This is actually a convenient method which calls `content_tag_for` internally with `:div` as the tag name. You can pass either an Active Record object or a collection of objects. For example:
-
-```html+erb
-<%= div_for(@article, class: "frontpage") do %>
-  <td><%= @article.title %></td>
-<% end %>
-```
-
-Will generate this HTML output:
-
-```html
-<div id="article_1234" class="article frontpage">
-  <td>Hello World!</td>
-</div>
-```
 
 ### AssetTagHelper
 
@@ -436,39 +408,13 @@ config.action_controller.asset_host = "assets.example.com"
 image_tag("rails.png") # => <img src="http://assets.example.com/images/rails.png" alt="Rails" />
 ```
 
-#### register_javascript_expansion
-
-Register one or more JavaScript files to be included when symbol is passed to javascript_include_tag. This method is typically intended to be called from plugin initialization to register JavaScript files that the plugin installed in `vendor/assets/javascripts`.
-
-```ruby
-ActionView::Helpers::AssetTagHelper.register_javascript_expansion monkey: ["head", "body", "tail"]
-
-javascript_include_tag :monkey # =>
-  <script src="/assets/head.js"></script>
-  <script src="/assets/body.js"></script>
-  <script src="/assets/tail.js"></script>
-```
-
-#### register_stylesheet_expansion
-
-Register one or more stylesheet files to be included when symbol is passed to `stylesheet_link_tag`. This method is typically intended to be called from plugin initialization to register stylesheet files that the plugin installed in `vendor/assets/stylesheets`.
-
-```ruby
-ActionView::Helpers::AssetTagHelper.register_stylesheet_expansion monkey: ["head", "body", "tail"]
-
-stylesheet_link_tag :monkey # =>
-  <link href="/assets/head.css" media="screen" rel="stylesheet" />
-  <link href="/assets/body.css" media="screen" rel="stylesheet" />
-  <link href="/assets/tail.css" media="screen" rel="stylesheet" />
-```
-
 #### auto_discovery_link_tag
 
 Returns a link tag that browsers and feed readers can use to auto-detect an RSS or Atom feed.
 
 ```ruby
-auto_discovery_link_tag(:rss, "http://www.example.com/feed.rss", {title: "RSS Feed"}) # =>
-  <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="http://www.example.com/feed" />
+auto_discovery_link_tag(:rss, "http://www.example.com/feed.rss", { title: "RSS Feed" }) # =>
+  <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="http://www.example.com/feed.rss" />
 ```
 
 #### image_path
@@ -849,7 +795,7 @@ time_select("order", "submitted")
 Returns a `pre` tag that has object dumped by YAML. This creates a very readable way to inspect an object.
 
 ```ruby
-my_hash = {'first' => 1, 'second' => 'two', 'third' => [1,2,3]}
+my_hash = { 'first' => 1, 'second' => 'two', 'third' => [1,2,3] }
 debug(my_hash)
 ```
 
@@ -874,7 +820,7 @@ The core method of this helper, form_for, gives you the ability to create a form
 
 ```html+erb
 # Note: a @person variable will have been created in the controller (e.g. @person = Person.new)
-<%= form_for @person, url: {action: "create"} do |f| %>
+<%= form_for @person, url: { action: "create" } do |f| %>
   <%= f.text_field :first_name %>
   <%= f.text_field :last_name %>
   <%= submit_tag 'Create' %>
@@ -894,7 +840,7 @@ The HTML generated for this would be:
 The params object created when this form is submitted would look like:
 
 ```ruby
-{"action" => "create", "controller" => "people", "person" => {"first_name" => "William", "last_name" => "Smith"}}
+{ "action" => "create", "controller" => "people", "person" => { "first_name" => "William", "last_name" => "Smith" } }
 ```
 
 The params hash has a nested person value, which can therefore be accessed with params[:person] in the controller.
@@ -915,7 +861,7 @@ check_box("article", "validated")
 Creates a scope around a specific model object like form_for, but doesn't create the form tags themselves. This makes fields_for suitable for specifying additional model objects in the same form:
 
 ```html+erb
-<%= form_for @person, url: {action: "update"} do |person_form| %>
+<%= form_for @person, url: { action: "update" } do |person_form| %>
   First name: <%= person_form.text_field :first_name %>
   Last name : <%= person_form.text_field :last_name %>
 
@@ -1050,7 +996,7 @@ end
 Sample usage (selecting the associated Author for an instance of Article, `@article`):
 
 ```ruby
-collection_select(:article, :author_id, Author.all, :id, :name_with_initial, {prompt: true})
+collection_select(:article, :author_id, Author.all, :id, :name_with_initial, { prompt: true })
 ```
 
 If `@article.author_id` is 1, this would return:
@@ -1222,7 +1168,7 @@ Create a select tag and a series of contained option tags for the provided objec
 Example:
 
 ```ruby
-select("article", "person_id", Person.all.collect {|p| [ p.name, p.id ] }, {include_blank: true})
+select("article", "person_id", Person.all.collect { |p| [ p.name, p.id ] }, { include_blank: true })
 ```
 
 If `@article.person_id` is 1, this would become:
@@ -1285,7 +1231,7 @@ Creates a field set for grouping HTML form elements.
 Creates a file upload field.
 
 ```html+erb
-<%= form_tag({action:"post"}, multipart: true) do %>
+<%= form_tag({ action: "post" }, multipart: true) do %>
   <label for="file">File to Upload</label> <%= file_field_tag "file" %>
   <%= submit_tag %>
 <% end %>
@@ -1421,22 +1367,6 @@ date_field_tag "dob"
 
 Provides functionality for working with JavaScript in your views.
 
-#### button_to_function
-
-Returns a button that'll trigger a JavaScript function using the onclick handler. Examples:
-
-```ruby
-button_to_function "Greeting", "alert('Hello world!')"
-button_to_function "Delete", "if (confirm('Really?')) do_delete()"
-button_to_function "Details" do |page|
-  page[:details].visual_effect :toggle_slide
-end
-```
-
-#### define_javascript_functions
-
-Includes the Action Pack JavaScript libraries inside a single `script` tag.
-
 #### escape_javascript
 
 Escape carrier returns and single and double quotes for JavaScript segments.
@@ -1455,15 +1385,6 @@ javascript_tag "alert('All is good')"
 alert('All is good')
 //]]>
 </script>
-```
-
-#### link_to_function
-
-Returns a link that will trigger a JavaScript function using the onclick handler and return false after the fact.
-
-```ruby
-link_to_function "Greeting", "alert('Hello world!')"
-# => <a onclick="alert('Hello world!'); return false;" href="#">Greeting</a>
 ```
 
 ### NumberHelper
@@ -1600,7 +1521,7 @@ details can be found in the [Rails Security Guide](security.html#cross-site-requ
 Localized Views
 ---------------
 
-Action View has the ability render different templates depending on the current locale.
+Action View has the ability to render different templates depending on the current locale.
 
 For example, suppose you have a `ArticlesController` with a show action. By default, calling this action will render `app/views/articles/show.html.erb`. But if you set `I18n.locale = :de`, then `app/views/articles/show.de.html.erb` will be rendered instead. If the localized template isn't present, the undecorated version will be used. This means you're not required to provide localized views for all cases, but they will be preferred and used if available.
 

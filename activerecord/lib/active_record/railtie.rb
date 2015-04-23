@@ -36,8 +36,6 @@ module ActiveRecord
     config.eager_load_namespaces << ActiveRecord
 
     rake_tasks do
-      require "active_record/base"
-
       namespace :db do
         task :load_config do
           ActiveRecord::Tasks::DatabaseTasks.database_configuration = Rails.application.config.database_configuration
@@ -100,6 +98,14 @@ module ActiveRecord
               end
             end
           end
+        end
+      end
+    end
+
+    initializer "active_record.warn_on_records_fetched_greater_than" do
+      if config.active_record.warn_on_records_fetched_greater_than
+        ActiveSupport.on_load(:active_record) do
+          require 'active_record/relation/record_fetch_warning'
         end
       end
     end

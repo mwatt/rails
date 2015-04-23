@@ -8,12 +8,12 @@ module ActiveRecord
     #
     #   Association
     #     SingularAssociation
-    #       HasOneAssociation
+    #       HasOneAssociation + ForeignAssociation
     #         HasOneThroughAssociation + ThroughAssociation
     #       BelongsToAssociation
     #         BelongsToPolymorphicAssociation
     #     CollectionAssociation
-    #       HasManyAssociation
+    #       HasManyAssociation + ForeignAssociation
     #         HasManyThroughAssociation + ThroughAssociation
     class Association #:nodoc:
       attr_reader :owner, :target, :reflection
@@ -121,7 +121,7 @@ module ActiveRecord
       # Can be overridden (i.e. in ThroughAssociation) to merge in other scopes (i.e. the
       # through association's scope)
       def target_scope
-        AssociationRelation.create(klass, klass.arel_table, self).merge!(klass.all)
+        AssociationRelation.create(klass, klass.arel_table, klass.predicate_builder, self).merge!(klass.all)
       end
 
       # Loads the \target if needed and returns it.

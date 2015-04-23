@@ -35,21 +35,16 @@ module ActiveRecord
     #
     # Note: not all valid +select+ expressions are valid +count+ expressions. The specifics differ
     # between databases. In invalid cases, an error from the database is thrown.
-    def count(column_name = nil, options = {})
-      # TODO: Remove options argument as soon we remove support to
-      # activerecord-deprecated_finders.
-      column_name, options = nil, column_name if column_name.is_a?(Hash)
-      calculate(:count, column_name, options)
+    def count(column_name = nil)
+      calculate(:count, column_name)
     end
 
     # Calculates the average value on a given column. Returns +nil+ if there's
     # no row. See +calculate+ for examples with options.
     #
     #   Person.average(:age) # => 35.8
-    def average(column_name, options = {})
-      # TODO: Remove options argument as soon we remove support to
-      # activerecord-deprecated_finders.
-      calculate(:average, column_name, options)
+    def average(column_name)
+      calculate(:average, column_name)
     end
 
     # Calculates the minimum value on a given column. The value is returned
@@ -57,10 +52,8 @@ module ActiveRecord
     # +calculate+ for examples with options.
     #
     #   Person.minimum(:age) # => 7
-    def minimum(column_name, options = {})
-      # TODO: Remove options argument as soon we remove support to
-      # activerecord-deprecated_finders.
-      calculate(:minimum, column_name, options)
+    def minimum(column_name)
+      calculate(:minimum, column_name)
     end
 
     # Calculates the maximum value on a given column. The value is returned
@@ -68,10 +61,8 @@ module ActiveRecord
     # +calculate+ for examples with options.
     #
     #   Person.maximum(:age) # => 93
-    def maximum(column_name, options = {})
-      # TODO: Remove options argument as soon we remove support to
-      # activerecord-deprecated_finders.
-      calculate(:maximum, column_name, options)
+    def maximum(column_name)
+      calculate(:maximum, column_name)
     end
 
     # Calculates the sum of values on a given column. The value is returned
@@ -114,17 +105,15 @@ module ActiveRecord
     #   Person.group(:last_name).having("min(age) > 17").minimum(:age)
     #
     #   Person.sum("2 * age")
-    def calculate(operation, column_name, options = {})
-      # TODO: Remove options argument as soon we remove support to
-      # activerecord-deprecated_finders.
+    def calculate(operation, column_name)
       if column_name.is_a?(Symbol) && attribute_alias?(column_name)
         column_name = attribute_alias(column_name)
       end
 
       if has_include?(column_name)
-        construct_relation_for_association_calculations.calculate(operation, column_name, options)
+        construct_relation_for_association_calculations.calculate(operation, column_name)
       else
-        perform_calculation(operation, column_name, options)
+        perform_calculation(operation, column_name)
       end
     end
 
@@ -141,9 +130,9 @@ module ActiveRecord
     # the plucked column names, if they can be deduced. Plucking an SQL fragment
     # returns String values by default.
     #
-    #   Person.pluck(:id)
-    #   # SELECT people.id FROM people
-    #   # => [1, 2, 3]
+    #   Person.pluck(:name)
+    #   # SELECT people.name FROM people
+    #   # => ['David', 'Jeremy', 'Jose']
     #
     #   Person.pluck(:id, :name)
     #   # SELECT people.id, people.name FROM people
@@ -161,6 +150,8 @@ module ActiveRecord
     #   # SELECT DATEDIFF(updated_at, created_at) FROM people
     #   # => ['0', '27761', '173']
     #
+    # See also +ids+.
+    #
     def pluck(*column_names)
       column_names.map! do |column_name|
         if column_name.is_a?(Symbol) && attribute_alias?(column_name)
@@ -177,8 +168,8 @@ module ActiveRecord
         relation.select_values = column_names.map { |cn|
           columns_hash.key?(cn) ? arel_table[cn] : cn
         }
-        result = klass.connection.select_all(relation.arel, nil, bind_values)
-        result.cast_values(klass.column_types)
+        result = klass.connection.select_all(relation.arel, nil, bound_attributes)
+        result.cast_values(klass.attribute_types)
       end
     end
 
@@ -193,12 +184,10 @@ module ActiveRecord
     private
 
     def has_include?(column_name)
-      eager_loading? || (includes_values.present? && ((column_name && column_name != :all) || references_eager_loaded_tables?))
+      eager_loading? || (includes_values.present? && column_name && column_name != :all)
     end
 
-    def perform_calculation(operation, column_name, options = {})
-      # TODO: Remove options argument as soon we remove support to
-      # activerecord-deprecated_finders.
+    def perform_calculation(operation, column_name)
       operation = operation.to_s.downcase
 
       # If #count is used with #distinct / #uniq it is considered distinct. (eg. relation.distinct.count)
@@ -235,32 +224,29 @@ module ActiveRecord
     end
 
     def execute_simple_calculation(operation, column_name, distinct) #:nodoc:
-      # Postgresql doesn't like ORDER BY when there are no GROUP BY
+      # PostgreSQL doesn't like ORDER BY when there are no GROUP BY
       relation = unscope(:order)
 
       column_alias = column_name
-
-      bind_values = nil
 
       if operation == "count" && (relation.limit_value || relation.offset_value)
         # Shortcut when limit is zero.
         return 0 if relation.limit_value == 0
 
         query_builder = build_count_subquery(relation, column_name, distinct)
-        bind_values = query_builder.bind_values + relation.bind_values
       else
         column = aggregate_column(column_name)
 
         select_value = operation_over_aggregate_column(column, operation, distinct)
 
         column_alias = select_value.alias
+        column_alias ||= @klass.connection.column_name_for_operation(operation, select_value)
         relation.select_values = [select_value]
 
         query_builder = relation.arel
-        bind_values = query_builder.bind_values + relation.bind_values
       end
 
-      result = @klass.connection.select_all(query_builder, nil, bind_values)
+      result = @klass.connection.select_all(query_builder, nil, bound_attributes)
       row    = result.first
       value  = row && row.values.first
       column = result.column_types.fetch(column_alias) do
@@ -302,7 +288,7 @@ module ActiveRecord
           operation,
           distinct).as(aggregate_alias)
       ]
-      select_values += select_values unless having_values.empty?
+      select_values += select_values unless having_clause.empty?
 
       select_values.concat group_fields.zip(group_aliases).map { |field,aliaz|
         if field.respond_to?(:as)
@@ -316,11 +302,11 @@ module ActiveRecord
       relation.group_values  = group
       relation.select_values = select_values
 
-      calculated_data = @klass.connection.select_all(relation, nil, bind_values)
+      calculated_data = @klass.connection.select_all(relation, nil, relation.bound_attributes)
 
       if association
         key_ids     = calculated_data.collect { |row| row[group_aliases.first] }
-        key_records = association.klass.base_class.find(key_ids)
+        key_records = association.klass.base_class.where(association.klass.base_class.primary_key => key_ids)
         key_records = Hash[key_records.map { |r| [r.id, r] }]
       end
 
@@ -369,9 +355,9 @@ module ActiveRecord
     def type_cast_calculated_value(value, type, operation = nil)
       case operation
         when 'count'   then value.to_i
-        when 'sum'     then type.type_cast_from_database(value || 0)
+        when 'sum'     then type.deserialize(value || 0)
         when 'average' then value.respond_to?(:to_d) ? value.to_d : value
-        else type.type_cast_from_database(value)
+        else type.deserialize(value)
       end
     end
 
@@ -390,11 +376,9 @@ module ActiveRecord
 
       aliased_column = aggregate_column(column_name == :all ? 1 : column_name).as(column_alias)
       relation.select_values = [aliased_column]
-      arel = relation.arel
-      subquery = arel.as(subquery_alias)
+      subquery = relation.arel.as(subquery_alias)
 
       sm = Arel::SelectManager.new relation.engine
-      sm.bind_values = arel.bind_values
       select_value = operation_over_aggregate_column(column_alias, 'count', distinct)
       sm.project(select_value).from(subquery)
     end

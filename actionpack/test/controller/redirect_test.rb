@@ -1,8 +1,5 @@
 require 'abstract_unit'
 
-class WorkshopsController < ActionController::Base
-end
-
 class RedirectController < ActionController::Base
   # empty method not used anywhere to ensure methods like
   # `status` and `location` aren't called on `redirect_to` calls
@@ -63,7 +60,7 @@ class RedirectController < ActionController::Base
   end
 
   def redirect_to_url_with_unescaped_query_string
-    redirect_to "http://dev.rubyonrails.org/query?status=new"
+    redirect_to "http://example.com/query?status=new"
   end
 
   def redirect_to_url_with_complex_scheme
@@ -233,7 +230,7 @@ class RedirectTest < ActionController::TestCase
   def test_redirect_to_url_with_unescaped_query_string
     get :redirect_to_url_with_unescaped_query_string
     assert_response :redirect
-    assert_redirected_to "http://dev.rubyonrails.org/query?status=new"
+    assert_redirected_to "http://example.com/query?status=new"
   end
 
   def test_redirect_to_url_with_complex_scheme

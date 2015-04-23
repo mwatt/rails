@@ -6,21 +6,19 @@ module ActiveJob
     #
     # Delayed::Job (or DJ) encapsulates the common pattern of asynchronously
     # executing longer tasks in the background. Although DJ can have many
-    # storage backends one of the most used is based on Active Record.
+    # storage backends, one of the most used is based on Active Record.
     # Read more about Delayed Job {here}[https://github.com/collectiveidea/delayed_job].
     #
-    # To use Delayed Job set the queue_adapter config to +:delayed_job+.
+    # To use Delayed Job, set the queue_adapter config to +:delayed_job+.
     #
     #   Rails.application.config.active_job.queue_adapter = :delayed_job
     class DelayedJobAdapter
-      class << self
-        def enqueue(job) #:nodoc:
-          Delayed::Job.enqueue(JobWrapper.new(job.serialize), queue: job.queue_name)
-        end
+      def enqueue(job) #:nodoc:
+        Delayed::Job.enqueue(JobWrapper.new(job.serialize), queue: job.queue_name)
+      end
 
-        def enqueue_at(job, timestamp) #:nodoc:
-          Delayed::Job.enqueue(JobWrapper.new(job.serialize), queue: job.queue_name, run_at: Time.at(timestamp))
-        end
+      def enqueue_at(job, timestamp) #:nodoc:
+        Delayed::Job.enqueue(JobWrapper.new(job.serialize), queue: job.queue_name, run_at: Time.at(timestamp))
       end
 
       class JobWrapper #:nodoc:

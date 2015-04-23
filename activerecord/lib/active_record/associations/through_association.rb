@@ -18,7 +18,7 @@ module ActiveRecord
 
             reflection_scope = reflection.scope
             if reflection_scope && reflection_scope.arity.zero?
-              relation.merge!(reflection_scope)
+              relation = relation.merge(reflection_scope)
             end
 
             scope.merge!(
@@ -33,7 +33,7 @@ module ActiveRecord
         # Construct attributes for :through pointing to owner and associate. This is used by the
         # methods which create and delete records on the association.
         #
-        # We only support indirectly modifying through associations which has a belongs_to source.
+        # We only support indirectly modifying through associations which have a belongs_to source.
         # This is the "has_many :tags, through: :taggings" situation, where the join model
         # typically has a belongs_to on both side. In other words, associations which could also
         # be represented as has_and_belongs_to_many associations.
@@ -90,6 +90,17 @@ module ActiveRecord
           if reflection.nested?
             raise HasManyThroughNestedAssociationsAreReadonly.new(owner, reflection)
           end
+        end
+
+        def build_record(attributes)
+          inverse = source_reflection.inverse_of
+          target = through_association.target
+
+          if inverse && target && !target.is_a?(Array)
+            attributes[inverse.foreign_key] = target.id
+          end
+
+          super(attributes)
         end
     end
   end

@@ -2,6 +2,7 @@
 # so fixtures aren't loaded into that environment
 abort("Abort testing: Your Rails environment is running in production mode!") if Rails.env.production?
 
+require "rails/test_unit/minitest_plugin"
 require 'active_support/testing/autorun'
 require 'active_support/test_case'
 require 'action_controller'
@@ -9,18 +10,13 @@ require 'action_controller/test_case'
 require 'action_dispatch/testing/integration'
 require 'rails/generators/test_case'
 
-# Config Rails backtrace in tests.
-require 'rails/backtrace_cleaner'
-if ENV["BACKTRACE"].nil?
-  Minitest.backtrace_filter = Rails.backtrace_cleaner
-end
-
 if defined?(ActiveRecord::Base)
   ActiveRecord::Migration.maintain_test_schema!
 
   class ActiveSupport::TestCase
     include ActiveRecord::TestFixtures
     self.fixture_path = "#{Rails.root}/test/fixtures/"
+    self.file_fixture_path = self.fixture_path + "files"
   end
 
   ActionDispatch::IntegrationTest.fixture_path = ActiveSupport::TestCase.fixture_path

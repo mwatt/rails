@@ -1,15 +1,39 @@
-# encoding: utf-8
 require 'abstract_unit'
-require 'rbconfig'
 require 'zlib'
 
 module StaticTests
+  def setup
+    silence_warnings do
+      @default_internal_encoding = Encoding.default_internal
+      @default_external_encoding = Encoding.default_external
+    end
+  end
+
+  def teardown
+    silence_warnings do
+      Encoding.default_internal = @default_internal_encoding
+      Encoding.default_external = @default_external_encoding
+    end
+  end
+
   def test_serves_dynamic_content
     assert_equal "Hello, World!", get("/nofile").body
   end
 
   def test_handles_urls_with_bad_encoding
     assert_equal "Hello, World!", get("/doorkeeper%E3E4").body
+  end
+
+  def test_handles_urls_with_ascii_8bit
+    assert_equal "Hello, World!", get("/doorkeeper%E3E4".force_encoding('ASCII-8BIT')).body
+  end
+
+  def test_handles_urls_with_ascii_8bit_on_win_31j
+    silence_warnings do
+      Encoding.default_internal = "Windows-31J"
+      Encoding.default_external = "Windows-31J"
+    end
+    assert_equal "Hello, World!", get("/doorkeeper%E3E4".force_encoding('ASCII-8BIT')).body
   end
 
   def test_sets_cache_control
@@ -145,6 +169,16 @@ module StaticTests
     assert_equal default_response.headers['Content-Type'], response.headers['Content-Type']
   end
 
+  def test_serves_gzip_files_with_not_modified
+    file_name = "/gzip/application-a71b3024f80aea3181c09774ca17e712.js"
+    last_modified = File.mtime(File.join(@root, "#{file_name}.gz"))
+    response = get(file_name, 'HTTP_ACCEPT_ENCODING' => 'gzip', 'HTTP_IF_MODIFIED_SINCE' => last_modified.httpdate)
+    assert_equal 304, response.status
+    assert_equal nil, response.headers['Content-Type']
+    assert_equal nil, response.headers['Content-Encoding']
+    assert_equal nil, response.headers['Vary']
+  end
+
   # Windows doesn't allow \ / : * ? " < > | in filenames
   unless RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
     def test_serves_static_file_with_colon
@@ -200,7 +234,9 @@ class StaticTest < ActiveSupport::TestCase
   }
 
   def setup
-    @app = ActionDispatch::Static.new(DummyApp, "#{FIXTURE_LOAD_PATH}/public", "public, max-age=60")
+    super
+    @root = "#{FIXTURE_LOAD_PATH}/public"
+    @app = ActionDispatch::Static.new(DummyApp, @root, "public, max-age=60")
   end
 
   def public_path
@@ -208,11 +244,29 @@ class StaticTest < ActiveSupport::TestCase
   end
 
   include StaticTests
+
+  def test_custom_handler_called_when_file_is_outside_root
+    filename = 'shared.html.erb'
+    assert File.exist?(File.join(@root, '..', filename))
+    env = {
+      "REQUEST_METHOD"=>"GET",
+      "REQUEST_PATH"=>"/..%2F#{filename}",
+      "PATH_INFO"=>"/..%2F#{filename}",
+      "REQUEST_URI"=>"/..%2F#{filename}",
+      "HTTP_VERSION"=>"HTTP/1.1",
+      "SERVER_NAME"=>"localhost",
+      "SERVER_PORT"=>"8080",
+      "QUERY_STRING"=>""
+    }
+    assert_equal(DummyApp.call(nil), @app.call(env))
+  end
 end
 
 class StaticEncodingTest < StaticTest
   def setup
-    @app = ActionDispatch::Static.new(DummyApp, "#{FIXTURE_LOAD_PATH}/公共", "public, max-age=60")
+    super
+    @root = "#{FIXTURE_LOAD_PATH}/公共"
+    @app = ActionDispatch::Static.new(DummyApp, @root, "public, max-age=60")
   end
 
   def public_path

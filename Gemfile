@@ -11,14 +11,18 @@ gem 'rake', '>= 10.3'
 gem 'mocha', '~> 0.14', require: false
 
 gem 'rack-cache', '~> 1.2'
-gem 'jquery-rails', '~> 4.0.0.beta2'
+gem 'jquery-rails', github: 'rails/jquery-rails', branch: 'master'
 gem 'coffee-rails', '~> 4.1.0'
 gem 'turbolinks'
+gem 'arel', github: 'rails/arel', branch: 'master'
+gem 'mail', github: 'mikel/mail'
+
+gem 'sprockets', '~> 3.0.0.rc.1'
 
 # require: false so bcrypt is loaded only when has_secure_password is used.
 # This is to avoid ActiveModel (and by extension the entire framework)
 # being dependent on a binary library.
-gem 'bcrypt', '~> 3.1.7', require: false
+gem 'bcrypt', '~> 3.1.10', require: false
 
 # This needs to be with require false to avoid
 # it being automatically loaded by sprockets
@@ -26,12 +30,12 @@ gem 'uglifier', '>= 1.3.0', require: false
 
 group :doc do
   gem 'sdoc', '~> 0.4.0'
-  gem 'redcarpet', '~> 3.1.2', platforms: :ruby
+  gem 'redcarpet', '~> 3.2.3', platforms: :ruby
   gem 'w3c_validators'
-  gem 'kindlerb'
+  gem 'kindlerb', '0.1.1'
 end
 
-# AS
+# ActiveSupport
 gem 'dalli', '>= 2.2.1'
 
 # ActiveJob
@@ -41,7 +45,7 @@ group :job do
   gem 'sidekiq', require: false
   gem 'sucker_punch', require: false
   gem 'delayed_job', require: false
-  gem 'queue_classic', "< 3.0.0", require: false, platforms: :ruby
+  gem 'queue_classic', require: false, platforms: :ruby
   gem 'sneakers', '0.1.1.pre', require: false
   gem 'que', require: false
   gem 'backburner', require: false
@@ -59,13 +63,10 @@ group :test do
   # FIX: Our test suite isn't ready to run in random order yet
   gem 'minitest', '< 5.3.4'
 
-  platforms :mri_19 do
-    gem 'ruby-prof', '~> 0.11.2'
+  platforms :mri do
+    gem 'stackprof'
+    # gem 'byebug'
   end
-
-  # platforms :mri_19, :mri_20 do
-  #   gem 'debugger'
-  # end
 
   gem 'benchmark-ips'
 end
@@ -76,13 +77,13 @@ platforms :ruby do
   # Needed for compiling the ActionDispatch::Journey parser
   gem 'racc', '>=1.4.6', require: false
 
-  # AR
+  # ActiveRecord
   gem 'sqlite3', '~> 1.3.6'
 
   group :db do
-    gem 'pg', '>= 0.11.0'
+    gem 'pg', '>= 0.18.0'
     gem 'mysql', '>= 2.9.0'
-    gem 'mysql2', '>= 0.3.13'
+    gem 'mysql2', '>= 0.3.18'
   end
 end
 

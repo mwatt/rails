@@ -1,3 +1,5 @@
+**DO NOT READ THIS FILE ON GITHUB, GUIDES ARE PUBLISHED ON http://guides.rubyonrails.org.**
+
 Contributing to Ruby on Rails
 =============================
 
@@ -24,21 +26,25 @@ NOTE: Bugs in the most recent released version of Ruby on Rails are likely to ge
 
 ### Creating a Bug Report
 
-If you've found a problem in Ruby on Rails which is not a security risk, do a search in GitHub under [Issues](https://github.com/rails/rails/issues) in case it has already been reported. If you do not find any issue addressing it you may proceed to [open a new one](https://github.com/rails/rails/issues/new). (See the next section for reporting security issues.)
+If you've found a problem in Ruby on Rails which is not a security risk, do a search on GitHub under [Issues](https://github.com/rails/rails/issues) in case it has already been reported. If you are unable to find any open GitHub issues addressing the problem you found, your next step will be to [open a new one](https://github.com/rails/rails/issues/new). (See the next section for reporting security issues.)
 
 Your issue report should contain a title and a clear description of the issue at the bare minimum. You should include as much relevant information as possible and should at least post a code sample that demonstrates the issue. It would be even better if you could include a unit test that shows how the expected behavior is not occurring. Your goal should be to make it easy for yourself - and others - to replicate the bug and figure out a fix.
 
 Then, don't get your hopes up! Unless you have a "Code Red, Mission Critical, the World is Coming to an End" kind of bug, you're creating this issue report in the hope that others with the same problem will be able to collaborate with you on solving it. Do not expect that the issue report will automatically see any activity or that others will jump to fix it. Creating an issue like this is mostly to help yourself start on the path of fixing the problem and for others to confirm it with an "I'm having this problem too" comment.
 
-### Create a Self-Contained gist for Active Record and Action Controller Issues
+### Create an Executable Test Case
 
-If you are filing a bug report, please use
-[Active Record template for gems](https://github.com/rails/rails/blob/master/guides/bug_report_templates/active_record_gem.rb) or
-[Action Controller template for gems](https://github.com/rails/rails/blob/master/guides/bug_report_templates/action_controller_gem.rb)
-if the bug is found in a published gem, and
-[Active Record template for master](https://github.com/rails/rails/blob/master/guides/bug_report_templates/active_record_master.rb) or
-[Action Controller template for master](https://github.com/rails/rails/blob/master/guides/bug_report_templates/action_controller_master.rb)
-if the bug happens in the master branch.
+Having a way to reproduce your issue will be very helpful for others to help confirm, investigate and ultimately fix your issue. You can do this by providing an executable test case. To make this process easier, we have prepared several bug report templates for you to use as a starting point:
+
+* Template for Active Record (models, database) issues: [gem](https://github.com/rails/rails/blob/master/guides/bug_report_templates/active_record_gem.rb) / [master](https://github.com/rails/rails/blob/master/guides/bug_report_templates/active_record_master.rb)
+* Template for Action Pack (controllers, routing) issues: [gem](https://github.com/rails/rails/blob/master/guides/bug_report_templates/action_controller_gem.rb) / [master](https://github.com/rails/rails/blob/master/guides/bug_report_templates/action_controller_master.rb)
+* Generic template for other issues: [gem](https://github.com/rails/rails/blob/master/guides/bug_report_templates/generic_gem.rb) / [master](https://github.com/rails/rails/blob/master/guides/bug_report_templates/generic_master.rb)
+
+These templates include the boilerplate code to set up a test case against either a released version of Rails (`*_gem.rb`) or edge Rails (`*_master.rb`).
+
+Simply copy the content of the appropriate template into a `.rb` file and make the necessary changes to demonstrate the issue. You can execute it by running `ruby the_file.rb` in your terminal. If all goes well, you should see your test case failing.
+
+You can then share your executable test case as a [gist](https://gist.github.com), or simply paste the content into the issue description.
 
 ### Special Treatment for Security Issues
 
@@ -171,6 +177,14 @@ $ git checkout -b my_new_branch
 
 It doesn't matter much what name you use, because this branch will only exist on your local computer and your personal repository on GitHub. It won't be part of the Rails Git repository.
 
+### Bundle install
+
+Install the required gems.
+
+```bash
+$ bundle install
+```
+
 ### Running an Application Against Your Local Branch
 
 In case you need a dummy Rails app to test changes, the `--dev` flag of `rails new` generates an application that uses your local branch:
@@ -205,7 +219,7 @@ Rails follows a simple set of coding style conventions:
 * Use Ruby >= 1.9 syntax for hashes. Prefer `{ a: :b }` over `{ :a => :b }`.
 * Prefer `&&`/`||` over `and`/`or`.
 * Prefer class << self over self.method for class methods.
-* Use `MyClass.my_method(my_arg)` not `my_method( my_arg )` or `my_method my_arg`.
+* Use `my_method(my_arg)` not `my_method( my_arg )` or `my_method my_arg`.
 * Use `a = b` and not `a=b`.
 * Use assert_not methods instead of refute.
 * Prefer `method { do_stuff }` instead of `method{do_stuff}` for single-line blocks.
@@ -234,11 +248,11 @@ This will generate a report with the following information:
 
 ```
 Calculating -------------------------------------
-            addition     69114 i/100ms
-  addition with send     64062 i/100ms
+            addition   132.013k i/100ms
+  addition with send   125.413k i/100ms
 -------------------------------------------------
-            addition  5307644.4 (±3.5%) i/s -   26539776 in   5.007219s
-  addition with send  3702897.9 (±3.5%) i/s -   18513918 in   5.006723s
+            addition      9.677M (± 1.7%) i/s -     48.449M
+  addition with send      6.794M (± 1.1%) i/s -     33.987M
 ```
 
 Please see the benchmark/ips [README](https://github.com/evanphx/benchmark-ips/blob/master/README.md) for more information.
@@ -287,7 +301,12 @@ $ ruby -w -Itest test/mail_layout_test.rb -n test_explicit_class_layout
 The `-n` option allows you to run a single method instead of the whole
 file.
 
-##### Testing Active Record
+#### Testing Active Record
+
+First, create the databases you'll need. For MySQL and PostgreSQL,
+running the SQL statements `create database activerecord_unittest` and
+`create database activerecord_unittest2` is sufficient. This is not
+necessary for SQLite3.
 
 This is how you run the Active Record test suite only for SQLite3:
 
@@ -340,9 +359,9 @@ $ RUBYOPT=-W0 bundle exec rake test
 
 The CHANGELOG is an important part of every release. It keeps the list of changes for every Rails version.
 
-You should add an entry to the CHANGELOG of the framework that you modified if you're adding or removing a feature, committing a bug fix or adding deprecation notices. Refactorings and documentation changes generally should not go to the CHANGELOG.
+You should add an entry **to the top** of the CHANGELOG of the framework that you modified if you're adding or removing a feature, committing a bug fix or adding deprecation notices. Refactorings and documentation changes generally should not go to the CHANGELOG.
 
-A CHANGELOG entry should summarize what was changed and should end with author's name and it should go on top of a CHANGELOG. You can use multiple lines if you need more space and you can attach code examples indented with 4 spaces. If a change is related to a specific issue, you should attach the issue's number. Here is an example CHANGELOG entry:
+A CHANGELOG entry should summarize what was changed and should end with the author's name. You can use multiple lines if you need more space and you can attach code examples indented with 4 spaces. If a change is related to a specific issue, you should attach the issue's number. Here is an example CHANGELOG entry:
 
 ```
 *   Summary of a change that briefly describes what was changed. You can use multiple
@@ -359,7 +378,12 @@ A CHANGELOG entry should summarize what was changed and should end with author's
     *Your Name*
 ```
 
-Your name can be added directly after the last word if you don't provide any code examples or don't need multiple paragraphs. Otherwise, it's best to make as a new paragraph.
+Your name can be added directly after the last word if there are no code
+examples or multiple paragraphs. Otherwise, it's best to make a new paragraph.
+
+### Updating the Gemfile.lock
+
+Some changes require the dependencies to be upgraded. In these cases make sure you run `bundle update` to get the right version of the dependency and commit the `Gemfile.lock` file within your changes.
 
 ### Sanity Check
 
@@ -379,21 +403,27 @@ When you're happy with the code on your computer, you need to commit the changes
 $ git commit -a
 ```
 
-At this point, your editor should be fired up and you can write a message for this commit. Well formatted and descriptive commit messages are extremely helpful for the others, especially when figuring out why given change was made, so please take the time to write it.
+This should fire up your editor to write a commit message. When you have
+finished, save and close to continue.
 
-Good commit message should be formatted according to the following example:
+A well-formatted and descriptive commit message is very helpful to others for
+understanding why the change was made, so please take the time to write it.
+
+A good commit message looks like this:
 
 ```
 Short summary (ideally 50 characters or less)
 
-More detailed description, if necessary. It should be wrapped to 72
-characters. Try to be as descriptive as you can, even if you think that
-the commit content is obvious, it may not be obvious to others. You
-should add such description also if it's already present in bug tracker,
-it should not be necessary to visit a webpage to check the history.
+More detailed description, if necessary. It should be wrapped to
+72 characters. Try to be as descriptive as you can. Even if you
+think that the commit content is obvious, it may not be obvious
+to others. Add any description that is already present in the
+relevant issues; it should not be necessary to visit a webpage
+to check the history.
 
-Description can have multiple paragraphs and you can use code examples
-inside, just indent it with 4 spaces:
+The description section can have multiple paragraphs.
+
+Code examples can be embedded by indenting them with 4 spaces:
 
     class ArticlesController
       def index
@@ -403,13 +433,15 @@ inside, just indent it with 4 spaces:
 
 You can also add bullet points:
 
-- you can use dashes or asterisks
+- make a bullet point by starting a line with either a dash (-)
+  or an asterisk (*)
 
-- also, try to indent next line of a point for readability, if it's too
-  long to fit in 72 characters
+- wrap lines at 72 characters, and indent any additional lines
+  with 2 spaces for readability
 ```
 
-TIP. Please squash your commits into a single commit when appropriate. This simplifies future cherry picks, and also keeps the git log clean.
+TIP. Please squash your commits into a single commit when appropriate. This
+simplifies future cherry picks and keeps the git log clean.
 
 ### Update Your Branch
 

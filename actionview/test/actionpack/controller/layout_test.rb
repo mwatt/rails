@@ -1,5 +1,4 @@
 require 'abstract_unit'
-require 'rbconfig'
 require 'active_support/core_ext/array/extract_options'
 
 # The view_paths array must be set on Base and not LayoutTest so that LayoutTest's inherited
@@ -123,6 +122,14 @@ class PrependsViewPathController < LayoutTest
   end
 end
 
+class ParentController < LayoutTest
+  layout 'item'
+end
+
+class ChildController < ParentController
+  layout 'layout_test', only: :hello
+end
+
 class OnlyLayoutController < LayoutTest
   layout 'item', :only => "hello"
 end
@@ -225,6 +232,12 @@ class LayoutSetInResponseTest < ActionController::TestCase
     @controller = AbsolutePathLayoutController.new
     get :hello
     assert_equal "layout_test.erb hello.erb", @response.body.strip
+  end
+
+  def test_respect_to_parent_layout
+    @controller = ChildController.new
+    get :goodbye
+    assert_template :layout => "layouts/item"
   end
 end
 

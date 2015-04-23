@@ -1,3 +1,5 @@
+**DO NOT READ THIS FILE ON GITHUB, GUIDES ARE PUBLISHED ON http://guides.rubyonrails.org.**
+
 Debugging Rails Applications
 ============================
 
@@ -127,9 +129,14 @@ TIP: By default, each log is created under `Rails.root/log/` and the log file is
 
 ### Log Levels
 
-When something is logged it's printed into the corresponding log if the log level of the message is equal or higher than the configured log level. If you want to know the current log level you can call the `Rails.logger.level` method.
+When something is logged, it's printed into the corresponding log if the log
+level of the message is equal or higher than the configured log level. If you
+want to know the current log level, you can call the `Rails.logger.level`
+method.
 
-The available log levels are: `:debug`, `:info`, `:warn`, `:error`, `:fatal`, and `:unknown`, corresponding to the log level numbers from 0 up to 5 respectively. To change the default log level, use
+The available log levels are: `:debug`, `:info`, `:warn`, `:error`, `:fatal`,
+and `:unknown`, corresponding to the log level numbers from 0 up to 5,
+respectively. To change the default log level, use
 
 ```ruby
 config.log_level = :warn # In any environment initializer, or
@@ -309,7 +316,7 @@ For example:
 
 ```bash
 => Booting WEBrick
-=> Rails 4.2.0 application starting in development on http://0.0.0.0:3000
+=> Rails 5.0.0 application starting in development on http://0.0.0.0:3000
 => Run `rails server -h` for more startup options
 => Notice: server is listening on all interfaces (0.0.0.0). Consider using 127.0.0.1 (--binding option)
 => Ctrl-C to shutdown server
@@ -422,11 +429,11 @@ then `backtrace` will supply the answer.
 --> #0  ArticlesController.index
       at /PathTo/project/test_app/app/controllers/articles_controller.rb:8
     #1  ActionController::ImplicitRender.send_action(method#String, *args#Array)
-      at /PathToGems/actionpack-4.2.0/lib/action_controller/metal/implicit_render.rb:4
+      at /PathToGems/actionpack-5.0.0/lib/action_controller/metal/implicit_render.rb:4
     #2  AbstractController::Base.process_action(action#NilClass, *args#Array)
-      at /PathToGems/actionpack-4.2.0/lib/abstract_controller/base.rb:189
+      at /PathToGems/actionpack-5.0.0/lib/abstract_controller/base.rb:189
     #3  ActionController::Rendering.process_action(action#NilClass, *args#NilClass)
-      at /PathToGems/actionpack-4.2.0/lib/action_controller/metal/rendering.rb:10
+      at /PathToGems/actionpack-5.0.0/lib/action_controller/metal/rendering.rb:10
 ...
 ```
 
@@ -438,7 +445,7 @@ context.
 ```
 (byebug) frame 2
 
-[184, 193] in /PathToGems/actionpack-4.2.0/lib/abstract_controller/base.rb
+[184, 193] in /PathToGems/actionpack-5.0.0/lib/abstract_controller/base.rb
    184:       # is the intended way to override action dispatching.
    185:       #
    186:       # Notice that the first argument is the method to be dispatched
@@ -542,7 +549,7 @@ This way an irb session will be started within the context you invoked it. But
 be warned: this is an experimental feature.
 
 The `var` method is the most convenient way to show variables and their values.
-Let's let `byebug` to help us with it.
+Let's let `byebug` help us with it.
 
 ```
 (byebug) help var
@@ -655,7 +662,7 @@ instruction to be executed. In this case, the activesupport's `week` method.
 ```
 (byebug) step
 
-[50, 59] in /PathToGems/activesupport-4.2.0/lib/active_support/core_ext/numeric/time.rb
+[50, 59] in /PathToGems/activesupport-5.0.0/lib/active_support/core_ext/numeric/time.rb
    50:     ActiveSupport::Duration.new(self * 24.hours, [[:days, self]])
    51:   end
    52:   alias :day :days
@@ -780,10 +787,10 @@ will be stopped and you will have to start it again.
 
 `byebug` has a few available options to tweak its behaviour:
 
-* `set autoreload`: Reload source code when changed (default: true).
-* `set autolist`: Execute `list` command on every breakpoint (default: true).
+* `set autoreload`: Reload source code when changed (defaults: true).
+* `set autolist`: Execute `list` command on every breakpoint (defaults: true).
 * `set listsize _n_`: Set number of source lines to list by default to _n_
-(default: 10)
+(defaults: 10)
 * `set forcestep`: Make sure the `next` and `step` commands always move to a new
 line.
 
@@ -797,6 +804,63 @@ The debugger reads these global settings when it starts. For example:
 set forcestep
 set listsize 25
 ```
+
+Debugging with the `web-console` gem
+------------------------------------
+
+Web Console is a bit like `byebug`, but it runs in the browser. In any page you
+are developing, you can request a console in the context of a view or a
+controller. The console would be rendered next to your HTML content.
+
+### Console
+
+Inside any controller action or view, you can then invoke the console by
+calling the `console` method.
+
+For example, in a controller:
+
+```ruby
+class PostsController < ApplicationController
+  def new
+    console
+    @post = Post.new
+  end
+end
+```
+
+Or in a view:
+
+```html+erb
+<% console %>
+
+<h2>New Post</h2>
+```
+
+This will render a console inside your view. You don't need to care about the
+location of the `console` call; it won't be rendered on the spot of its
+invocation but next to your HTML content.
+
+The console executes pure Ruby code. You can define and instantiate
+custom classes, create new models and inspect variables.
+
+NOTE: Only one console can be rendered per request. Otherwise `web-console`
+will raise an error on the second `console` invocation.
+
+### Inspecting Variables
+
+You can invoke `instance_variables` to list all the instance variables
+available in your context. If you want to list all the local variables, you can
+do that with `local_variables`.
+
+### Settings
+
+* `config.web_console.whitelisted_ips`: Authorized list of IPv4 or IPv6
+addresses and networks (defaults: `127.0.0.1/8, ::1`).
+* `config.web_console.whiny_requests`: Log a message when a console rendering
+is prevented (defaults: `true`).
+
+Since `web-console` evaluates plain Ruby code remotely on the server, don't try
+to use it in production.
 
 Debugging Memory Leaks
 ----------------------
@@ -830,7 +894,7 @@ application. Here is a list of useful plugins for debugging:
 * [Footnotes](https://github.com/josevalim/rails-footnotes) Every Rails page has
 footnotes that give request information and link back to your source via
 TextMate.
-* [Query Trace](https://github.com/ntalbott/query_trace/tree/master) Adds query
+* [Query Trace](https://github.com/ruckus/active-record-query-trace/tree/master) Adds query
 origin tracing to your logs.
 * [Query Reviewer](https://github.com/nesquena/query_reviewer) This rails plugin
 not only runs "EXPLAIN" before each of your select queries in development, but
@@ -854,6 +918,7 @@ References
 * [ruby-debug Homepage](http://bashdb.sourceforge.net/ruby-debug/home-page.html)
 * [debugger Homepage](https://github.com/cldwalker/debugger)
 * [byebug Homepage](https://github.com/deivid-rodriguez/byebug)
+* [web-console Homepage](https://github.com/rails/web-console)
 * [Article: Debugging a Rails application with ruby-debug](http://www.sitepoint.com/debug-rails-app-ruby-debug/)
 * [Ryan Bates' debugging ruby (revised) screencast](http://railscasts.com/episodes/54-debugging-ruby-revised)
 * [Ryan Bates' stack trace screencast](http://railscasts.com/episodes/24-the-stack-trace)

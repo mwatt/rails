@@ -41,7 +41,7 @@ module ActiveRecord
         def get_records
           if reflection.scope_chain.any?(&:any?) ||
               scope.eager_loading? ||
-              klass.current_scope
+              klass.scope_attributes?
 
             return scope.limit(1).to_a
           end

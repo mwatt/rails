@@ -1,7 +1,6 @@
 require 'active_support/core_ext/hash/slice'
 require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/module/anonymous'
-require 'active_support/core_ext/struct'
 require 'action_dispatch/http/mime_type'
 
 module ActionController
@@ -86,7 +85,7 @@ module ActionController
         new name, format, include, exclude, nil, nil
       end
 
-      def initialize(name, format, include, exclude, klass, model) # nodoc
+      def initialize(name, format, include, exclude, klass, model) # :nodoc:
         super
         @include_set = include
         @name_set    = name
@@ -132,7 +131,7 @@ module ActionController
       private
       # Determine the wrapper model from the controller's name. By convention,
       # this could be done by trying to find the defined model that has the
-      # same singularize name as the controller. For example, +UsersController+
+      # same singular name as the controller. For example, +UsersController+
       # will try to find if the +User+ model exists.
       #
       # This method also does namespace lookup. Foo::Bar::UsersController will

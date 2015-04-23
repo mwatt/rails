@@ -1,3 +1,5 @@
+**DO NOT READ THIS FILE ON GITHUB, GUIDES ARE PUBLISHED ON http://guides.rubyonrails.org.**
+
 The Basics of Creating Rails Plugins
 ====================================
 
@@ -263,7 +265,7 @@ module Yaffle
   end
 end
 
-ActiveRecord::Base.send :include, Yaffle::ActsAsYaffle
+ActiveRecord::Base.include(Yaffle::ActsAsYaffle)
 ```
 
 You can then return to the root directory (`cd ../..`) of your plugin and rerun the tests using `rake`.
@@ -306,7 +308,7 @@ module Yaffle
   end
 end
 
-ActiveRecord::Base.send :include, Yaffle::ActsAsYaffle
+ActiveRecord::Base.include(Yaffle::ActsAsYaffle)
 ```
 
 When you run `rake`, you should see the tests all pass:
@@ -380,7 +382,7 @@ module Yaffle
   end
 end
 
-ActiveRecord::Base.send :include, Yaffle::ActsAsYaffle
+ActiveRecord::Base.include(Yaffle::ActsAsYaffle)
 ```
 
 Run `rake` one final time and you should see:
@@ -433,7 +435,7 @@ Once your README is solid, go through and add rdoc comments to all of the method
 Once your comments are good to go, navigate to your plugin directory and run:
 
 ```bash
-$ bin/rake rdoc
+$ bundle exec rake rdoc
 ```
 
 ### References

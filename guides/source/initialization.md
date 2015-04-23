@@ -1,3 +1,5 @@
+**DO NOT READ THIS FILE ON GITHUB, GUIDES ARE PUBLISHED ON http://guides.rubyonrails.org.**
+
 The Rails Initialization Process
 ================================
 
@@ -32,7 +34,7 @@ Launch!
 Let's start to boot and initialize the app. A Rails application is usually
 started by running `rails console` or `rails server`.
 
-### `railties/bin/rails`
+### `railties/exe/rails`
 
 The `rails` in the command `rails server` is a ruby executable in your load
 path. This executable contains the following lines:
@@ -43,7 +45,7 @@ load Gem.bin_path('railties', 'rails', version)
 ```
 
 If you try out this command in a Rails console, you would see that this loads
-`railties/bin/rails`. A part of the file `railties/bin/rails.rb` has the
+`railties/exe/rails`. A part of the file `railties/exe/rails.rb` has the
 following code:
 
 ```ruby
@@ -161,7 +163,7 @@ throwing an error message. If the command is valid, a method of the same name
 is called.
 
 ```ruby
-COMMAND_WHITELIST = %(plugin generate destroy console server dbconsole application runner new version help)
+COMMAND_WHITELIST = %w(plugin generate destroy console server dbconsole application runner new version help)
 
 def run_command!(command)
   command = parse_command(command)
@@ -357,7 +359,7 @@ private
   end
 
   def create_tmp_directories
-    %w(cache pids sessions sockets).each do |dir_to_make|
+    %w(cache pids sockets).each do |dir_to_make|
       FileUtils.mkdir_p(File.join(Rails.root, 'tmp', dir_to_make))
     end
   end
@@ -373,13 +375,12 @@ private
   end
 ```
 
-This is where the first output of the Rails initialization happens. This
-method creates a trap for `INT` signals, so if you `CTRL-C` the server,
-it will exit the process. As we can see from the code here, it will
-create the `tmp/cache`, `tmp/pids`, `tmp/sessions` and `tmp/sockets`
-directories. It then calls `wrapped_app` which is responsible for
-creating the Rack app, before creating and assigning an
-instance of `ActiveSupport::Logger`.
+This is where the first output of the Rails initialization happens. This method
+creates a trap for `INT` signals, so if you `CTRL-C` the server, it will exit the
+process. As we can see from the code here, it will create the `tmp/cache`,
+`tmp/pids`, and `tmp/sockets` directories. It then calls `wrapped_app` which is
+responsible for creating the Rack app, before creating and assigning an instance
+of `ActiveSupport::Logger`.
 
 The `super` method will call `Rack::Server.start` which begins its definition like this:
 

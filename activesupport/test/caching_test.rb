@@ -399,15 +399,16 @@ module CacheStoreBehavior
     assert_nil @cache.read('foo')
   end
 
-  def test_race_condition_protection
-    time = Time.now
-    @cache.write('foo', 'bar', :expires_in => 60)
-    Time.stubs(:now).returns(time + 61)
-    result = @cache.fetch('foo', :race_condition_ttl => 10) do
-      assert_equal 'bar', @cache.read('foo')
-      "baz"
+  def test_race_condition_protection_skipped_if_not_defined
+    @cache.write('foo', 'bar')
+    time = @cache.send(:read_entry, 'foo', {}).expires_at
+    Time.stubs(:now).returns(Time.at(time))
+
+    result = @cache.fetch('foo') do
+      assert_equal nil, @cache.read('foo')
+      'baz'
     end
-    assert_equal "baz", result
+    assert_equal 'baz', result
   end
 
   def test_race_condition_protection_is_limited
@@ -435,6 +436,17 @@ module CacheStoreBehavior
     assert_equal "bar", @cache.read('foo')
     Time.stubs(:now).returns(time + 91)
     assert_nil @cache.read('foo')
+  end
+
+  def test_race_condition_protection
+    time = Time.now
+    @cache.write('foo', 'bar', :expires_in => 60)
+    Time.stubs(:now).returns(time + 61)
+    result = @cache.fetch('foo', :race_condition_ttl => 10) do
+      assert_equal 'bar', @cache.read('foo')
+      "baz"
+    end
+    assert_equal "baz", result
   end
 
   def test_crazy_key_characters
@@ -672,6 +684,7 @@ class FileStoreTest < ActiveSupport::TestCase
 
   def teardown
     FileUtils.rm_r(cache_dir)
+  rescue Errno::ENOENT
   end
 
   def cache_dir
@@ -689,6 +702,11 @@ class FileStoreTest < ActiveSupport::TestCase
     FileUtils.touch(filepath)
     @cache.clear
     assert File.exist?(filepath)
+  end
+
+  def test_clear_without_cache_dir
+    FileUtils.rm_r(cache_dir)
+    @cache.clear
   end
 
   def test_long_keys
@@ -1021,6 +1039,15 @@ class CacheStoreLoggerTest < ActiveSupport::TestCase
     @cache.mute { @cache.fetch('foo') { 'bar' } }
     assert @buffer.string.blank?
   end
+
+  def test_multi_read_loggin
+    @cache.write 'hello', 'goodbye'
+    @cache.write 'world', 'earth'
+
+    @cache.read_multi('hello', 'world')
+
+    assert_match "Caches multi read:\n- hello\n- world", @buffer.string
+  end
 end
 
 class CacheEntryTest < ActiveSupport::TestCase
@@ -1046,31 +1073,5 @@ class CacheEntryTest < ActiveSupport::TestCase
     entry = ActiveSupport::Cache::Entry.new(value)
     assert_equal value, entry.value
     assert_equal value.bytesize, entry.size
-  end
-
-  def test_restoring_version_4beta1_entries
-    version_4beta1_entry = ActiveSupport::Cache::Entry.allocate
-    version_4beta1_entry.instance_variable_set(:@v, "hello")
-    version_4beta1_entry.instance_variable_set(:@x, Time.now.to_i + 60)
-    entry = Marshal.load(Marshal.dump(version_4beta1_entry))
-    assert_equal "hello", entry.value
-    assert_equal false, entry.expired?
-  end
-
-  def test_restoring_compressed_version_4beta1_entries
-    version_4beta1_entry = ActiveSupport::Cache::Entry.allocate
-    version_4beta1_entry.instance_variable_set(:@v, Zlib::Deflate.deflate(Marshal.dump("hello")))
-    version_4beta1_entry.instance_variable_set(:@c, true)
-    entry = Marshal.load(Marshal.dump(version_4beta1_entry))
-    assert_equal "hello", entry.value
-  end
-
-  def test_restoring_expired_version_4beta1_entries
-    version_4beta1_entry = ActiveSupport::Cache::Entry.allocate
-    version_4beta1_entry.instance_variable_set(:@v, "hello")
-    version_4beta1_entry.instance_variable_set(:@x, Time.now.to_i - 1)
-    entry = Marshal.load(Marshal.dump(version_4beta1_entry))
-    assert_equal "hello", entry.value
-    assert_equal true, entry.expired?
   end
 end

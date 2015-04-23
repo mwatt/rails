@@ -61,9 +61,13 @@ module ActionController
 
     def redirect_to(*args)
       ActiveSupport::Notifications.instrument("redirect_to.action_controller") do |payload|
-        result = super
-        payload[:status]   = response.status
-        payload[:location] = response.filtered_location
+        begin
+          result = super
+        rescue AbstractController::HaltAction
+          append_redirect_info_to_payload(payload)
+          raise
+        end
+        append_redirect_info_to_payload(payload)
         result
       end
     end
@@ -92,6 +96,11 @@ module ActionController
     # :api: plugin
     def append_info_to_payload(payload) #:nodoc:
       payload[:view_runtime] = view_runtime
+    end
+
+    def append_redirect_info_to_payload(payload) #:nodoc:
+      payload[:status]   = response.status
+      payload[:location] = response.filtered_location
     end
 
     module ClassMethods

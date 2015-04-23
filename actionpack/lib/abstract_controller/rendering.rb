@@ -13,6 +13,9 @@ module AbstractController
     end
   end
 
+  class HaltAction < Error
+  end
+
   module Rendering
     extend ActiveSupport::Concern
     include ActionView::ViewPaths

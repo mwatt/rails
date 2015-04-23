@@ -21,7 +21,7 @@ module ActionDispatch
     end
 
 
-    # Takes a path to a file. If the file is found, is a valid, and has
+    # Takes a path to a file. If the file is found, has valid encoding, and has
     # correct read permissions, the return value is a URI-escaped string
     # representing the filename. Otherwise, false is returned.
     #

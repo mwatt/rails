@@ -455,7 +455,7 @@ module ActionDispatch
       end
 
       # Returns the value of the cookie by +name+ if it is untampered,
-      # returns +nil+ otherwise and if no such cookie exists.
+      # returns +nil+ otherwise or if no such cookie exists.
       def [](name)
         if signed_message = @parent_jar[name]
           deserialize name, verify(signed_message)
@@ -516,7 +516,7 @@ module ActionDispatch
       end
 
       # Returns the value of the cookie by +name+ if it is untampered,
-      # returns +nil+ otherwise and if no such cookie exists.
+      # returns +nil+ otherwise or if no such cookie exists.
       def [](name)
         if encrypted_message = @parent_jar[name]
           deserialize name, decrypt_and_verify(encrypted_message)

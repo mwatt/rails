@@ -391,6 +391,8 @@ module Rails
           require "erb"
           all_secrets = YAML.load(ERB.new(IO.read(yaml)).result) || {}
           env_secrets = all_secrets[Rails.env]
+          common_secrets = all_secrets['common']
+          secrets.merge!(common_secrets.symbolize_keys) if common_secrets
           secrets.merge!(env_secrets.symbolize_keys) if env_secrets
         end
 

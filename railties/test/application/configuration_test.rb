@@ -521,6 +521,32 @@ module ApplicationTests
       end
     end
 
+    test "secrets common to all environments can be specified in secrets.yml" do
+      app_file 'config/secrets.yml', <<-YAML
+        common:
+          foo_api_token: 1234567
+      YAML
+
+      require "#{app_path}/config/environment"
+
+      assert_equal 1234567, app.secrets.foo_api_token
+    end
+
+    test "environment specific secrets override common secrets" do
+      app_file 'config/secrets.yml', <<-YAML
+        common:
+          foo_api_token: 1234567
+        production:
+          foo_api_token: 99999999
+      YAML
+
+      with_rails_env "production" do
+        require "#{app_path}/config/environment"
+      end
+
+      assert_equal 99999999, app.secrets.foo_api_token
+    end
+
     test "protect from forgery is the default in a new app" do
       make_basic_app
 

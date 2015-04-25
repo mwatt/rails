@@ -1,3 +1,9 @@
+*   Add a way to specify common secrets in `config/secrets.yml` which
+    will be loaded in all environments. Environment specific secrets
+    will override common secrets.
+
+    *Prathamesh Sonpatki*
+
 *   Remove sqlite support from `rails dbconsole`.
 
     *Andrew White*

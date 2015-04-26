@@ -1,3 +1,10 @@
+*   Allow `DelayedJob` to report id back to `ActiveJob::Base` as
+    `provider_job_id`.
+
+    Fixes #18821.
+
+    *Kevin Deisz*
+
 *   A generated job now inherents from `app/jobs/application_job.rb` by default.
 
     *Jeroen van Baarsen*

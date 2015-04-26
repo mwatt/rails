@@ -84,7 +84,7 @@ module SneakersJobsManager
     end
 
     def bunny_queue
-      @queue ||= bunny_publisher.exchange.channel.queue "integration_tests", durable: true
+      @queue ||= bunny_publisher.send(:exchange).channel.queue "integration_tests", durable: true
     end
 
 end

@@ -46,7 +46,7 @@ group :job do
   gem 'sucker_punch', require: false
   gem 'delayed_job', require: false
   gem 'queue_classic', require: false, platforms: :ruby
-  gem 'sneakers', '0.1.1.pre', require: false
+  gem 'sneakers', '>= 1.0.0', require: false
   gem 'que', require: false
   gem 'backburner', require: false
   gem 'qu-rails', github: "bkeepers/qu", branch: "master", require: false

@@ -301,6 +301,8 @@ module ActiveRecord
 
       assign_attributes(attributes) if attributes
 
+      @attributes.eval_proc_values!
+
       yield self if block_given?
       run_callbacks :initialize
     end

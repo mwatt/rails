@@ -80,6 +80,14 @@ module ActiveRecord
       attributes.select { |_, attr| attr.has_been_read? }.keys
     end
 
+    def eval_proc_values!
+      @attributes.each do |name, attribute|
+        if attribute.value_before_type_cast.is_a?(Proc)
+          attribute.eval_proc_value!
+        end
+      end
+    end
+
     protected
 
     attr_reader :attributes

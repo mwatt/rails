@@ -81,4 +81,11 @@
 
     *Isaac Seymour*
 
+*   Allow `DelayedJob` to report id back to `ActiveJob::Base` as
+    `provider_job_id`.
+
+    Fixes #18821.
+
+    *Kevin Deisz*
+
 Please check [4-2-stable](https://github.com/rails/rails/blob/4-2-stable/activejob/CHANGELOG.md) for previous changes.

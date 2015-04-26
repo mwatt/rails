@@ -236,6 +236,7 @@ module ActiveRecord
         if value == NO_DEFAULT_PROVIDED
           default_attribute = _default_attributes[name].with_type(type)
         elsif from_user
+          value = value.call if value.is_a?(Proc)
           default_attribute = Attribute.from_user(name, value, type)
         else
           default_attribute = Attribute.from_database(name, value, type)

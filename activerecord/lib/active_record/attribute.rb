@@ -98,6 +98,10 @@ module ActiveRecord
       [self.class, name, value_before_type_cast, type].hash
     end
 
+    def eval_proc_value!
+      @value_before_type_cast = @value_before_type_cast.call
+    end
+
     protected
 
     def initialize_dup(other)

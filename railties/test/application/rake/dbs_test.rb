@@ -94,6 +94,16 @@ module ApplicationTests
       #   end
       # end
 
+      test 'db:drop failure because bad permissions' do
+        with_database_existing do
+          with_bad_permissions do
+            output = `bundle exec rake db:drop 2>&1`
+            assert_match /Couldn't drop/, output
+            assert_equal 1, $?.exitstatus
+          end
+        end
+      end
+
       def db_migrate_and_status(expected_database)
         Dir.chdir(app_path) do
           `rails generate model book title:string;

@@ -66,6 +66,23 @@ module ApplicationTests
         end
       end
 
+      def with_bad_permissions
+        Dir.chdir(app_path) do
+          set_database_url
+          FileUtils.chmod("-w", "db")
+          yield
+          FileUtils.chmod("+w", "db")
+        end
+      end
+
+      test 'db:create failure because bad permissions' do
+        with_bad_permissions do
+          output = `bundle exec rake db:create 2>&1`
+          assert_match /Couldn't create database/, output
+          assert_equal 1, $?.exitstatus
+        end
+      end
+
       # This test should work, but it does not. It seems (at least for sqlite)
       # the NoDatabaseError is never raised.
       # https://github.com/rails/rails/blob/f00554a8226b9529c38be1f3e61b6b1888682fb4/activerecord/lib/active_record/connection_adapters/sqlite3_adapter.rb#L34-L37

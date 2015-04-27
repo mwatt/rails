@@ -49,6 +49,34 @@ module ApplicationTests
         db_create_and_drop database_url_db_name
       end
 
+      def with_database_existing
+        Dir.chdir(app_path) do
+          set_database_url
+          `bundle exec rake db:create`
+          yield
+          `bundle exec rake db:drop`
+        end
+      end
+
+      test 'db:create failure because database exists' do
+        with_database_existing do
+          output = `bundle exec rake db:create 2>&1`
+          assert_match /already exists/, output
+          assert_equal 0, $?.exitstatus
+        end
+      end
+
+      # This test should work, but it does not. It seems (at least for sqlite)
+      # the NoDatabaseError is never raised.
+      # https://github.com/rails/rails/blob/f00554a8226b9529c38be1f3e61b6b1888682fb4/activerecord/lib/active_record/connection_adapters/sqlite3_adapter.rb#L34-L37
+      # test 'db:drop failure because database does not exist' do
+      #   Dir.chdir(app_path) do
+      #     output = `bundle exec rake db:drop 2>&1`
+      #     assert_match /does not exist/, output
+      #     assert_equal 0, $?.exitstatus
+      #   end
+      # end
+
       def db_migrate_and_status(expected_database)
         Dir.chdir(app_path) do
           `bin/rails generate model book title:string;

@@ -96,6 +96,7 @@ module ActiveRecord
       rescue Exception => error
         $stderr.puts error, *(error.backtrace)
         $stderr.puts "Couldn't create database for #{configuration.inspect}"
+        exit(1)
       end
 
       def create_all

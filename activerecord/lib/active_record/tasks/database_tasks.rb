@@ -118,6 +118,7 @@ module ActiveRecord
       rescue Exception => error
         $stderr.puts error, *(error.backtrace)
         $stderr.puts "Couldn't drop #{configuration['database']}"
+        exit(1)
       end
 
       def drop_all

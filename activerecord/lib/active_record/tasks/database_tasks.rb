@@ -96,7 +96,7 @@ module ActiveRecord
       rescue Exception => error
         $stderr.puts error, *(error.backtrace)
         $stderr.puts "Couldn't create database for #{configuration.inspect}"
-        exit(1)
+        raise
       end
 
       def create_all
@@ -118,7 +118,7 @@ module ActiveRecord
       rescue Exception => error
         $stderr.puts error, *(error.backtrace)
         $stderr.puts "Couldn't drop #{configuration['database']}"
-        exit(1)
+        raise
       end
 
       def drop_all

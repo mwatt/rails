@@ -208,6 +208,16 @@ class InheritanceTest < ActiveRecord::TestCase
     assert_nothing_raised { Client.new(type: 'VerySpecialClient') }
   end
 
+  def test_new_without_storing_full_sti_class
+    old = ActiveRecord::Base.store_full_sti_class
+    ActiveRecord::Base.store_full_sti_class = false
+    Company::SpecialCo # force autoloading
+    item = Company.new(:type => 'SpecialCo')
+    assert_instance_of Company::SpecialCo, item
+  ensure
+    ActiveRecord::Base.store_full_sti_class = old
+  end
+
   def test_new_with_autoload_paths
     path = File.expand_path('../../models/autoloadable', __FILE__)
     ActiveSupport::Dependencies.autoload_paths << path

@@ -24,6 +24,10 @@ module ActionDispatch
       'X-Content-Type-Options' => 'nosniff'
     }
 
+    config.public_file_server.headers = {
+      'Cache-Control'.freeze => 'public, max-age=3600'
+    }
+
     config.eager_load_namespaces << ActionDispatch
 
     initializer "action_dispatch.configure" do |app|

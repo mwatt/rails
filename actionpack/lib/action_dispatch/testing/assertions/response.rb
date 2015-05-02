@@ -20,7 +20,7 @@ module ActionDispatch
       #   # assert that the response code was status code 401 (unauthorized)
       #   assert_response 401
       def assert_response(type, message = nil)
-        message ||= "Expected response to be a <#{type}>, but was <#{@response.response_code}>"
+        message ||= generate_response_message(type)
 
         if Symbol === type
           if [:success, :missing, :redirect, :error].include?(type)
@@ -76,6 +76,19 @@ module ActionDispatch
             handle = @controller || ActionController::Redirecting
             handle._compute_redirect_to_location(@request, fragment)
           end
+        end
+
+        def generate_response_message(type)
+          message = "Expected response to be a <#{type}>, but was"
+
+          if @response.redirect?
+            redirect_is = normalize_argument_to_redirection(@response.location)
+            message << " a redirect to <#{redirect_is}>"
+          else
+            message << " <#{@response.response_code}>"
+          end
+
+          message
         end
     end
   end

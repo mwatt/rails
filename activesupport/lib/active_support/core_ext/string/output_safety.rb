@@ -37,7 +37,7 @@ class ERB
       if s.html_safe?
         s
       else
-        s.gsub(HTML_ESCAPE_REGEXP, HTML_ESCAPE)
+        ActiveSupport::Multibyte::Unicode.tidy_bytes(s).gsub(HTML_ESCAPE_REGEXP, HTML_ESCAPE)
       end
     end
     module_function :unwrapped_html_escape

@@ -1,3 +1,7 @@
+*   Handle invalid UTF-8 strings correctly in `ERB::Util.html_escape`.
+
+    *Grey Baker*
+
 *   Encoding ActiveSupport::TimeWithZone to YAML now preserves the timezone information.
 
     Fixes #9183.

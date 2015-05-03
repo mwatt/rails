@@ -1,3 +1,7 @@
+*   Add `:expression` option support on the schema default.
+
+    *Ryuta Kamizono*
+
 *   Include the `Enumerable` module in `ActiveRecord::Relation`
 
     *Sean Griffin & bogdan*

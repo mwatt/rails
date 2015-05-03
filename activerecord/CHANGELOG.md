@@ -1,3 +1,7 @@
+*   Add `:expression` option support on the schema default.
+
+    *Ryuta Kamizono*
+
 *   Fixed an error which would occur in dirty checking when calling
     `update_attributes` from a getter.
 

@@ -153,6 +153,8 @@ module ActiveRecord
         super + [:array]
       end
 
+      private
+
       def schema_type(column)
         return super unless column.serial?
 
@@ -162,16 +164,12 @@ module ActiveRecord
           'serial'
         end
       end
-      private :schema_type
 
-      def schema_default(column)
-        if column.default_function
-          column.default_function.inspect unless column.serial?
-        else
-          super
-        end
+      def schema_expression(column)
+        super unless column.serial?
       end
-      private :schema_default
+
+      public
 
       # Returns +true+, since this connection adapter supports prepared statement
       # caching.

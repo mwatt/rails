@@ -83,6 +83,7 @@ module ActionView
         end
       rescue I18n::MissingTranslationData => e
         if remaining_defaults.present?
+          options.delete(:raise) unless options[:raise] && raise_error
           translate remaining_defaults.shift, options.merge(default: remaining_defaults)
         else
           raise e if raise_error

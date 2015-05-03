@@ -1,3 +1,7 @@
+*   Add `:expression` option support on the schema default.
+
+    *Ryuta Kamizono*
+
 *   Add `cache_key` to ActiveRecord::Relation.
 
     Example:

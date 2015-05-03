@@ -39,8 +39,13 @@ module ActiveRecord
           spec[:scale] = scale
         end
 
-        default = schema_default(column) if column.has_default?
-        spec[:default]   = default unless default.nil?
+        if column.has_default?
+          if default = schema_default(column)
+            spec[:default] = default
+          elsif expression = schema_expression(column)
+            spec[:expression] = expression
+          end
+        end
 
         if collation = schema_collation(column)
           spec[:collation] = collation
@@ -51,7 +56,7 @@ module ActiveRecord
 
       # Lists the valid migration options
       def migration_keys
-        [:name, :limit, :precision, :scale, :default, :null, :collation]
+        [:name, :limit, :precision, :scale, :default, :expression, :null, :collation]
       end
 
       private
@@ -79,6 +84,10 @@ module ActiveRecord
         unless default.nil?
           type.type_cast_for_schema(default)
         end
+      end
+
+      def schema_expression(column)
+        column.default_function.inspect if column.default_function
       end
 
       def schema_collation(column)

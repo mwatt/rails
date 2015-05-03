@@ -1,3 +1,7 @@
+*   Add `:expression` option support on the schema default.
+
+    *Ryuta Kamizono*
+
 *   Lookup the attribute name for `restrict_with_error` messages on the
     model class that defines the association.
 

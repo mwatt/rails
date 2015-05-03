@@ -65,6 +65,7 @@ module ActiveRecord
             column_options = {}
             column_options[:null] = o.null unless o.null.nil?
             column_options[:default] = o.default unless o.default.nil?
+            column_options[:expression] = o.expression unless o.expression.nil?
             column_options[:column] = o
             column_options[:first] = o.first
             column_options[:after] = o.after
@@ -75,7 +76,11 @@ module ActiveRecord
           end
 
           def add_column_options!(sql, options)
-            sql << " DEFAULT #{quote_default_expression(options[:default], options[:column])}" if options_include_default?(options)
+            if options_include_default?(options)
+              sql << " DEFAULT #{quote_default_expression(options[:default], options[:column])}"
+            elsif options_include_default?(options, :expression)
+              sql << " DEFAULT #{options[:expression]}"
+            end
             # must explicitly check for :null to allow change_column to work on migrations
             if options[:null] == false
               sql << " NOT NULL"
@@ -89,8 +94,8 @@ module ActiveRecord
             sql
           end
 
-          def options_include_default?(options)
-            options.include?(:default) && !(options[:null] == false && options[:default].nil?)
+          def options_include_default?(options, default = :default)
+            options.include?(default) && !(options[:null] == false && options[default].nil?)
           end
 
           def action_sql(action, dependency)

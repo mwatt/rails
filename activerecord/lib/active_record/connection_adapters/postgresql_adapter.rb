@@ -164,14 +164,10 @@ module ActiveRecord
       end
       private :schema_type
 
-      def schema_default(column)
-        if column.default_function
-          column.default_function.inspect unless column.serial?
-        else
-          super
-        end
+      def schema_expression(column)
+        super unless column.serial?
       end
-      private :schema_default
+      private :schema_expression
 
       # Returns +true+, since this connection adapter supports prepared statement
       # caching.

@@ -1,7 +1,10 @@
 language: ruby
-sudo: false
 script: 'ci/travis.rb'
 before_install:
+  - sudo apt-get update
+  - sudo apt-get install language-pack-en
+  - sudo /etc/init.d/postgresql stop
+  - sudo /etc/init.d/postgresql start 9.3
   - gem install bundler
   - "rm ${BUNDLE_GEMFILE}.lock"
 before_script:
@@ -48,5 +51,3 @@ services:
   - memcached
   - redis
   - rabbitmq
-addons:
-  postgresql: "9.3"

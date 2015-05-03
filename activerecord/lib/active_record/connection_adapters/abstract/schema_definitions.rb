@@ -15,7 +15,7 @@ module ActiveRecord
     # are typically created by methods in TableDefinition, and added to the
     # +columns+ attribute of said TableDefinition object, in order to be used
     # for generating a number of table creation or table changing SQL statements.
-    class ColumnDefinition < Struct.new(:name, :type, :limit, :precision, :scale, :default, :null, :first, :after, :auto_increment, :primary_key, :collation, :sql_type) #:nodoc:
+    class ColumnDefinition < Struct.new(:name, :type, :limit, :precision, :scale, :default, :null, :expression, :first, :after, :auto_increment, :primary_key, :collation, :sql_type) #:nodoc:
 
       def primary_key?
         primary_key || type.to_sym == :primary_key
@@ -432,6 +432,7 @@ module ActiveRecord
         column.precision   = options[:precision]
         column.scale       = options[:scale]
         column.default     = options[:default]
+        column.expression  = options[:expression]
         column.null        = options[:null]
         column.first       = options[:first]
         column.after       = options[:after]

@@ -1,3 +1,7 @@
+*   Add `:expression` option support on the schema default.
+
+    *Ryuta Kamizono*
+
 *   Dump indexes in `create_table` instead of `add_index`.
 
     If the adapter supports indexes in create table, generated SQL is

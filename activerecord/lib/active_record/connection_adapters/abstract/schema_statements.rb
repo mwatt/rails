@@ -232,10 +232,6 @@ module ActiveRecord
           end
         end
 
-        td.foreign_keys.each_pair do |other_table_name, foreign_key_options|
-          add_foreign_key(table_name, other_table_name, foreign_key_options)
-        end
-
         result
       end
 
@@ -756,15 +752,7 @@ module ActiveRecord
       def add_foreign_key(from_table, to_table, options = {})
         return unless supports_foreign_keys?
 
-        options[:column] ||= foreign_key_column_for(to_table)
-
-        options = {
-          column: options[:column],
-          primary_key: options[:primary_key],
-          name: foreign_key_name(from_table, options),
-          on_delete: options[:on_delete],
-          on_update: options[:on_update]
-        }
+        options = foreign_key_options(from_table, to_table, options)
         at = create_alter_table from_table
         at.add_foreign_key to_table, options
 
@@ -823,6 +811,13 @@ module ActiveRecord
 
       def foreign_key_column_for(table_name) # :nodoc:
         "#{table_name.to_s.singularize}_id"
+      end
+
+      def foreign_key_options(from_table, to_table, options) # :nodoc:
+        options = options.dup
+        options[:column] ||= foreign_key_column_for(to_table)
+        options[:name]   ||= foreign_key_name(from_table, options)
+        options
       end
 
       def dump_schema_information #:nodoc:

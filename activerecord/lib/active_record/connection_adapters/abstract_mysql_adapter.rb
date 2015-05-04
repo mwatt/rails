@@ -54,6 +54,7 @@ module ActiveRecord
 
           statements = o.columns.map { |c| accept c }
           statements.concat(o.indexes.map { |column_name, options| index_in_create(name, column_name, options) })
+          statements.concat(o.foreign_keys.map { |to_table, options| foreign_key_in_create(o.name, to_table, options) })
 
           create_sql << "(#{statements.join(', ')}) " if statements.present?
           create_sql << "#{o.options}"

@@ -232,10 +232,6 @@ module ActiveRecord
           end
         end
 
-        td.foreign_keys.each_pair do |other_table_name, foreign_key_options|
-          add_foreign_key(table_name, other_table_name, foreign_key_options)
-        end
-
         result
       end
 
@@ -825,6 +821,14 @@ module ActiveRecord
         "#{table_name.to_s.singularize}_id"
       end
 
+      def foreign_key_name(table_name, options) # :nodoc:
+        identifier = "#{table_name}_#{options.fetch(:column)}_fk"
+        hashed_identifier = Digest::SHA256.hexdigest(identifier).first(10)
+        options.fetch(:name) do
+          "fk_rails_#{hashed_identifier}"
+        end
+      end
+
       def dump_schema_information #:nodoc:
         sm_table = ActiveRecord::Migrator.schema_migrations_table_name
 
@@ -1043,14 +1047,6 @@ module ActiveRecord
 
       def create_alter_table(name)
         AlterTable.new create_table_definition(name)
-      end
-
-      def foreign_key_name(table_name, options) # :nodoc:
-        identifier = "#{table_name}_#{options.fetch(:column)}_fk"
-        hashed_identifier = Digest::SHA256.hexdigest(identifier).first(10)
-        options.fetch(:name) do
-          "fk_rails_#{hashed_identifier}"
-        end
       end
 
       def validate_index_length!(table_name, new_name) # :nodoc:

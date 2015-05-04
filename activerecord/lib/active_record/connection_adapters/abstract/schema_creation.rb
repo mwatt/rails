@@ -14,8 +14,10 @@ module ActiveRecord
           send m, o
         end
 
-        delegate :quote_column_name, :quote_table_name, :quote_default_expression, :type_to_sql, to: :@conn
-        private :quote_column_name, :quote_table_name, :quote_default_expression, :type_to_sql
+        delegate :quote_column_name, :quote_table_name, :quote_default_expression, :type_to_sql,
+          :supports_indexes_in_create?, :supports_foreign_keys?, :foreign_key_column_for, :foreign_key_name, to: :@conn
+        private :quote_column_name, :quote_table_name, :quote_default_expression, :type_to_sql,
+          :supports_indexes_in_create?, :supports_foreign_keys?, :foreign_key_column_for, :foreign_key_name
 
         private
 
@@ -38,23 +40,37 @@ module ActiveRecord
           end
 
           def visit_TableDefinition(o)
-            create_sql = "CREATE#{' TEMPORARY' if o.temporary} TABLE "
-            create_sql << "#{quote_table_name(o.name)} "
-            create_sql << "(#{o.columns.map { |c| accept c }.join(', ')}) " unless o.as
+            create_sql = "CREATE#{' TEMPORARY' if o.temporary} TABLE #{quote_table_name(o.name)} "
+
+            statements = o.columns.map { |c| accept c }
+
+            if supports_indexes_in_create?
+              statements += o.indexes.map { |column_name, options| index_in_create(o.name, column_name, options) }
+            end
+
+            if supports_foreign_keys?
+              statements += o.foreign_keys.map { |to_table, options| foreign_key_in_create(o.name, to_table, options) }
+            end
+
+            create_sql << "(#{statements.join(', ')}) " if statements.present?
             create_sql << "#{o.options}"
             create_sql << " AS #{@conn.to_sql(o.as)}" if o.as
             create_sql
           end
 
-          def visit_AddForeignKey(o)
+          def visit_ForeignKeyDefinition(o)
             sql = <<-SQL.strip_heredoc
-              ADD CONSTRAINT #{quote_column_name(o.name)}
+              CONSTRAINT #{quote_column_name(o.name)}
               FOREIGN KEY (#{quote_column_name(o.column)})
                 REFERENCES #{quote_table_name(o.to_table)} (#{quote_column_name(o.primary_key)})
             SQL
             sql << " #{action_sql('DELETE', o.on_delete)}" if o.on_delete
             sql << " #{action_sql('UPDATE', o.on_update)}" if o.on_update
             sql
+          end
+
+          def visit_AddForeignKey(o)
+            "ADD #{accept(o)}"
           end
 
           def visit_DropForeignKey(name)
@@ -91,6 +107,24 @@ module ActiveRecord
 
           def options_include_default?(options)
             options.include?(:default) && !(options[:null] == false && options[:default].nil?)
+          end
+
+          def index_in_create(table_name, column_name, options)
+            raise NotImplementedError, "index_in_create is not implemented"
+          end
+
+          def foreign_key_in_create(from_table, to_table, options = {})
+            options[:column] ||= foreign_key_column_for(to_table)
+
+            options = {
+              column: options[:column],
+              primary_key: options[:primary_key],
+              name: foreign_key_name(from_table, options),
+              on_delete: options[:on_delete],
+              on_update: options[:on_update]
+            }
+
+            accept ForeignKeyDefinition.new(from_table, to_table, options)
           end
 
           def action_sql(action, dependency)

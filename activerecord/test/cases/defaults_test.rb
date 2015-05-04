@@ -103,6 +103,17 @@ if current_adapter?(:PostgreSQLAdapter)
 end
 
 if current_adapter?(:MysqlAdapter, :Mysql2Adapter)
+  class MysqlDefaultExpressionTest < ActiveRecord::TestCase
+    include SchemaDumpingHelper
+
+    if mysql_56?
+      test "schema dump includes default expression" do
+        output = dump_table_schema("datetime_defaults")
+        assert_match %r{t\.datetime\s+"modified_datetime",\s+expression: "CURRENT_TIMESTAMP"}, output
+      end
+    end
+  end
+
   class DefaultsTestWithoutTransactionalFixtures < ActiveRecord::TestCase
     # ActiveRecord::Base#create! (and #save and other related methods) will
     # open a new transaction. When in transactional tests mode, this will

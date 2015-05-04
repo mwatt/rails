@@ -1,4 +1,11 @@
 ActiveRecord::Schema.define do
+
+  if mysql_56?
+    create_table :datetime_defaults, force: true do |t|
+      t.datetime :modified_datetime, expression: 'CURRENT_TIMESTAMP'
+    end
+  end
+
   create_table :binary_fields, force: true do |t|
     t.binary :var_binary, limit: 255
     t.binary :var_binary_large, limit: 4095

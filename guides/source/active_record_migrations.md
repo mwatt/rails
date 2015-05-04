@@ -436,8 +436,17 @@ change_column_default :products, :approved, false
 This sets `:name` field on products to a `NOT NULL` column and the default
 value of the `:approved` field to false.
 
-TIP: Unlike `change_column` (and `change_column_default`), `change_column_null`
-is reversible.
+Additionaly, for `change_column_default`, you can pass a Hash which defines the
+changes. This will make the command reversible. The command above can be
+rewritten as:
+
+```ruby
+change_column_default :products, :approved, from: true, to: false
+```
+
+TIP: `change_column` command is always irreversible, `change_column_null` is
+always reversible, and `change_column_default` is only reversible if using
+`:from` and `:to` syntax.
 
 ### Column Modifiers
 

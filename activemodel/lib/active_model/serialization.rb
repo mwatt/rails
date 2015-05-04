@@ -69,6 +69,37 @@ module ActiveModel
   #   person.serializable_hash(only: 'name')
   #   person.serializable_hash(include: :address)
   #   person.serializable_hash(include: { address: { only: 'city' }})
+  #
+  # Example with <tt>:include</tt> option
+  #
+  #   class User
+  #     include ActiveModel::Serializers::JSON
+  #     attr_accessor :name, :notes # Emulate has_many :notes
+  #     def attributes
+  #       {'name' => nil}
+  #     end
+  #   end
+  #
+  #   class Note
+  #     include ActiveModel::Serializers::JSON
+  #     attr_accessor :title, :text
+  #     def attributes
+  #       {'title' => nil, 'text' => nil}
+  #     end
+  #   end
+  #
+  #   note = Note.new
+  #   note.title = 'Battle of Austerlitz'
+  #   note.text = 'Some text here'
+  #
+  #   user = User.new
+  #   user.name = 'Napoleon'
+  #   user.notes = [note]
+  #
+  #   user.serializable_hash
+  #   #=> {"name" => "Napoleon"} 
+  #   user.serializable_hash(include: {notes: {only: 'title'}})
+  #   #=> {"name" => "Napoleon", "notes" => [{"title"=>"Battle of Austerlitz"}]}
   module Serialization
     # Returns a serialized hash of your object.
     #

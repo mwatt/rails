@@ -1,4 +1,5 @@
-*   Handle invalid UTF-8 strings correctly in `ERB::Util.html_escape`.
+*   Handle invalid UTF-8 strings correctly in `ERB::Util.html_escape`,
+    `ERB::Util.unwrapped_html_escape` and `ERB::Util.html_escape_once`.
 
     *Grey Baker*
 

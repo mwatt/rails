@@ -793,6 +793,12 @@ class OutputSafetyTest < ActiveSupport::TestCase
     assert_equal escaped_string, ERB::Util.html_escape_once(string)
     assert_equal escaped_string, ERB::Util.html_escape_once(escaped_string)
   end
+
+  test "ERB::Util.html_escape_once should correctly handle invalid UTF-8 strings" do
+    string = "\251 <"
+    expected = "© &lt;"
+    assert_equal expected, ERB::Util.html_escape_once(string)
+  end
 end
 
 class StringExcludeTest < ActiveSupport::TestCase

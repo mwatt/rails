@@ -566,9 +566,15 @@ module ActiveRecord
         execute_and_free(sql, 'SCHEMA') do |result|
           each_hash(result).map do |field|
             field_name = set_field_encoding(field[:Field])
-            sql_type = field[:Type]
-            type_metadata = fetch_type_metadata(sql_type, field[:Extra])
-            new_column(field_name, field[:Default], type_metadata, field[:Null] == "YES", nil, field[:Collation])
+            type_metadata = fetch_type_metadata(field[:Type], field[:Extra])
+            if type_metadata.type == :datetime && field[:Default] == "CURRENT_TIMESTAMP"
+              default_value = nil
+              default_function = field[:Default]
+            else
+              default_value = field[:Default]
+              default_function = nil
+            end
+            new_column(field_name, default_value, type_metadata, field[:Null] == "YES", default_function, field[:Collation])
           end
         end
       end

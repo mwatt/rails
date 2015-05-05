@@ -98,7 +98,7 @@ module ActiveModel
   #
   #   user.serializable_hash
   #   #=> {"name" => "Napoleon"} 
-  #   user.serializable_hash(include: {notes: {only: 'title'}})
+  #   user.serializable_hash(include: { notes: { only: 'title' }})
   #   #=> {"name" => "Napoleon", "notes" => [{"title"=>"Battle of Austerlitz"}]}
   module Serialization
     # Returns a serialized hash of your object.

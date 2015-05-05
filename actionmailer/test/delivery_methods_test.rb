@@ -103,14 +103,28 @@ class MailDeliveryTest < ActiveSupport::TestCase
   end
 
   test "ActionMailer should be told when Mail gets delivered" do
-    DeliveryMailer.expects(:deliver_mail).once
-    DeliveryMailer.welcome.deliver_now
+    DeliveryMailer.delivery_method = :test
+    mail = DeliveryMailer.welcome
+    mock = Minitest::Mock.new
+    mock.expect(:call, nil, [mail])
+    DeliveryMailer.stub(:deliver_mail, mock) do
+      mail.deliver_now
+    end
+    mock.verify
   end
 
   test "delivery method can be customized per instance" do
-    Mail::SMTP.any_instance.expects(:deliver!)
-    email = DeliveryMailer.welcome.deliver_now
-    assert_instance_of Mail::SMTP, email.delivery_method
+    smtp = Mail::SMTP.new({})
+    Mail::SMTP.stub(:new, smtp) do
+      mail_instance = DeliveryMailer.welcome
+      mock = Minitest::Mock.new
+      mock.expect(:call, nil, [mail_instance])
+      smtp.stub(:deliver!, mock) do
+        email = mail_instance.deliver_now
+        assert_instance_of Mail::SMTP, email.delivery_method
+      end
+      mock.verify
+    end
     email = DeliveryMailer.welcome(delivery_method: :test).deliver_now
     assert_instance_of Mail::TestMailer, email.delivery_method
   end
@@ -177,8 +191,15 @@ class MailDeliveryTest < ActiveSupport::TestCase
     old_perform_deliveries = DeliveryMailer.perform_deliveries
     begin
       DeliveryMailer.perform_deliveries = false
-      Mail::Message.any_instance.expects(:deliver!).never
-      DeliveryMailer.welcome.deliver_now
+      message = Mail::Message.new
+      Mail::Message.stub(:new, message) do
+        mail = DeliveryMailer.welcome
+        mock = Minitest::Mock.new
+        message.stub(:deliver!, mock) do
+          mail.deliver_now
+        end
+        mock.verify
+      end
     ensure
       DeliveryMailer.perform_deliveries = old_perform_deliveries
     end

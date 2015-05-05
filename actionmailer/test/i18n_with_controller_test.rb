@@ -52,10 +52,17 @@ class ActionMailerI18nWithControllerTest < ActionDispatch::IntegrationTest
   end
 
   def test_send_mail
-    Mail::SMTP.any_instance.expects(:deliver!)
-    with_translation 'de', email_subject: '[Anmeldung] Willkommen' do
-      get '/test/send_mail'
-      assert_equal "Mail sent - Subject: [Anmeldung] Willkommen", @response.body
+    smtp = Mail::SMTP.new({})
+    Mail::SMTP.stub(:new, smtp) do
+      mock = Minitest::Mock.new
+      mock.expect(:call, nil, [Mail::Message])
+      smtp.stub(:deliver!, mock) do
+        with_translation 'de', email_subject: '[Anmeldung] Willkommen' do
+          get '/test/send_mail'
+          assert_equal "Mail sent - Subject: [Anmeldung] Willkommen", @response.body
+        end
+      end
+      mock.verify
     end
   end
 

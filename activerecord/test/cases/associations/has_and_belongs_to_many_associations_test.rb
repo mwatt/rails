@@ -577,6 +577,11 @@ class HasAndBelongsToManyAssociationsTest < ActiveRecord::TestCase
     assert_equal developers(:poor_jamis), projects(:active_record).developers.where("salary < 10000").first
   end
 
+  test "test_association_with_extend_option" do
+    post = posts(:welcome)
+    assert_equal "lifo",  post.categories_with_extend.author
+  end
+
   def test_replace_with_less
     david = developers(:david)
     david.projects = [projects(:action_controller)]

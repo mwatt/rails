@@ -1,3 +1,7 @@
+*   Add `extend` option on `has_and_belongs_to_many`.
+
+    *Jaehyun Shin*
+
 *   Dump indexes in `create_table` instead of `add_index`.
 
     If the adapter supports indexes in create table, generated SQL is

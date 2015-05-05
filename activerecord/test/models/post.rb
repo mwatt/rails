@@ -88,6 +88,7 @@ class Post < ActiveRecord::Base
   has_many :scategories, through: :category_posts, source: :category
   has_and_belongs_to_many :categories
   has_and_belongs_to_many :special_categories, :join_table => "categories_posts", :association_foreign_key => 'category_id'
+  has_and_belongs_to_many :categories_with_extend, class_name: "Category", :join_table => "categories_posts", :association_foreign_key => 'category_id', extend: NamedExtension
 
   has_many :taggings, :as => :taggable, :counter_cache => :tags_count
   has_many :tags, :through => :taggings do

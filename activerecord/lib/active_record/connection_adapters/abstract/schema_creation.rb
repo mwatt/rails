@@ -86,6 +86,11 @@ module ActiveRecord
             if options[:primary_key] == true
               sql << " PRIMARY KEY"
             end
+
+            if options[:collation].present?
+              sql << " COLLATE \"#{ options[:collation] }\""
+            end
+
             sql
           end
 

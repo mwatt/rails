@@ -1,3 +1,9 @@
+*   Create a new ActiveSupport::SafeBuffer instance when content_for is flushed.
+
+    Fixes #19890
+
+    *Yoong Kang Lim*
+
 *   Remove `:rescue_format` option for `translate` helper since it's no longer
     supported by I18n.
 

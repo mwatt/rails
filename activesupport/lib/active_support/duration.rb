@@ -9,6 +9,9 @@ module ActiveSupport
   class Duration
     attr_accessor :value, :parts
 
+    autoload :ISO8601Parser,     'active_support/duration/iso8601_parser'
+    autoload :ISO8601Serializer, 'active_support/duration/iso8601_serializer'
+
     def initialize(value, parts) #:nodoc:
       @value, @parts = value, parts
     end
@@ -113,17 +116,47 @@ module ActiveSupport
     def inspect #:nodoc:
       parts.
         reduce(::Hash.new(0)) { |h,(l,r)| h[l] += r; h }.
-        sort_by {|unit,  _ | [:years, :months, :days, :minutes, :seconds].index(unit)}.
+        sort_by {|unit,  _ | [:years, :months, :weeks, :days, :hours, :minutes, :seconds].index(unit)}.
         map     {|unit, val| "#{val} #{val == 1 ? unit.to_s.chop : unit.to_s}"}.
         to_sentence(locale: ::I18n.default_locale)
     end
 
+    # JSON representation should be a string formatted as ISO 8601 Duration, as recommended by Google JSON Style Guide:
+    # https://google-styleguide.googlecode.com/svn/trunk/jsoncstyleguide.xml?showone=Time_Duration_Property_Values#Time_Duration_Property_Values
     def as_json(options = nil) #:nodoc:
-      to_i
+      iso8601(precision: options && options[:precision])
     end
 
     def respond_to_missing?(method, include_private=false) #:nodoc:
       @value.respond_to?(method, include_private)
+    end
+
+    # Creates a new Duration from string formatted according to ISO 8601 Duration.
+    #
+    # See http://en.wikipedia.org/wiki/ISO_8601#Durations
+    # This method allows negative parts to be present in pattern.
+    # If invalid string is provided, it will raise +ActiveSupport::Duration::ISO8601Parser::ParsingError+.
+    def self.parse!(iso8601duration)
+      parts = ISO8601Parser.new(iso8601duration).parts
+      time  = ::Time.now
+      new(time.advance(parts) - time, parts)
+    end
+
+    # Creates a new Duration from string formatted according to ISO 8601 Duration.
+    #
+    # See http://en.wikipedia.org/wiki/ISO_8601#Durations
+    # This method allows negative parts to be present in pattern.
+    # If invalid string is provided, nil will be returned.
+    def self.parse(iso8601duration)
+      parse!(iso8601duration)
+    rescue ISO8601Parser::ParsingError
+      nil
+    end
+
+    # Build ISO 8601 Duration string for this duration.
+    # The +precision+ parameter can be used to limit seconds' precision of duration.
+    def iso8601(precision: nil)
+      ISO8601Serializer.new(self, precision: precision).serialize
     end
 
     delegate :<=>, to: :value

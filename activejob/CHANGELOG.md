@@ -1,3 +1,8 @@
+*   Allow `Sidekiq` to report the job id back to `ActiveJob::Base` as
+    `provider_job_id`
+
+    *Jeroen van Baarsen*
+
 *   `assert_enqueued_jobs` and `assert_performed_jobs` in block form use the
     given number as expected value. This makes the error message much easier to
     understand.

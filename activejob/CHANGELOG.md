@@ -1,4 +1,4 @@
-*   Allow `Sidekiq` to report the job id back to `ActiveJob::Base` as
+*   Allow `Sidekiq` and `que` to report the job id back to `ActiveJob::Base` as
     `provider_job_id`
 
     *Jeroen van Baarsen*

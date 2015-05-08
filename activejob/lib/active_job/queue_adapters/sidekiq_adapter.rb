@@ -21,6 +21,7 @@ module ActiveJob
           'class'   => JobWrapper,
           'wrapped' => job.class.to_s,
           'queue'   => job.queue_name,
+          'retry'   => job.max_attempts || true,
           'args'    => [ job.serialize ]
         job.provider_job_id = sidekiq_job_id
         sidekiq_job_id
@@ -31,6 +32,7 @@ module ActiveJob
           'class'   => JobWrapper,
           'wrapped' => job.class.to_s,
           'queue'   => job.queue_name,
+          'retry'   => job.max_attempts || true,
           'args'    => [ job.serialize ],
           'at'      => timestamp
         job.provider_job_id = sidekiq_job_id

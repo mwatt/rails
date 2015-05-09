@@ -22,13 +22,13 @@ class String
 		self.envelop('{' , '}')
 	end
 
-	#this string between slashs
-	def slashs 
+	#this string between slashses
+	def slashses 
 		self.envelop('/' , '/')
 	end
 
 	#this string between blackslashs
-	def backslashs
+	def backslashses
 		self.envelop('\\' , '\\')
 	end
 

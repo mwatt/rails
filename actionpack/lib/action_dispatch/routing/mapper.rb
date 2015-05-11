@@ -367,8 +367,24 @@ module ActionDispatch
         # You should put the root route at the top of <tt>config/routes.rb</tt>,
         # because this means it will be matched first. As this is the most popular route
         # of most Rails applications, this is beneficial.
-        def root(options = {})
-          match '/', { :as => :root, :via => :get }.merge!(options)
+        def root(path, options={})
+          if path.is_a?(String)
+            options[:to] = path
+          elsif path.is_a?(Hash) and options.empty?
+            options = path
+          else
+            raise ArgumentError, "must be called with a path and/or options"
+          end
+
+          if @scope.resources?
+            with_scope_level(:root) do
+              scope(parent_resource.path) do
+                match '/', { :as => :root, :via => :get }.merge!(options)
+              end
+            end
+          else
+            match '/', { :as => :root, :via => :get }.merge!(options)
+          end
         end
 
         # Matches a url pattern to one or more routes.
@@ -1543,26 +1559,6 @@ module ActionDispatch
           mapping = Mapping.build(@scope, @set, URI.parser.escape(path), as, options)
           app, conditions, requirements, defaults, as, anchor = mapping.to_route
           @set.add_route(app, conditions, requirements, defaults, as, anchor)
-        end
-
-        def root(path, options={})
-          if path.is_a?(String)
-            options[:to] = path
-          elsif path.is_a?(Hash) and options.empty?
-            options = path
-          else
-            raise ArgumentError, "must be called with a path and/or options"
-          end
-
-          if @scope.resources?
-            with_scope_level(:root) do
-              scope(parent_resource.path) do
-                super(options)
-              end
-            end
-          else
-            super(options)
-          end
         end
 
         protected

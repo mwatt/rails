@@ -1,3 +1,9 @@
+*   Don't ignore false values for `include_blank` passed to
+    `Tags::Base#select_content_tag`. Allows a combination of `required` and
+    `include_blank` to be passed to the `select` forms helper.
+
+    *Grey Baker*
+
 *   Remove `:rescue_format` option for `translate` helper since it's no longer
     supported by I18n.
 

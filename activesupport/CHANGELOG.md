@@ -1,3 +1,10 @@
+*   ActiveSupport::HashWithIndifferentAccess `select` and `reject` will now return
+    enumerator if called without block.
+
+    Fixes #20095
+
+    *Bernard Potocki*
+
 *   Encoding ActiveSupport::TimeWithZone to YAML now preserves the timezone information.
 
     Fixes #9183.

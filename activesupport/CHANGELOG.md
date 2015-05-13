@@ -1,3 +1,8 @@
+*   Added `Enumerable#map_with` to simplify pattern of creating a hash from an
+    enumerable with the original entries as keys and some mapping as values
+
+    *Matt Larraz*
+
 *   Encoding ActiveSupport::TimeWithZone to YAML now preserves the timezone information.
 
     Fixes #9183.

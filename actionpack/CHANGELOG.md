@@ -1,3 +1,9 @@
+*   Deprecate `assigns` and `assert_template`.
+
+    See #18950.
+
+    *Alan Guo Xiang Tan*
+
 *   `FileHandler` and `Static` middleware initializers accept `index` argument
     to configure the directory index file name. Defaults to `index` (as in
     `index.html`).

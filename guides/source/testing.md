@@ -467,7 +467,6 @@ Rails adds some custom assertions of its own to the `minitest` framework:
 | `assert_generates(expected_path, options, defaults={}, extras = {}, message=nil)` | Asserts that the provided options can be used to generate the provided path. This is the inverse of assert_recognizes. The extras parameter is used to tell the request the names and values of additional request parameters that would be in a query string. The message parameter allows you to specify a custom error message for assertion failures.|
 | `assert_response(type, message = nil)`                                            | Asserts that the response comes with a specific status code. You can specify `:success` to indicate 200-299, `:redirect` to indicate 300-399, `:missing` to indicate 404, or `:error` to match the 500-599 range. You can also pass an explicit status number or its symbolic equivalent. For more information, see [full list of status codes](http://rubydoc.info/github/rack/rack/master/Rack/Utils#HTTP_STATUS_CODES-constant) and how their [mapping](http://rubydoc.info/github/rack/rack/master/Rack/Utils#SYMBOL_TO_STATUS_CODE-constant) works.|
 | `assert_redirected_to(options = {}, message=nil)`                                 | Assert that the redirection options passed in match those of the redirect called in the latest action. This match can be partial, such that `assert_redirected_to(controller: "weblog")` will also match the redirection of `redirect_to(controller: "weblog", action: "show")` and so on. You can also pass named routes such as `assert_redirected_to root_path` and Active Record objects such as `assert_redirected_to @article`.|
-| `assert_template(expected = nil, message=nil)`                                    | Asserts that the request was rendered with the appropriate template file.|
 
 You'll see the usage of some of these assertions in the next chapter.
 
@@ -580,11 +579,11 @@ To test AJAX requests, you can specify the `xhr: true` option to `get`, `post`,
 `patch`, `put`, and `delete` methods:
 
 ```ruby
-test "ajax request responds with no layout" do
+test "ajax request" do
   get :show, params: { id: articles(:first).id }, xhr: true
 
-  assert_template :index
-  assert_template layout: nil
+  assert_equal 'hello world', @response.body
+  assert_equal "text/javascript", @response.content_type
 end
 ```
 
@@ -632,46 +631,6 @@ get :index # simulate the request with custom header
 @request.headers["HTTP_REFERER"] = "http://example.com/home"
 post :create # simulate the request with custom env variable
 ```
-
-### Testing Templates and Layouts
-
-Eventually, you may want to test whether a specific layout is rendered in the view of a response.
-
-#### Asserting Templates
-
-If you want to make sure that the response rendered the correct template and layout, you can use the `assert_template`
-method:
-
-```ruby
-test "index should render correct template and layout" do
-  get :index
-  assert_template :index
-  assert_template layout: "layouts/application"
-
-  # You can also pass a regular expression.
-  assert_template layout: /layouts\/application/
-end
-```
-
-NOTE: You cannot test for template and layout at the same time, with a single call to `assert_template`.
-
-WARNING: You must include the "layouts" directory name even if you save your layout file in this standard layout directory. Hence, `assert_template layout: "application"` will not work.
-
-#### Asserting Partials
-
-If your view renders any partial, when asserting for the layout, you can to assert for the partial at the same time.
-Otherwise, assertion will fail.
-
-Remember, we added the "_form" partial to our new Article view? Let's write an assertion for that in the `:new` action now:
-
-```ruby
-test "new should render correct layout" do
-  get :new
-  assert_template layout: "layouts/application", partial: "_form"
-end
-```
-
-This is the correct way to assert for when the view renders a partial with a given name. As identified by the `:partial` key passed to the `assert_template` call.
 
 ### Testing `flash` notices
 
@@ -1071,14 +1030,12 @@ How about testing our ability to create a new article in our blog and see the re
 test "can create an article" do
   get "/articles/new"
   assert_response :success
-  assert_template "articles/new", partial: "articles/_form"
 
   post "/articles",
     params: { article: { title: "can create", body: "article successfully." } }
   assert_response :redirect
   follow_redirect!
   assert_response :success
-  assert_template "articles/show"
   assert_select "p", "Title:\n  can create"
 end
 ```

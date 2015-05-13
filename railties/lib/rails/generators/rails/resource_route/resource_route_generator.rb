@@ -1,6 +1,8 @@
 module Rails
   module Generators
     class ResourceRouteGenerator < NamedBase # :nodoc:
+      class_option :api, type: :boolean,
+                         desc: "Preconfigure smaller stack for API only apps"
 
       # Properly nests namespaces passed into a generator
       #

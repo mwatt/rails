@@ -645,6 +645,15 @@ class FormOptionsHelperTest < ActionView::TestCase
     )
   end
 
+  def test_select_with_include_blank_false_and_required
+    @post = Post.new
+    @post.category = "<mus>"
+    assert_dom_equal(
+      "<select required=\"required\" id=\"post_category\" name=\"post[category]\"><option value=\"abe\">abe</option>\n<option value=\"&lt;mus&gt;\" selected=\"selected\">&lt;mus&gt;</option>\n<option value=\"hest\">hest</option></select>",
+      select("post", "category", %w( abe <mus> hest), { include_blank: false }, required: 'required')
+    )
+  end
+
   def test_select_with_blank_as_string
     @post = Post.new
     @post.category = "<mus>"

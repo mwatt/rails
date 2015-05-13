@@ -120,7 +120,7 @@ module ActionView
         def select_content_tag(option_tags, options, html_options)
           html_options = html_options.stringify_keys
           add_default_name_and_id(html_options)
-          options[:include_blank] ||= true unless options[:prompt] || select_not_required?(html_options)
+          options[:include_blank] ||= true unless options.key?(:include_blank) || options[:prompt] || select_not_required?(html_options)
           value = options.fetch(:selected) { value(object) }
           select = content_tag("select", add_options(option_tags, options, value), html_options)
 

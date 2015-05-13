@@ -24,6 +24,12 @@ class AssertTemplateController < ActionController::Base
 end
 
 class AssertTemplateControllerTest < ActionDispatch::IntegrationTest
+  def assert_template(args)
+    ActiveSupport::Deprecation.silence do
+      super(args)
+    end
+  end
+
   def test_template_reset_between_requests
     get '/assert_template/render_with_template'
     assert_template 'test/hello_world'

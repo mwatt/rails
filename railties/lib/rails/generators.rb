@@ -44,6 +44,7 @@ module Rails
 
     DEFAULT_OPTIONS = {
       rails: {
+        api: false,
         assets: true,
         force_plural: false,
         helper: true,
@@ -62,6 +63,7 @@ module Rails
     }
 
     def self.configure!(config) #:nodoc:
+      api_only! if config.api_only
       no_color! unless config.colorize_logging
       aliases.deep_merge! config.aliases
       options.deep_merge! config.options
@@ -97,6 +99,21 @@ module Rails
     #   Rails::Generators.fallbacks[:shoulda] = :test_unit
     def self.fallbacks
       @fallbacks ||= {}
+    end
+
+    # Configure generators for API only applications. It basically hides
+    # everything that is usually browser related, such as assets and session
+    # migration generators, and completely disable views, helpers and assets
+    # so generators such as scaffold won't create them.
+    def self.api_only!
+      hide_namespaces "assets", "helper", "css", "js"
+
+      options[:rails].merge!(
+        api: true,
+        assets: false,
+        helper: false,
+        template_engine: nil
+      )
     end
 
     # Remove the color from output.

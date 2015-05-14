@@ -104,12 +104,22 @@ class ObjectTryTest < ActiveSupport::TestCase
       end
     end
 
-    assert_equal 'delegator method', klass.new(Object.new).try(:delegator_method)
+    assert_equal 'delegator method', klass.new(@string).try(:delegator_method)
   end
 
   def test_try_with_method_on_delegator_target
     klass = Class.new(SimpleDelegator)
 
     assert_equal @string.reverse, klass.new(@string).try(:reverse)
+  end
+
+  def test_try_with_overriden_method_on_delegator
+    klass = Class.new(SimpleDelegator) do
+      def reverse
+        'delegator method'
+      end
+    end
+
+    assert_equal 'delegator method', klass.new(@string).try(:reverse)
   end
 end

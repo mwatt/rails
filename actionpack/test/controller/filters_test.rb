@@ -13,16 +13,6 @@ class ActionController::Base
       filters.map!(&:raw_filter)
     end
   end
-
-  def assigns(key = nil)
-    assigns = {}
-    instance_variables.each do |ivar|
-      next if ActionController::Base.protected_instance_variables.include?(ivar)
-      assigns[ivar[1..-1]] = instance_variable_get(ivar)
-    end
-
-    key.nil? ? assigns : assigns[key.to_s]
-  end
 end
 
 class FilterTest < ActionController::TestCase
@@ -550,6 +540,16 @@ class FilterTest < ActionController::TestCase
     end
   end
 
+  def assigns(args = nil)
+    ActiveSupport::Deprecation.silence do
+      if args
+        super(args)
+      else
+        super
+      end
+    end
+  end
+
   def test_non_yielding_around_actions_do_not_raise
     controller = NonYieldingAroundFilterController.new
     assert_nothing_raised do
@@ -560,7 +560,7 @@ class FilterTest < ActionController::TestCase
   def test_after_actions_are_not_run_if_around_action_does_not_yield
     controller = NonYieldingAroundFilterController.new
     test_process(controller, "index")
-    assert_equal ["filter_one", "it didn't yield"], controller.assigns['filters']
+    assert_equal ["filter_one", "it didn't yield"], assigns['filters']
   end
 
   def test_added_action_to_inheritance_graph
@@ -1006,6 +1006,16 @@ class YieldingAroundFiltersTest < ActionController::TestCase
     controller = ControllerWithFilterInstance
     assert_nothing_raised { test_process(controller,'no_raise') }
     assert_raise(After) { test_process(controller,'raises_after') }
+  end
+
+  def assigns(args = nil)
+    ActiveSupport::Deprecation.silence do
+      if args
+        super(args)
+      else
+        super
+      end
+    end
   end
 
   def test_with_proc

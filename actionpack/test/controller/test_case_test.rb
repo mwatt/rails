@@ -438,6 +438,16 @@ XML
     assert_equal "OK", @response.body
   end
 
+  def assigns(args = nil)
+    ActiveSupport::Deprecation.silence do
+      if args
+        super(args)
+      else
+        super
+      end
+    end
+  end
+
   def test_assigns
     process :test_assigns
     # assigns can be accessed using assigns(key)
@@ -457,9 +467,7 @@ XML
     @controller = ViewAssignsController.new
     process :test_assigns
     assert_equal nil, assigns(:foo)
-    assert_equal nil, assigns[:foo]
     assert_equal "bar", assigns(:bar)
-    assert_equal "bar", assigns[:bar]
   end
 
   def test_should_not_impose_childless_html_tags_in_xml

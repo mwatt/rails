@@ -361,13 +361,6 @@ class TestController < ApplicationController
     render :nothing => true
   end
 
-  def render_to_string_with_assigns
-    @before = "i'm before the render"
-    render_to_string :text => "foo"
-    @after = "i'm after the render"
-    render :template => "test/hello_world"
-  end
-
   def render_to_string_with_exception
     render_to_string :file => "exception that will not be caught - this will certainly not work"
   end
@@ -450,12 +443,6 @@ class TestController < ApplicationController
 
   def action_talk_to_layout
     # Action template sets variable that's picked up by layout
-  end
-
-  # :addressed:
-  def render_text_with_assigns
-    @hello = "world"
-    render :text => "foo"
   end
 
   def render_with_assigns_option
@@ -1045,20 +1032,8 @@ class RenderTest < ActionController::TestCase
     assert_equal '', @response.body
   end
 
-  def test_render_to_string_doesnt_break_assigns
-    get :render_to_string_with_assigns
-    assert_equal "i'm before the render", assigns(:before)
-    assert_equal "i'm after the render", assigns(:after)
-  end
-
   def test_bad_render_to_string_still_throws_exception
     assert_raise(ActionView::MissingTemplate) { get :render_to_string_with_exception }
-  end
-
-  def test_render_to_string_that_throws_caught_exception_doesnt_break_assigns
-    assert_nothing_raised { get :render_to_string_with_caught_exception }
-    assert_equal "i'm before the render", assigns(:before)
-    assert_equal "i'm after the render", assigns(:after)
   end
 
   def test_accessing_params_in_template_with_layout
@@ -1114,12 +1089,6 @@ class RenderTest < ActionController::TestCase
   def test_action_talk_to_layout
     get :action_talk_to_layout
     assert_equal "<title>Talking to the layout</title>\nAction was here!", @response.body
-  end
-
-  # :addressed:
-  def test_render_text_with_assigns
-    get :render_text_with_assigns
-    assert_equal "world", assigns["hello"]
   end
 
   def test_render_text_with_assigns_option
@@ -1185,22 +1154,22 @@ class RenderTest < ActionController::TestCase
 
   def test_render_to_string_partial
     get :render_to_string_with_partial
-    assert_equal "only partial", assigns(:partial_only)
-    assert_equal "Hello: david", assigns(:partial_with_locals)
+    assert_equal "only partial", @controller.instance_variable_get(:@partial_only)
+    assert_equal "Hello: david", @controller.instance_variable_get(:@partial_with_locals)
     assert_equal "text/html", @response.content_type
   end
 
   def test_render_to_string_with_template_and_html_partial
     get :render_to_string_with_template_and_html_partial
-    assert_equal "**only partial**\n", assigns(:text)
-    assert_equal "<strong>only partial</strong>\n", assigns(:html)
+    assert_equal "**only partial**\n", @controller.instance_variable_get(:@text)
+    assert_equal "<strong>only partial</strong>\n", @controller.instance_variable_get(:@html)
     assert_equal "<strong>only html partial</strong>\n", @response.body
     assert_equal "text/html", @response.content_type
   end
 
   def test_render_to_string_and_render_with_different_formats
     get :render_to_string_and_render_with_different_formats
-    assert_equal "<strong>only partial</strong>\n", assigns(:html)
+    assert_equal "<strong>only partial</strong>\n", @controller.instance_variable_get(:@html)
     assert_equal "**only partial**\n", @response.body
     assert_equal "text/plain", @response.content_type
   end

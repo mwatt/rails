@@ -102,6 +102,10 @@ class AssertTemplateControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  def assigns(arg)
+    ActiveSupport::Deprecation.silence { super(arg) }
+  end
+
   def test_assigns_do_not_reset_template_assertion
     get '/assert_template/render_with_layout'
     assert_equal 'hello', assigns(:variable_for_layout)

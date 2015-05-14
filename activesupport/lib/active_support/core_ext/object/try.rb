@@ -1,3 +1,23 @@
+require 'delegate'
+
+class Tries #:nodoc:
+  def self.try(o, *a, &b)
+    try!(o, *a, &b) if a.empty? || o.respond_to?(a.first)
+  end
+
+  def self.try!(o, *a, &b)
+    if a.empty? && block_given?
+      if b.arity.zero?
+        o.instance_eval(&b)
+      else
+        yield o
+      end
+    else
+      o.public_send(*a, &b)
+    end
+  end
+end
+
 class Object
   # Invokes the public method whose name goes as first argument just like
   # +public_send+ does, except that if the receiver does not respond to it the
@@ -56,11 +76,9 @@ class Object
   #
   # Please also note that +try+ is defined on +Object+. Therefore, it won't work
   # with instances of classes that do not have +Object+ among their ancestors,
-  # like direct subclasses of +BasicObject+. For example, using +try+ with
-  # +SimpleDelegator+ will delegate +try+ to the target instead of calling it on
-  # the delegator itself.
+  # like direct subclasses of +BasicObject+.
   def try(*a, &b)
-    try!(*a, &b) if a.empty? || respond_to?(a.first)
+    Tries.try(self, *a, &b)
   end
 
   # Same as #try, but raises a NoMethodError exception if the receiver is
@@ -70,15 +88,7 @@ class Object
   #   nil.try!(:upcase) # => nil
   #   123.try!(:upcase) # => NoMethodError: undefined method `upcase' for 123:Fixnum
   def try!(*a, &b)
-    if a.empty? && block_given?
-      if b.arity.zero?
-        instance_eval(&b)
-      else
-        yield self
-      end
-    else
-      public_send(*a, &b)
-    end
+    Tries.try!(self, *a, &b)
   end
 end
 
@@ -102,5 +112,17 @@ class NilClass
   #   nil.try!(:name) # => nil
   def try!(*args)
     nil
+  end
+end
+
+class Delegator
+  # See Object#try
+  def try(*a, &b)
+    Tries.try(self, *a, &b)
+  end
+
+  # See Object#try!
+  def try!(*a, &b)
+    Tries.try!(self, *a, &b)
   end
 end

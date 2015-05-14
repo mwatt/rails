@@ -96,4 +96,14 @@ class ObjectTryTest < ActiveSupport::TestCase
 
     assert_nil klass.new.try(:private_method)
   end
+
+  def test_try_with_delegated_method
+    klass = Class.new(SimpleDelegator) do
+      def delegated_method
+        'delegated method'
+      end
+    end
+
+    assert_equal 'delegated method', klass.new(Object.new).try(:delegated_method)
+  end
 end

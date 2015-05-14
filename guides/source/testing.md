@@ -509,12 +509,11 @@ class ArticlesControllerTest < ActionController::TestCase
   test "should get index" do
     get :index
     assert_response :success
-    assert_not_nil assigns(:articles)
   end
 end
 ```
 
-In the `test_should_get_index` test, Rails simulates a request on the action called `index`, making sure the request was successful and also ensuring that it assigns a valid `articles` instance variable.
+In the `test_should_get_index` test, Rails simulates a request on the action called `index`, making sure the request was successful.
 
 The `get` method kicks off the web request and populates the results into the response. It accepts 4 arguments:
 
@@ -552,7 +551,7 @@ test "should create article" do
     post :create, params: { article: { title: 'Some title' } }
   end
 
-  assert_redirected_to article_path(assigns(:article))
+  assert_redirected_to article_path(Article.last)
 end
 ```
 
@@ -591,20 +590,16 @@ end
 
 After a request has been made and processed, you will have 4 Hash objects ready for use:
 
-* `assigns` - Any objects that are stored as instance variables in actions for use in views.
 * `cookies` - Any cookies that are set.
 * `flash` - Any objects living in the flash.
 * `session` - Any object living in session variables.
 
-As is the case with normal Hash objects, you can access the values by referencing the keys by string. You can also reference them by symbol name, except for `assigns`. For example:
+As is the case with normal Hash objects, you can access the values by referencing the keys by string. You can also reference them by symbol name. For example:
 
 ```ruby
 flash["gordon"]               flash[:gordon]
 session["shmession"]          session[:shmession]
 cookies["are_good_for_u"]     cookies[:are_good_for_u]
-
-# Because you can't use assigns[:something] for historical reasons:
-assigns["something"]          assigns(:something)
 ```
 
 ### Instance Variables Available
@@ -647,7 +642,7 @@ test "should create article" do
     post :create, params: { article: { title: 'Some title' } }
   end
 
-  assert_redirected_to article_path(assigns(:article))
+  assert_redirected_to article_path(Article.last)
   assert_equal 'Article was successfully created.', flash[:notice]
 end
 ```
@@ -740,7 +735,7 @@ We can also add a test for updating an existing Article.
 test "should update article" do
   article = articles(:one)
   patch :update, params: { id: article.id, article: { title: "updated" } }
-  assert_redirected_to article_path(assigns(:article))
+  assert_redirected_to article_path(article)
 end
 ```
 
@@ -779,7 +774,7 @@ class ArticlesControllerTest < ActionController::TestCase
 
   test "should update article" do
     patch :update, params: { id: @article.id, article: { title: "updated" } }
-    assert_redirected_to article_path(assigns(:article))
+    assert_redirected_to article_path(@article)
   end
 end
 ```
@@ -816,7 +811,6 @@ class ProfileControllerTest < ActionController::TestCase
 
     get :show
     assert_response :success
-    assert_equal users(:david), assigns(:user)
   end
 end
 ```

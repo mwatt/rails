@@ -97,13 +97,19 @@ class ObjectTryTest < ActiveSupport::TestCase
     assert_nil klass.new.try(:private_method)
   end
 
-  def test_try_with_delegated_method
+  def test_try_with_method_on_delegator
     klass = Class.new(SimpleDelegator) do
-      def delegated_method
-        'delegated method'
+      def delegator_method
+        'delegator method'
       end
     end
 
-    assert_equal 'delegated method', klass.new(Object.new).try(:delegated_method)
+    assert_equal 'delegator method', klass.new(Object.new).try(:delegator_method)
+  end
+
+  def test_try_with_method_on_delegator_target
+    klass = Class.new(SimpleDelegator)
+
+    assert_equal @string.reverse, klass.new(@string).try(:reverse)
   end
 end

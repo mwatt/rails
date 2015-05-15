@@ -1,8 +1,8 @@
 require 'delegate'
 
-class Tries
+class Tries #:nodoc:
   def self.try(o, *a, &b)
-    self.try!(o, *a, &b) if a.empty? || o.respond_to?(a.first)
+    try!(o, *a, &b) if a.empty? || o.respond_to?(a.first)
   end
 
   def self.try!(o, *a, &b)
@@ -116,10 +116,12 @@ class NilClass
 end
 
 class Delegator
+  # See Object#try
   def try(*a, &b)
     Tries.try(self, *a, &b)
   end
 
+  # See Object#try!
   def try!(*a, &b)
     Tries.try!(self, *a, &b)
   end

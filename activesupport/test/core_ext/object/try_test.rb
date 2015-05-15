@@ -97,20 +97,7 @@ class ObjectTryTest < ActiveSupport::TestCase
     assert_nil klass.new.try(:private_method)
   end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-  class MyDelegator < SimpleDelegator
+  class Decorator < SimpleDelegator
     def delegator_method
       'delegator method'
     end
@@ -127,24 +114,24 @@ class ObjectTryTest < ActiveSupport::TestCase
   end
 
   def test_try_with_method_on_delegator
-    assert_equal 'delegator method', MyDelegator.new(@string).try(:delegator_method)
+    assert_equal 'delegator method', Decorator.new(@string).try(:delegator_method)
   end
 
   def test_try_with_method_on_delegator_target
-    assert_equal 5, MyDelegator.new(@string).size
+    assert_equal 5, Decorator.new(@string).size
   end
 
   def test_try_with_overriden_method_on_delegator
-    assert_equal 'overridden reverse', MyDelegator.new(@string).reverse
+    assert_equal 'overridden reverse', Decorator.new(@string).reverse
   end
 
   def test_try_with_private_method_on_delegator
-    assert_nil MyDelegator.new(@string).try(:private_delegator_method)
+    assert_nil Decorator.new(@string).try(:private_delegator_method)
   end
 
   def test_try_with_private_method_on_delegator_bang
     assert_raise(NoMethodError) do
-      MyDelegator.new(@string).try!(:private_delegator_method)
+      Decorator.new(@string).try!(:private_delegator_method)
     end
   end
 
@@ -157,7 +144,7 @@ class ObjectTryTest < ActiveSupport::TestCase
       end
     end
 
-    assert_nil MyDelegator.new(klass.new).try(:private_method)
+    assert_nil Decorator.new(klass.new).try(:private_method)
   end
 
   def test_try_with_private_method_on_delegator_target_bang
@@ -170,7 +157,7 @@ class ObjectTryTest < ActiveSupport::TestCase
     end
 
     assert_raise(NoMethodError) do
-      MyDelegator.new(klass.new).try!(:private_method)
+      Decorator.new(klass.new).try!(:private_method)
     end
   end
 end

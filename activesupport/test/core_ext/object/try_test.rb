@@ -96,4 +96,81 @@ class ObjectTryTest < ActiveSupport::TestCase
 
     assert_nil klass.new.try(:private_method)
   end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  class MyDelegator < SimpleDelegator
+    def delegator_method
+      'delegator method'
+    end
+
+    def reverse
+      'overridden reverse'
+    end
+
+    private
+
+    def private_delegator_method
+      'private delegator method'
+    end
+  end
+
+  def test_try_with_method_on_delegator
+    assert_equal 'delegator method', MyDelegator.new(@string).try(:delegator_method)
+  end
+
+  def test_try_with_method_on_delegator_target
+    assert_equal 5, MyDelegator.new(@string).size
+  end
+
+  def test_try_with_overriden_method_on_delegator
+    assert_equal 'overridden reverse', MyDelegator.new(@string).reverse
+  end
+
+  def test_try_with_private_method_on_delegator
+    assert_nil MyDelegator.new(@string).try(:private_delegator_method)
+  end
+
+  def test_try_with_private_method_on_delegator_bang
+    assert_raise(NoMethodError) do
+      MyDelegator.new(@string).try!(:private_delegator_method)
+    end
+  end
+
+  def test_try_with_private_method_on_delegator_target
+    klass = Class.new do
+      private
+
+      def private_method
+        'private method'
+      end
+    end
+
+    assert_nil MyDelegator.new(klass.new).try(:private_method)
+  end
+
+  def test_try_with_private_method_on_delegator_target_bang
+    klass = Class.new do
+      private
+
+      def private_method
+        'private method'
+      end
+    end
+
+    assert_raise(NoMethodError) do
+      MyDelegator.new(klass.new).try!(:private_method)
+    end
+  end
 end

@@ -199,13 +199,13 @@ class PostgresqlUUIDGenerationTest < ActiveRecord::TestCase
     def test_schema_dumper_for_uuid_primary_key
       schema = dump_table_schema "pg_uuids"
       assert_match(/\bcreate_table "pg_uuids", id: :uuid, default: "uuid_generate_v1\(\)"/, schema)
-      assert_match(/t\.uuid   "other_uuid", default: "uuid_generate_v4\(\)"/, schema)
+      assert_match(/t\.uuid   "other_uuid", expression: "uuid_generate_v4\(\)"/, schema)
     end
 
     def test_schema_dumper_for_uuid_primary_key_with_custom_default
       schema = dump_table_schema "pg_uuids_2"
       assert_match(/\bcreate_table "pg_uuids_2", id: :uuid, default: "my_uuid_generator\(\)"/, schema)
-      assert_match(/t\.uuid   "other_uuid_2", default: "my_uuid_generator\(\)"/, schema)
+      assert_match(/t\.uuid   "other_uuid_2", expression: "my_uuid_generator\(\)"/, schema)
     end
   end
 end

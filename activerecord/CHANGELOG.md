@@ -1,3 +1,7 @@
+*   Add `:expression` option support on the schema default.
+
+    *Ryuta Kamizono*
+
 *   Allow single table inheritance instantiation to work when storing
     demodulized class names.
 

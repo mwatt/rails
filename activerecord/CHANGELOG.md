@@ -1,3 +1,12 @@
+*   Allow the use of symbols or strings to specify enum values in test
+    fixtures:
+
+        awdr:
+          title: "Agile Web Development with Rails"
+          status: :proposed
+
+    *George Claghorn*
+
 *   Allow single table inheritance instantiation to work when storing
     demodulized class names.
 

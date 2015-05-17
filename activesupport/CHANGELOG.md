@@ -1,3 +1,18 @@
+*  Add a bang version to `ActiveSupport::OrderedOptions` get methods which will raise an `ArgumentError` if the value is `.blank?`
+    Instead of doing this:
+
+       if (slack_url = Rails.application.secrets.slack_url).present?)
+         // Do something worthwhile
+       else
+         // Raise hell or handle error that important secret password is not specified
+       end
+
+    above then replaced to just
+
+        slack_url = Rails.application.secrets.slack_url!
+
+    *Aditya Sanghi*, *Gaurish Sharma*
+
 *   Patch `Delegator` to work with `#try`.
 
     Fixes #5790.

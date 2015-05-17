@@ -31,7 +31,13 @@ module ActiveSupport
       if name_string.chomp!('=')
         self[name_string] = args.first
       else
-        self[name]
+        bangs = name_string.chomp!('!')
+        return_value = self[name_string]
+        if bangs && return_value.blank?
+          raise(ArgumentError.new("Expected #{name_string} to be defined"))
+        else
+          return_value
+        end
       end
     end
 

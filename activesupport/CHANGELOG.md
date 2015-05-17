@@ -1,3 +1,11 @@
+*  Add bang version to OrderedOptions which will raise an `ArgumentError` if value is .blank?
+
+        Slack::Notifier.new(Rails.application.secrets.slack_url!)
+
+    Bang version of the method allows to crash in a more expected way.
+
+    *Aditya Sanghi*, *Gaurish Sharma*
+
 *   Patch `Delegator` to work with `#try`.
 
     Fixes #5790.

@@ -85,4 +85,18 @@ class OrderedOptionsTest < ActiveSupport::TestCase
     assert_equal 42, a.method(:blah=).call(42)
     assert_equal 42, a.method(:blah).call
   end
+
+  def test_raises_with_bang
+    a = ActiveSupport::OrderedOptions.new
+    a[:foo] = :bar
+    assert a.respond_to?(:foo!)
+
+    assert_nothing_raised { a.foo! }
+    assert_equal a.foo, a.foo!
+
+    assert_raises(ArgumentError) do
+      a.foo = nil
+      a.foo!
+    end
+  end
 end

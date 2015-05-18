@@ -15,7 +15,7 @@ module Rails
       filtered_results.reject!(&:skipped?) unless options[:verbose]
       filtered_results.map do |result|
         location, line = result.method(result.name).source_location
-        "bin/rails test #{location}:#{line}"
+        "bin/rails test #{Pathname(location).relative_path_from(Rails.root)}:#{line}"
       end.join "\n"
     end
   end

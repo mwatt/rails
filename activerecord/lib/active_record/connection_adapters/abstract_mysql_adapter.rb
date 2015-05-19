@@ -80,9 +80,6 @@ module ActiveRecord
           if options[:charset]
             sql << " CHARACTER SET #{options[:charset]}"
           end
-          if options[:collation]
-            sql << " COLLATE #{options[:collation]}"
-          end
           super
         end
 

@@ -1,3 +1,8 @@
+*   Make remove_foreign_key invertible. Any foreign key options must be
+    specified, similar to remove_column.
+
+    *Aster Ryan*
+
 *   Deprecate the PG `:point` type in favor of a new one which will return
     `Point` objects instead of an `Array`
 

@@ -777,7 +777,9 @@ module ActiveRecord
         execute schema_creation.accept(at)
       end
 
-      # Removes the given foreign key from the table.
+      # Removes the given foreign key from the table. The options parameters will be
+      # ignored if present. However, it is useful to provide any options used when
+      # creating the foreign key so that the migration can be reverted properly.
       #
       # Removes the foreign key on +accounts.branch_id+.
       #
@@ -791,6 +793,17 @@ module ActiveRecord
       #
       #   remove_foreign_key :accounts, name: :special_fk_name
       #
+      # The +options+ hash can include the following keys:
+      # [<tt>:column</tt>]
+      #   The foreign key column name on +from_table+. Defaults to <tt>to_table.singularize + "_id"</tt>
+      # [<tt>:primary_key</tt>]
+      #   The primary key column name on +to_table+. Defaults to +id+.
+      # [<tt>:name</tt>]
+      #   The constraint name. Defaults to <tt>fk_rails_<identifier></tt>.
+      # [<tt>:on_delete</tt>]
+      #   Action that happens <tt>ON DELETE</tt>. Valid values are +:nullify+, +:cascade:+ and +:restrict+
+      # [<tt>:on_update</tt>]
+      #   Action that happens <tt>ON UPDATE</tt>. Valid values are +:nullify+, +:cascade:+ and +:restrict+
       def remove_foreign_key(from_table, options_or_to_table = {})
         return unless supports_foreign_keys?
 

@@ -184,6 +184,21 @@ module ActiveRecord
         [:remove_foreign_key, [from_table, options]]
       end
 
+      def invert_remove_foreign_key(args)
+        from_table, to_table, remove_options = args
+        remove_options ||= {}
+
+        if remove_options[:name]
+          options = { name: remove_options[:name] }
+        elsif remove_options[:column]
+          options = { column: remove_options[:column] }
+        else
+          options = to_table
+        end
+
+        [:add_foreign_key, [from_table, options]]
+      end
+
       # Forwards any missing method call to the \target.
       def method_missing(method, *args, &block)
         if @delegate.respond_to?(method)

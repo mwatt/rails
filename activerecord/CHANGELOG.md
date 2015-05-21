@@ -1,3 +1,7 @@
+*   Add `extend` option on `has_and_belongs_to_many`.
+
+    *Jaehyun Shin*
+
 *   Allow single table inheritance instantiation to work when storing
     demodulized class names.
 

@@ -187,13 +187,14 @@ The full set of methods that can be used in this block are as follows:
 * `helper` defines whether or not to generate helpers. Defaults to `true`.
 * `integration_tool` defines which integration tool to use. Defaults to `nil`.
 * `javascripts` turns on the hook for JavaScript files in generators. Used in Rails for when the `scaffold` generator is run. Defaults to `true`.
-* `javascript_engine` configures the engine to be used (for eg. coffee) when generating assets. Defaults to `nil`.
+* `javascript_engine` configures the engine to be used (for eg. coffee) when generating assets. Defaults to `:js`.
 * `orm` defines which orm to use. Defaults to `false` and will use Active Record by default.
 * `resource_controller` defines which generator to use for generating a controller when using `rails generate resource`. Defaults to `:controller`.
+* `resource_route` defines whether inject resource route definition in routes or not. Defaults to `true`.
 * `scaffold_controller` different from `resource_controller`, defines which generator to use for generating a _scaffolded_ controller when using `rails generate scaffold`. Defaults to `:scaffold_controller`.
 * `stylesheets` turns on the hook for stylesheets in generators. Used in Rails for when the `scaffold` generator is run, but this hook can be used in other generates as well. Defaults to `true`.
 * `stylesheet_engine` configures the stylesheet engine (for eg. sass) to be used when generating assets. Defaults to `:css`.
-* `test_framework` defines which test framework to use. Defaults to `false` and will use Test::Unit by default.
+* `test_framework` defines which test framework to use. Defaults to `false` and will use Minitest by default.
 * `template_engine` defines which template engine to use, such as ERB or Haml. Defaults to `:erb`.
 
 ### Configuring Middleware
@@ -526,7 +527,7 @@ There are a few configuration options available in Active Support:
 
 * `config.active_support.test_order` sets the order that test cases are executed. Possible values are `:random` and `:sorted`. This option is set to `:random` in `config/environments/test.rb` in newly-generated applications. If you have an application that does not specify a `test_order`, it will default to `:sorted`, *until* Rails 5.0, when the default will become `:random`.
 
-* `config.active_support.escape_html_entities_in_json` enables or disables the escaping of HTML entities in JSON serialization. Defaults to `false`.
+* `config.active_support.escape_html_entities_in_json` enables or disables the escaping of HTML entities in JSON serialization. Defaults to `true`.
 
 * `config.active_support.use_standard_json_time_format` enables or disables serializing dates to ISO 8601 format. Defaults to `true`.
 
@@ -1126,7 +1127,7 @@ Search Engines Indexing
 
 Sometimes, you may want to prevent some pages of your application to be visible
 on search sites like Google, Bing, Yahoo or Duck Duck Go. The robots that index
-these sites will first analyse the `http://your-site.com/robots.txt` file to
+these sites will first analyze the `http://your-site.com/robots.txt` file to
 know which pages it is allowed to index.
 
 Rails creates this file for you inside the `/public` folder. By default, it allows

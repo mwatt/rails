@@ -532,7 +532,7 @@ pull request". The Rails core team will be notified about your submission.
 
 Most pull requests will go through a few iterations before they get merged.
 Different contributors will sometimes have different opinions, and often
-patches will need revised before they can get merged.
+patches will need to be revised before they can get merged.
 
 Some contributors to Rails have email notifications from GitHub turned on, but
 others do not. Furthermore, (almost) everyone who works on Rails is a
@@ -579,8 +579,7 @@ following:
 ```bash
 $ git fetch upstream
 $ git checkout my_pull_request
-$ git rebase upstream/master
-$ git rebase -i
+$ git rebase -i upstream/master
 
 < Choose 'squash' for all of your commits except the first one. >
 < Edit the commit message to make sense, and describe all your changes. >

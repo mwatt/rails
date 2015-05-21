@@ -1,4 +1,17 @@
-*   Encoding ActiveSupport::TimeWithZone to YAML now preserves the timezone information.
+*   Patch `Delegator` to work with `#try`.
+
+    Fixes #5790.
+
+    *Nate Smith*
+
+*   Add `Integer#positive?` and `Integer#negative?` query methods
+    in the vein of `Fixnum#zero?`.
+
+    This makes it nicer to do things like `bunch_of_numbers.select(&:positive?)`.
+
+    *DHH*
+
+*   Encoding `ActiveSupport::TimeWithZone` to YAML now preserves the timezone information.
 
     Fixes #9183.
 
@@ -44,12 +57,12 @@
 
     *Todd Bealmear*
 
-*   Fixed a problem where String#truncate_words would get stuck with a complex
+*   Fixed a problem where `String#truncate_words` would get stuck with a complex
     string.
 
     *Henrik Nygren*
 
-*   Fixed a roundtrip problem with AS::SafeBuffer where primitive-like strings
+*   Fixed a roundtrip problem with `AS::SafeBuffer` where primitive-like strings
     will be dumped as primitives:
 
     Before:
@@ -96,7 +109,7 @@
 
     *Ian Ker-Seymer*
 
-*   Duplicate frozen array when assigning it to a HashWithIndifferentAccess so
+*   Duplicate frozen array when assigning it to a `HashWithIndifferentAccess` so
     that it doesn't raise a `RuntimeError` when calling `map!` on it in `convert_value`.
 
     Fixes #18550.
@@ -125,7 +138,7 @@
 *   Add `#on_weekend?`, `#next_weekday`, `#prev_weekday` methods to `Date`,
     `Time`, and `DateTime`.
 
-    `#on_weekend?` returns true if the receiving date/time falls on a Saturday
+    `#on_weekend?` returns `true` if the receiving date/time falls on a Saturday
     or Sunday.
 
     `#next_weekday` returns a new date/time representing the next day that does
@@ -179,13 +192,13 @@
     `Callbacks::CallbackChain.halt_and_display_warning_on_return_false`, will
     either not work at all or display a deprecation warning.
 
-*   Add Callbacks::CallbackChain.halt_and_display_warning_on_return_false
+*   Add `Callbacks::CallbackChain.halt_and_display_warning_on_return_false`
 
     Setting `Callbacks::CallbackChain.halt_and_display_warning_on_return_false`
-    to true will let an app support the deprecated way of halting callback
+    to `true` will let an app support the deprecated way of halting callback
     chains by returning `false`.
 
-    Setting the value to false will tell the app to ignore any `false` value
+    Setting the value to `false` will tell the app to ignore any `false` value
     returned by callbacks, and only halt the chain upon `throw(:abort)`.
 
     The value can also be set with the Rails configuration option
@@ -198,7 +211,7 @@
 
     *claudiob*
 
-*   Changes arguments and default value of CallbackChain's :terminator option
+*   Changes arguments and default value of CallbackChain's `:terminator` option
 
     Chains of callbacks defined without an explicit `:terminator` option will
     now be halted as soon as a `before_` callback throws `:abort`.

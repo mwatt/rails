@@ -435,7 +435,7 @@ specify to make your test failure messages clearer. It's not required.
 | `assert_nothing_raised( exception1, exception2, ... ) { block }` | Ensures that the given block doesn't raise one of the given exceptions.|
 | `assert_instance_of( class, obj, [msg] )`                        | Ensures that `obj` is an instance of `class`.|
 | `assert_not_instance_of( class, obj, [msg] )`                    | Ensures that `obj` is not an instance of `class`.|
-| `assert_kind_of( class, obj, [msg] )`                            | Ensures that `obj` is or descends from `class`.|
+| `assert_kind_of( class, obj, [msg] )`                            | Ensures that `obj` is an instance of `class` or is descending from it.|
 | `assert_not_kind_of( class, obj, [msg] )`                        | Ensures that `obj` is not an instance of `class` and is not descending from it.|
 | `assert_respond_to( obj, symbol, [msg] )`                        | Ensures that `obj` responds to `symbol`.|
 | `assert_not_respond_to( obj, symbol, [msg] )`                    | Ensures that `obj` does not respond to `symbol`.|
@@ -484,7 +484,7 @@ All the basic assertions such as `assert_equal` defined in `Minitest::Assertions
 
 Each of these classes include `Minitest::Assertions`, allowing us to use all of the basic assertions in our tests.
 
-NOTE: For more information on `Minitest`, refer to [Minitest](http://ruby-doc.org/stdlib-2.1.0/libdoc/minitest/rdoc/MiniTest.html)
+NOTE: For more information on `Minitest`, refer to [Minitest](http://docs.seattlerb.org/minitest)
 
 Functional Tests for Your Controllers
 -------------------------------------
@@ -898,7 +898,7 @@ For more information on routing assertions available in Rails, see the API docum
 Testing Views
 -------------
 
-Testing the response to your request by asserting the presence of key HTML elements and their content is a common way to test the views of your application. The `assert_select` method allows you to query HTML elements of the response by using a simple yet powerful syntax.
+Testing the response to your request by asserting the presence of key HTML elements and their content is a common way to test the views of your application. Like route tests, view tests reside in `test/controllers/` or are part of controller tests. The `assert_select` method allows you to query HTML elements of the response by using a simple yet powerful syntax.
 
 There are two forms of `assert_select`:
 

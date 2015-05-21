@@ -185,7 +185,7 @@ module ActiveRecord
         super
       end
 
-      # Returns the specified association instance if it responds to :loaded?, nil otherwise.
+      # Returns the specified association instance if it exists, nil otherwise.
       def association_instance_get(name)
         @association_cache[name]
       end
@@ -285,7 +285,7 @@ module ActiveRecord
     #   end
     #
     # If your model class is <tt>Project</tt>, the module is
-    # named <tt>Project::GeneratedFeatureMethods</tt>. The GeneratedFeatureMethods module is
+    # named <tt>Project::GeneratedAssociationMethods</tt>. The GeneratedAssociationMethods module is
     # included in the model class immediately after the (anonymous) generated attributes methods
     # module, meaning an association will override the methods for an attribute with the same name.
     #
@@ -1722,7 +1722,7 @@ module ActiveRecord
 
         Builder::HasMany.define_callbacks self, middle_reflection
         Reflection.add_reflection self, middle_reflection.name, middle_reflection
-        middle_reflection.parent_reflection = [name.to_s, habtm_reflection]
+        middle_reflection.parent_reflection = habtm_reflection
 
         include Module.new {
           class_eval <<-RUBY, __FILE__, __LINE__ + 1
@@ -1743,7 +1743,7 @@ module ActiveRecord
         end
 
         has_many name, scope, hm_options, &extension
-        self._reflections[name.to_s].parent_reflection = [name.to_s, habtm_reflection]
+        self._reflections[name.to_s].parent_reflection = habtm_reflection
       end
     end
   end

@@ -1,4 +1,4 @@
-*   Fix rake routes not showing the right format when
+*   Fix `rake routes` not showing the right format when
     nesting multiple routes.
 
     See #18373.
@@ -281,7 +281,7 @@
 
 *   Ensure `append_info_to_payload` is called even if an exception is raised.
 
-    Fixes an issue where when an exception is raised in the request the additonal
+    Fixes an issue where when an exception is raised in the request the additional
     payload data is not available.
 
     See:

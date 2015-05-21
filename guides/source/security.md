@@ -572,7 +572,7 @@ NOTE: _When sanitizing, protecting or verifying something, prefer whitelists ove
 
 A blacklist can be a list of bad e-mail addresses, non-public actions or bad HTML tags. This is opposed to a whitelist which lists the good e-mail addresses, public actions, good HTML tags and so on. Although sometimes it is not possible to create a whitelist (in a SPAM filter, for example), _prefer to use whitelist approaches_:
 
-* Use before_action only: [...] instead of except: [...]. This way you don't forget to turn it off for newly added actions.
+* Use before_action except: [...] instead of only: [...] for security-related actions. This way you don't forget to enable security checks for newly added actions.
 * Allow &lt;strong&gt; instead of removing &lt;script&gt; against Cross-Site Scripting (XSS). See below for details.
 * Don't try to correct user input by blacklists:
     * This will make the attack work: "&lt;sc&lt;script&gt;ript&gt;".gsub("&lt;script&gt;", "")
@@ -925,7 +925,7 @@ HTTP/1.1 200 OK [Second New response created by attacker begins]
 Content-Type: text/html
 
 
-&lt;html&gt;&lt;font color=red&gt;hey&lt;/font&gt;&lt;/html&gt; [Arbitary malicious input is
+&lt;html&gt;&lt;font color=red&gt;hey&lt;/font&gt;&lt;/html&gt; [Arbitrary malicious input is
 Keep-Alive: timeout=15, max=100         shown as the redirected page]
 Connection: Keep-Alive
 Transfer-Encoding: chunked
@@ -971,7 +971,7 @@ request:
 | `{ "person": [null, null, ...] }` | `{ :person => [] }`     |
 | `{ "person": ["foo", null] }`     | `{ :person => ["foo"] }` |
 
-It is possible to return to old behaviour and disable `deep_munge` configuring
+It is possible to return to old behavior and disable `deep_munge` configuring
 your application if you are aware of the risk and know how to handle it:
 
 ```ruby
@@ -1033,4 +1033,5 @@ The security landscape shifts and it is important to keep up to date, because mi
 
 * Subscribe to the Rails security [mailing list](http://groups.google.com/group/rubyonrails-security)
 * [Keep up to date on the other application layers](http://secunia.com/) (they have a weekly newsletter, too)
-* A [good security blog](http://ha.ckers.org/blog/) including the [Cross-Site scripting Cheat Sheet](http://ha.ckers.org/xss.html)
+* A [good security blog](https://www.owasp.org) including the [Cross-Site scripting Cheat Sheet](https://www.owasp.org/index.php/DOM_based_XSS_Prevention_Cheat_Sheet)
+

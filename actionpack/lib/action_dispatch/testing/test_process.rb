@@ -6,7 +6,9 @@ module ActionDispatch
   module TestProcess
     def assigns(key = nil)
       ActiveSupport::Deprecation.warn(
-        "`assigns()` is deprecated and will be removed."
+        "`assigns()` is deprecated and will be removed. To continue using
+        `assigns()`, you may include Rails::Controller::Testing at
+        https://github.com/tgxworld/rails-controller-testing."
       )
 
       assigns = {}.with_indifferent_access

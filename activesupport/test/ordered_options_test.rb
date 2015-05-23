@@ -94,9 +94,10 @@ class OrderedOptionsTest < ActiveSupport::TestCase
     assert_nothing_raised { a.foo! }
     assert_equal a.foo, a.foo!
 
-    assert_raises(ArgumentError) do
+    assert_raises(KeyError) do
       a.foo = nil
       a.foo!
     end
+    assert_raises(KeyError){ a.non_existing_key! }
   end
 end

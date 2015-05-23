@@ -32,12 +32,11 @@ module ActiveSupport
         self[name_string] = args.first
       else
         bangs = name_string.chomp!('!')
-        return_value = self[name_string]
-        if bangs && return_value.blank?
-          raise(ArgumentError.new("Expected #{name_string} to be defined"))
+        if bangs
+          fetch(name_string.to_sym).presence || raise(KeyError.new("#{name_string} is nil or undefined"))
         else
-          return_value
-        end
+         self[name_string]
+       end
       end
     end
 

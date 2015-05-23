@@ -1,4 +1,4 @@
-*  Add bang version to OrderedOptions which will raise an `ArgumentError` if value is .blank?
+*  Add a bang version to `ActiveSupport::OrderedOptions` get methods which will raise an `ArgumentError` if the value is .blank
 
         Slack::Notifier.new(Rails.application.secrets.slack_url!)
 

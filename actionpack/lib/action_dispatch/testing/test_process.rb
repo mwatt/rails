@@ -5,6 +5,12 @@ require 'active_support/core_ext/hash/indifferent_access'
 module ActionDispatch
   module TestProcess
     def assigns(key = nil)
+      ActiveSupport::Deprecation.warn(
+        "`assigns()` is deprecated and will be removed. To continue using
+        `assigns()`, you may include Rails::Controller::Testing at
+        https://github.com/tgxworld/rails-controller-testing."
+      )
+
       assigns = {}.with_indifferent_access
       @controller.view_assigns.each { |k, v| assigns.regular_writer(k, v) }
       key.nil? ? assigns : assigns[key]

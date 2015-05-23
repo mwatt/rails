@@ -1,5 +1,5 @@
 *  Add a bang version to `ActiveSupport::OrderedOptions` get methods which will raise an `ArgumentError` if the value is `.blank?`
-    Instead of doing this:
+    Before:
 
        if (slack_url = Rails.application.secrets.slack_url).present?)
          // Do something worthwhile
@@ -7,7 +7,7 @@
          // Raise hell or handle error that important secret password is not specified
        end
 
-    above then replaced to just
+    After:
 
         slack_url = Rails.application.secrets.slack_url!
 

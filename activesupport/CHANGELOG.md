@@ -2,9 +2,9 @@
     Before:
 
        if (slack_url = Rails.application.secrets.slack_url).present?)
-         // Do something worthwhile
+            // Do something worthwhile
        else
-         // Raise hell or handle error that important secret password is not specified
+            // Raise hell or handle error that important secret password is not specified
        end
 
     After:

@@ -1,8 +1,5 @@
-*  Add a bang version to `ActiveSupport::OrderedOptions` get methods which will raise an `ArgumentError` if the value is .blank
-
-        Slack::Notifier.new(Rails.application.secrets.slack_url!)
-
-    Bang version of the method allows to crash in a more expected way.
+*  Add a bang version to `ActiveSupport::OrderedOptions` get methods which will raise an `ArgumentError` if the value is `.blank?`
+   for e.g. `Rails.application.secrets.slack_url!` will raise `ArgumentError` at runtime if the value of `slack_url` is not defined.
 
     *Aditya Sanghi*, *Gaurish Sharma*
 

@@ -53,6 +53,7 @@ module ActionDispatch
       @fullpath          = nil
       @ip                = nil
       @request_id        = nil
+      @body              = nil
     end
 
     def check_path_parameters!
@@ -287,8 +288,13 @@ module ActionDispatch
     # variable is already set, wrap it in a StringIO.
     def body
       if raw_post = @env['RAW_POST_DATA']
-        raw_post.force_encoding(Encoding::BINARY)
-        StringIO.new(raw_post)
+        raw_post_binary = raw_post.dup
+        raw_post_binary.force_encoding(Encoding::BINARY)
+        if @body.nil?
+          @body = StringIO.new(raw_post_binary)
+        else
+          @body
+        end
       else
         @env['rack.input']
       end

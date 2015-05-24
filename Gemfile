@@ -121,3 +121,5 @@ end
 
 # A gem necessary for ActiveRecord tests with IBM DB
 gem 'ibm_db' if ENV['IBM_DB']
+
+gem 'globalid', github: 'rails/globalid'

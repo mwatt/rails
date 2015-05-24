@@ -383,7 +383,8 @@ class AutomaticCollectionCacheTest < ActionController::TestCase
   def test_collection_fetches_cached_views
     get :index
 
-    ActionView::PartialRenderer.expects(:collection_with_template).never
+    # If `read_multi` doesn't return a cache; expect collection to be rendered
+    ActionView::PartialRenderer.any_instance.expects(:collection_with_template).never
     get :index
   end
 
@@ -403,7 +404,8 @@ class AutomaticCollectionCacheTest < ActionController::TestCase
   def test_caching_works_with_beginning_comment
     get :index_with_comment
 
-    ActionView::PartialRenderer.expects(:collection_with_template).never
+    # If `read_multi` doesn't return a cache; expect collection to be rendered
+    ActionView::PartialRenderer.any_instance.expects(:collection_with_template).never
     get :index_with_comment
   end
 end

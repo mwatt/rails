@@ -1,3 +1,7 @@
+*   Create a `tmp` directory before touching if it does not exist.
+    
+    *Yoong Kang Lim*
+
 *   `bin/setup` uses built-in rake tasks (`log:clear`, `tmp:clear`).
 
     *Mohnish Thallavajhula*

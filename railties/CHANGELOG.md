@@ -1,3 +1,8 @@
+*   Create a `tmp` directory before touching if it does not exist, and keep the tmp directory
+    after cloning.
+    
+    *Yoong Kang Lim*, *Sunny Juneja*
+
 *   `bin/setup` uses built-in rake tasks (`log:clear`, `tmp:clear`).
 
     *Mohnish Thallavajhula*

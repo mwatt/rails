@@ -17,5 +17,6 @@
 /log/*
 <% if keeps? -%>
 !/log/.keep
+!/tmp/.keep
 <% end -%>
 /tmp

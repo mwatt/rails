@@ -50,5 +50,14 @@ The Gemfile's dependencies are satisfied
         OUTPUT
       end
     end
+
+    def test_bin_without_tmp_folder
+      Dir.chdir(app_path) do
+        app_file 'db/schema.rb', ""
+        FileUtils.remove_dir('tmp')
+        `bin/setup 2>&1`
+        assert File.exist?('tmp/restart.txt')
+      end
+    end
   end
 end

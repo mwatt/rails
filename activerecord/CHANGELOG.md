@@ -1,3 +1,18 @@
+*   SQLite: `:collation` support for string and text columns.
+
+    Example:
+
+        create_table :foo do |t|
+          t.string :string_nocase, collation: 'NOCASE'
+          t.text :text_rtrim, collation: 'RTRIM'
+        end
+
+        add_column :foo, :title, :string, collation: 'RTRIM'
+
+        change_column :foo, :title, :string, collation: 'NOCASE'
+
+    *Akshay Vishnoi*
+
 *   Deprecate `Relation#uniq` use `Relation#distinct` instead.
 
     See #9683.

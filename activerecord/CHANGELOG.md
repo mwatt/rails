@@ -1,3 +1,7 @@
+*   Add `extend` option on `has_and_belongs_to_many`.
+
+    *Jaehyun Shin*
+
 *   Deprecate `Relation#uniq` use `Relation#distinct` instead.
 
     See #9683.

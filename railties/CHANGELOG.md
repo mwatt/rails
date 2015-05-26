@@ -1,3 +1,10 @@
+*   Generator a `.keep` file in the `tmp` folder by default as many scripts
+    assume the existence of this folder and most would fail if it is absent.
+
+    See #20299.
+
+    *Yoong Kang Lim*, *Sunny Juneja*
+
 *   `bin/setup` uses built-in rake tasks (`log:clear`, `tmp:clear`).
 
     *Mohnish Thallavajhula*

@@ -240,10 +240,10 @@ ActiveRecord::Schema.define do
   create_table :developers, force: true do |t|
     t.string   :name
     t.integer  :salary, default: 70000
-    t.datetime :created_at
-    t.datetime :updated_at
-    t.datetime :created_on
-    t.datetime :updated_on
+    t.datetime :created_at, precision: 6
+    t.datetime :updated_at, precision: 6
+    t.datetime :created_on, precision: 6
+    t.datetime :updated_on, precision: 6
   end
 
   create_table :developers_projects, force: true, id: false do |t|
@@ -337,7 +337,7 @@ ActiveRecord::Schema.define do
 
   create_table :invoices, force: true do |t|
     t.integer :balance
-    t.datetime :updated_at
+    t.datetime :updated_at, precision: 6
   end
 
   create_table :iris, force: true do |t|
@@ -487,7 +487,7 @@ ActiveRecord::Schema.define do
 
   create_table :owners, primary_key: :owner_id, force: true do |t|
     t.string :name
-    t.column :updated_at, :datetime
+    t.column :updated_at, :datetime, precision: 6
     t.column :happy_at,   :datetime
     t.string :essay_id
   end
@@ -505,10 +505,10 @@ ActiveRecord::Schema.define do
     t.column :color, :string
     t.column :parrot_sti_class, :string
     t.column :killer_id, :integer
-    t.column :created_at, :datetime
-    t.column :created_on, :datetime
-    t.column :updated_at, :datetime
-    t.column :updated_on, :datetime
+    t.column :created_at, :datetime, precision: 0
+    t.column :created_on, :datetime, precision: 0
+    t.column :updated_at, :datetime, precision: 0
+    t.column :updated_on, :datetime, precision: 0
   end
 
   create_table :parrots_pirates, id: false, force: true do |t|
@@ -551,15 +551,15 @@ ActiveRecord::Schema.define do
   create_table :pets, primary_key: :pet_id, force: true do |t|
     t.string :name
     t.integer :owner_id, :integer
-    t.timestamps null: false
+    t.timestamps null: false, precision: 6
   end
 
   create_table :pirates, force: true do |t|
     t.column :catchphrase, :string
     t.column :parrot_id, :integer
     t.integer :non_validated_parrot_id
-    t.column :created_on, :datetime
-    t.column :updated_on, :datetime
+    t.column :created_on, :datetime, precision: 6
+    t.column :updated_on, :datetime, precision: 6
   end
 
   create_table :posts, force: true do |t|
@@ -666,7 +666,7 @@ ActiveRecord::Schema.define do
   create_table :ship_parts, force: true do |t|
     t.string :name
     t.integer :ship_id
-    t.datetime :updated_at
+    t.datetime :updated_at, precision: 6
   end
 
   create_table :speedometers, force: true, id: false do |t|
@@ -750,7 +750,7 @@ ActiveRecord::Schema.define do
     t.string   :parent_title
     t.string   :type
     t.string   :group
-    t.timestamps null: true
+    t.timestamps null: true, precision: 6
   end
 
   create_table :toys, primary_key: :toy_id, force: true do |t|

@@ -7,6 +7,7 @@ require 'models/pet'
 require 'models/toy'
 require 'models/car'
 require 'models/task'
+require 'models/parrot'
 
 class TimestampTest < ActiveRecord::TestCase
   fixtures :developers, :owners, :pets, :toys, :cars, :tasks
@@ -456,6 +457,14 @@ class TimestampTest < ActiveRecord::TestCase
     assert_equal ['created_at', 'updated_at'], indexes.flat_map(&:columns).sort
   ensure
     ActiveRecord::Base.connection.drop_table(:foos)
+  end
+
+  def test_datetime_precision_applied_to_timestamp
+    d = Parrot.create!(name: 'Bogdan')
+    in_instance = d.created_at
+    from_db = Parrot.find(d.id).created_at
+    assert_equal from_db.usec, in_instance.usec
+    assert_equal from_db, in_instance
   end
 end
 

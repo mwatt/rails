@@ -307,6 +307,12 @@ module ActionView
   end
 
   class RenderTemplateTest < ActionView::TestCase
+    def assert_template(args)
+      ActiveSupport::Deprecation.silence do
+        super(args)
+      end
+    end
+
     test "supports specifying templates with a Regexp" do
       controller.controller_path = "fun"
       render(:template => "fun/games/hello_world")

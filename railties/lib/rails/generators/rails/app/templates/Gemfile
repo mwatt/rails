@@ -25,7 +25,11 @@ group :development, :test do
 <% if RUBY_ENGINE == 'ruby' -%>
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
+<% end -%>
+end
 
+group :development do
+<% if RUBY_ENGINE == 'ruby' -%>
   # Access an IRB console on exception pages or by using <%%= console %> in views
   <%- if options.dev? || options.edge? -%>
   gem 'web-console', github: "rails/web-console"

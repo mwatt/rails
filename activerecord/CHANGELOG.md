@@ -1,3 +1,12 @@
+*   Allow the use of symbols or strings to specify enum values in test
+    fixtures:
+
+        awdr:
+          title: "Agile Web Development with Rails"
+          status: :proposed
+
+    *George Claghorn*
+
 *   Pass `:extend` option for `has_and_belongs_to_many` associations to the underlying `has_many :through`.
 
     *Jaehyun Shin*

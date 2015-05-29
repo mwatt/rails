@@ -620,6 +620,17 @@ class RespondToControllerTest < ActionController::TestCase
     ActionController::Base.logger = old_logger
   end
 
+  def test_invalid_variant_configured_to_raise_on_missing_template
+    @controller.raise_on_missing_template=true
+    @request.variant = :invalid
+
+    assert_raises(ActionView::MissingTemplate) do
+      get :variant_with_implicit_rendering
+    end
+  ensure
+    @controller.raise_on_missing_template=false
+  end
+
   def test_variant_not_set_regular_template_missing
     get :variant_with_implicit_rendering
     assert_response :no_content

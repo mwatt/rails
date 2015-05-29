@@ -446,6 +446,16 @@ XML
     assert_equal "OK", @response.body
   end
 
+  def assigns(args = nil)
+    ActiveSupport::Deprecation.silence do
+      if args
+        super(args)
+      else
+        super
+      end
+    end
+  end
+
   def test_assigns
     process :test_assigns
     # assigns can be accessed using assigns(key)

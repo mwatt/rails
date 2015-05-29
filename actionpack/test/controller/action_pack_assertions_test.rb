@@ -304,14 +304,6 @@ class ActionPackAssertionsControllerTest < ActionController::TestCase
     assert session.empty?
   end
 
-  def test_render_template_action
-    process :nothing
-    assert_template nil
-
-    process :hello_world
-    assert_template 'hello_world'
-  end
-
   def test_redirection_location
     process :redirect_internal
     assert_equal 'http://test.host/nothing', @response.redirect_url
@@ -457,6 +449,12 @@ end
 
 class AssertTemplateTest < ActionController::TestCase
   tests ActionPackAssertionsController
+
+  def assert_template(args)
+    ActiveSupport::Deprecation.silence do
+      super(args)
+    end
+  end
 
   def test_with_invalid_hash_keys_raises_argument_error
     assert_raise(ArgumentError) do

@@ -36,7 +36,7 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
     delete '/logout'
     assert_equal 'sessions#destroy', @response.body
 
-    assert_equal '/logout', logout_path
+    assert_equal '/logout', sessions_destroy_path
     assert_equal '/logout', url_for(:controller => 'sessions', :action => 'destroy', :only_path => true)
   end
 
@@ -52,7 +52,7 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
 
     get '/login'
     assert_equal 'sessions#new', @response.body
-    assert_equal '/login', login_path
+    assert_equal '/login', sessions_new_path
 
     post '/login'
     assert_equal 'sessions#create', @response.body
@@ -61,7 +61,7 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
     assert_equal '/login', url_for(:controller => 'sessions', :action => 'new', :only_path => true)
 
     assert_equal 'http://rubyonrails.org/login', url_for(:controller => 'sessions', :action => 'create')
-    assert_equal 'http://rubyonrails.org/login', login_url
+    assert_equal 'http://rubyonrails.org/login', sessions_new_url
   end
 
   def test_login_redirect

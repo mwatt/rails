@@ -98,7 +98,7 @@ module ActionView
       #   <%# Template Dependency: todolists/todolist %>
       #   <%= render_sortable_todolists @project.todolists %>
       #
-      # The pattern used to match these is <tt>/# Template Dependency: (\S+)/</tt>,
+      # The pattern used to match these is /# Template Dependency: ([^ ]+)/,
       # so it's important that you type it out just so.
       # You can only declare one template dependency per line.
       #
@@ -229,6 +229,34 @@ module ActionView
           self.output_buffer = output_buffer.class.new(output_buffer)
         end
         controller.write_fragment(name, fragment, options)
+      end
+
+      class PerRequestFragmentCacheExpiry # :nodoc:
+        def initialize(app)
+          @app = app
+        end
+
+        def call(env)
+          ActionView::Base.per_request_fragment_cache.clear
+
+          @app.call(env)
+        end
+      end
+
+      module PerRequestFragmentCache # :nodoc:
+        extend ActiveSupport::Concern
+
+        included do
+          mattr_accessor(:per_request_fragment_cache) { ActiveSupport::Cache::MemoryStore.new }
+        end
+
+        def fragment_for(*args)
+          require 'byebug'; byebug
+
+          per_request_fragment_cache.fetch(args) do
+            super(*args)
+          end
+        end
       end
     end
   end

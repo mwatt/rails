@@ -42,6 +42,16 @@ module ActionView
       end
     end
 
+    initializer "action_view.fragment_name_cache" do |app|
+      ActiveSupport.on_load(:action_view) do
+        if Rails.env.development?
+          app.middleware.use Helpers::CacheHelper::FragmentNameCacheExpiry
+
+          Base.prepend Helpers::CacheHelper::PerRequestFragmentNameCache
+        end
+      end
+    end
+
     initializer "action_view.setup_action_pack" do |app|
       ActiveSupport.on_load(:action_controller) do
         ActionView::RoutingUrlFor.include(ActionDispatch::Routing::UrlFor)

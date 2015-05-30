@@ -75,7 +75,7 @@ module ActionView
       #   render(topics)         => render("topics/topic")
       #   render(message.topics) => render("topics/topic")
       #
-      # It's not possible to derive all render calls like that, though. 
+      # It's not possible to derive all render calls like that, though.
       # Here are a few examples of things that can't be derived:
       #
       #   render group_of_attachments
@@ -98,14 +98,14 @@ module ActionView
       #   <%# Template Dependency: todolists/todolist %>
       #   <%= render_sortable_todolists @project.todolists %>
       #
-      # The pattern used to match these is /# Template Dependency: ([^ ]+)/, 
+      # The pattern used to match these is /# Template Dependency: ([^ ]+)/,
       # so it's important that you type it out just so.
       # You can only declare one template dependency per line.
       #
       # === External dependencies
       #
-      # If you use a helper method, for example, inside a cached block and 
-      # you then update that helper, you'll have to bump the cache as well. 
+      # If you use a helper method, for example, inside a cached block and
+      # you then update that helper, you'll have to bump the cache as well.
       # It doesn't really matter how you do it, but the md5 of the template file
       # must change. One recommendation is to simply be explicit in a comment, like:
       #
@@ -130,8 +130,8 @@ module ActionView
       # The collection can then automatically use any cached renders for that
       # template by reading them at once instead of one by one.
       #
-      # See ActionView::Template::Handlers::ERB.resource_cache_call_pattern for 
-      # more information on what cache calls make a template eligible for this 
+      # See ActionView::Template::Handlers::ERB.resource_cache_call_pattern for
+      # more information on what cache calls make a template eligible for this
       # collection caching.
       #
       # The automatic cache multi read can be turned off like so:
@@ -229,6 +229,32 @@ module ActionView
           self.output_buffer = output_buffer.class.new(output_buffer)
         end
         controller.write_fragment(name, fragment, options)
+      end
+
+      class FragmentNameCacheExpiry # :nodoc:
+        def initialize(app)
+          @app = app
+        end
+
+        def call(env)
+          ActionView::Base.fragment_name_cache.clear
+
+          @app.call(env)
+        end
+      end
+
+      module PerRequestFragmentNameCache # :nodoc:
+        extend ActiveSupport::Concern
+
+        included do
+          mattr_accessor(:fragment_name_cache) { ActiveSupport::Cache::MemoryStore.new }
+        end
+
+        def cache_fragment_name(*args)
+          fragment_name_cache.fetch(args) do
+            super(*args)
+          end
+        end
       end
     end
   end

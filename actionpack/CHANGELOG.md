@@ -1,3 +1,9 @@
+*   Fix routes defined within a controller block that take an :id.
+
+    See #20312.
+
+    *Yoong Kang Lim*
+
 *   `FileHandler` and `Static` middleware initializers accept `index` argument
     to configure the directory index file name. Defaults to `index` (as in
     `index.html`).

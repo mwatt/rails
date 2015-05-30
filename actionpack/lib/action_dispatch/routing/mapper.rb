@@ -787,6 +787,8 @@ module ActionDispatch
               value = block
             elsif option == :options
               value = options
+            elsif option == :controller
+              value = options.delete(option)
             else
               value = options.delete(option)
             end
@@ -1526,7 +1528,11 @@ module ActionDispatch
           path = path_for_action(action, options.delete(:path))
           raise ArgumentError, "path is required" if path.blank?
 
-          action = action.to_s.dup
+          if options[:action]
+            action = "#{@scope[:controller]}_#{options[:action].to_s}"
+          else
+            action = action.to_s.dup
+          end
 
           if action =~ /^[\w\-\/]+$/
             options[:action] ||= action.tr('-', '_') unless action.include?("/")

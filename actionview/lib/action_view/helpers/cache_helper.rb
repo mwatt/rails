@@ -218,7 +218,7 @@ module ActionView
         virtual_path ||= @virtual_path
         if virtual_path
           names  = Array(name.is_a?(Hash) ? controller.url_for(name).split("://").last : name)
-          digest = Digestor.digest name: virtual_path, finder: lookup_context, dependencies: view_cache_dependencies
+          digest = generate_digest name: virtual_path, finder: lookup_context, dependencies: view_cache_dependencies
 
           [ *names, digest ]
         else
@@ -246,6 +246,32 @@ module ActionView
           self.output_buffer = output_buffer.class.new(output_buffer)
         end
         controller.write_fragment(name, fragment, options)
+      end
+
+      # Overriden in development to cache the generated digests
+      def generate_digest(options) # :nodoc:
+        Digestor.digest(options)
+      end
+
+      class PerRequestDigestCacheExpiry < Struct.new(:app) # :nodoc:
+        def call(env)
+          ActionView::Base.digest_cache.clear
+          app.call(env)
+        end
+      end
+
+      module PerRequestDigestCache # :nodoc:
+        extend ActiveSupport::Concern
+
+        included do
+          mattr_accessor(:digest_cache) { ThreadSafe::Cache.new }
+        end
+
+        module PrependedMethods
+          def generate_digest(options)
+            digest_cache[options] ||= super(options)
+          end
+        end
       end
     end
   end

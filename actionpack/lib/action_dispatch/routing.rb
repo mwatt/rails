@@ -121,13 +121,15 @@ module ActionDispatch
   #
   #   # In routes.rb
   #   controller :blog do
-  #     get 'blog/show'     => :list
-  #     get 'blog/delete'   => :delete
-  #     get 'blog/edit/:id' => :edit
+  #     get 'blog/index'        => :list
+  #     get 'blog/show/:id'     => :show
+  #     get 'blog/delete/:id'   => :delete
+  #     get 'blog/edit/:id'     => :edit
   #   end
   #
   #   # provides named routes for show, delete, and edit
-  #   link_to @article.title, show_path(id: @article.id)
+  #   link_to @article.title, blog_show_path(id: @article.id)
+  #   link_to "Article index", blog_list_path
   #
   # == Pretty URLs
   #

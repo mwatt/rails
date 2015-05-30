@@ -230,6 +230,32 @@ module ActionView
         end
         controller.write_fragment(name, fragment, options)
       end
+
+      class PerRequestFragmentCacheExpiry # :nodoc:
+        def initialize(app)
+          @app = app
+        end
+
+        def call(env)
+          ActionView::Base.per_request_fragment_cache.clear
+
+          @app.call(env)
+        end
+      end
+
+      module PerRequestFragmentCache # :nodoc:
+        extend ActiveSupport::Concern
+
+        included do
+          mattr_accessor(:per_request_fragment_cache) { ActiveSupport::Cache::MemoryStore.new }
+        end
+
+        def fragment_for(*args)
+          per_request_fragment_cache.fetch(args) do
+            super(*args)
+          end
+        end
+      end
     end
   end
 end

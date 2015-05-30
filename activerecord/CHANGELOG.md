@@ -1,3 +1,14 @@
+*   Do not set sql_mode if specify `strict: :default` explicitly.
+
+        # database.yml
+        production:
+          adapter: mysql2
+          database: foo_prod
+          user: foo
+          strict: :default
+
+    *Ryuta Kamizono*
+
 *   SQLite: `:collation` support for string and text columns.
 
     Example:

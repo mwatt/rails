@@ -513,6 +513,15 @@ class PluginGeneratorTest < Rails::Generators::TestCase
     end
   end
 
+  def test_controller_tests_pass_by_default_inside_mountable_engine
+    run_generator [destination_root, "--mountable"]
+    FileUtils.cd(destination_root)
+
+    quietly { `bin/rails g controller dashboard foo` }
+
+    assert_match(/2 runs, 2 assertions, 0 failures, 0 errors/, `bundle exec rake test 2>&1`)
+  end
+
   def test_generating_scaffold_controller_inside_mountable_engine
     run_generator [destination_root, "--mountable"]
 
@@ -524,6 +533,18 @@ class PluginGeneratorTest < Rails::Generators::TestCase
       assert_match(/@user = bukkits_users\(:one\)/, contents)
       assert_match(/@routes = Engine.routes/, contents)
     end
+  end
+
+  def test_scaffold_tests_pass_by_default_inside_mountable_engine
+    run_generator [destination_root, "--mountable"]
+    FileUtils.cd(destination_root)
+
+    quietly do
+      `bin/rails g scaffold User name:string age:integer;
+      bundle exec rake db:migrate`
+    end
+
+    assert_match(/8 runs, 13 assertions, 0 failures, 0 errors/, `bundle exec rake test 2>&1`)
   end
 
   def test_git_name_and_email_in_gemspec_file

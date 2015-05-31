@@ -174,4 +174,13 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
       end
     end
   end
+
+  def test_controller_tests_pass_by_default_inside_mountable_engine
+    run_generator [destination_root, "--mountable"]
+    FileUtils.cd(destination_root)
+
+    quietly { `bin/rails g controller dashboard foo` }
+
+    assert_match(/2 runs, 2 assertions, 0 failures, 0 errors/, `bundle exec rake test 2>&1`)
+  end
 end

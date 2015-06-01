@@ -1,3 +1,7 @@
+*   Deprecate passing first parameter as `Hash` and default status code for `head` method.
+
+    *Mehmet Emin İNAÇ*
+
 *   `FileHandler` and `Static` middleware initializers accept `index` argument
     to configure the directory index file name. Defaults to `index` (as in
     `index.html`).

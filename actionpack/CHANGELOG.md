@@ -1,3 +1,7 @@
+*   Deprecate passing first parameter as `Hash` and default status code for `head` method.
+
+    *Mehmet Emin İNAÇ*
+
 *   Remove `assigns` and `assert_template`. Both methods have been extracted
     into a gem at https://github.com/rails/rails-controller-testing.
 

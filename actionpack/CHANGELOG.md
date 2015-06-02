@@ -1,3 +1,10 @@
+*   Add `-g` option for `rake routes` task. This option returns the url `name`,
+    `verb`, `path` and `reqs` field that match the pattern.
+
+    See #18902.
+
+    *Anton Davydov*
+
 *   Remove `assigns` and `assert_template`. Both methods have been extracted
     into a gem at https://github.com/rails/rails-controller-testing.
 

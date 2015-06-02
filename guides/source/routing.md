@@ -1115,6 +1115,11 @@ You may restrict the listing to the routes that map to a particular controller s
 $ CONTROLLER=users bin/rake routes
 ```
 
+You can grep your routes with `-g`, which filters routes by `name`, `verb`, `path`, or `reqs`.
+```bash
+$ bin/rake routes -g users
+```
+
 TIP: You'll find that the output from `rake routes` is much more readable if you widen your terminal window until the output lines don't wrap.
 
 ### Testing Routes

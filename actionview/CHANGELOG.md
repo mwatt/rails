@@ -1,3 +1,19 @@
+*   Improve detection of partial templates eligible for collection caching.
+
+    The regular expression which was used to detect partial templates that
+    begin with a `<% cache ... do %>` call missed some cases.  This commits
+    attempts to improve the detection for some cases such as multi-line
+    comments at the beginning of the template.  The different templates are
+    listed in two new unit test methods.
+
+    Note that specially crafted Ruby code can still evade such `cache`-call
+    detection: for example, a user might have its own method which itself
+    calls the Rails `cache` helper. In such a case, the template's code
+    doesn't start with a literal `cache` string and therefore will not be
+    eligible for collection caching.
+
+    *Dov Murik*
+
 *   Do not put partial name to `local_assigns` when rendering without
     an object or a collection.
 

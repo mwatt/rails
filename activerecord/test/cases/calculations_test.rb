@@ -649,7 +649,7 @@ class CalculationsTest < ActiveRecord::TestCase
   def test_pluck_loaded_relation_sql_fragment
     companies = Company.order(:id).limit(3).load
     assert_queries 1 do
-      assert_equal ['37signals', 'Summit', 'Microsoft'], companies.pluck('DISTINCT name')
+      assert_equal [[1, '37signals'], [2, 'Summit'], [3, 'Microsoft']], companies.pluck('DISTINCT id, name')
     end
   end
 

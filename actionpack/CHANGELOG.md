@@ -1,3 +1,10 @@
+*   Add `-g` option for `rake routes` task. This option returns the url `name`,
+    `verb`, `path` and `reqs` field that match the pattern.
+
+    See #18902.
+
+    *Anton Davydov*
+
 *   Handle InvalidURIError on bad paths on redirect route.
 
     *arthurnn*

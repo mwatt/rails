@@ -86,8 +86,8 @@ module SharedGeneratorTests
     end
   end
 
-  def test_template_is_executed_when_supplied
-    path = "https://gist.github.com/josevalim/103208/raw/"
+  def test_template_is_executed_when_supplied_an_http_path
+    path = "http://gist.github.com/josevalim/103208/raw/"
     template = %{ say "It works!" }
     template.instance_eval "def read; self; end" # Make the string respond to read
 

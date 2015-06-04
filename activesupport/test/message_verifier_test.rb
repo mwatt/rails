@@ -2,6 +2,7 @@ require 'abstract_unit'
 require 'openssl'
 require 'active_support/time'
 require 'active_support/json'
+require 'minitest/mock'
 
 class MessageVerifierTest < ActiveSupport::TestCase
 
@@ -24,6 +25,7 @@ class MessageVerifierTest < ActiveSupport::TestCase
     data, hash = @verifier.generate(@data).split("--")
     assert !@verifier.valid_message?(nil)
     assert !@verifier.valid_message?("")
+    assert !@verifier.valid_message?("\xff")
     assert !@verifier.valid_message?("#{data.reverse}--#{hash}")
     assert !@verifier.valid_message?("#{data}--#{hash.reverse}")
     assert !@verifier.valid_message?("purejunk")
@@ -36,13 +38,25 @@ class MessageVerifierTest < ActiveSupport::TestCase
   end
 
   def test_verified_returns_false_on_invalid_message
-    assert !@verifier.verified("purejunk")
+    message = @verifier.generate(@data)
+    mock = MiniTest::Mock.new
+    mock.expect(:call, false, [message])
+    @verifier.stub(:valid_message?, mock) do
+      assert !@verifier.verified(message)
+    end
+    mock.verify
   end
 
   def test_verify_exception_on_invalid_message
-    assert_raise(ActiveSupport::MessageVerifier::InvalidSignature) do
-      @verifier.verify("purejunk")
+    message = @verifier.generate(@data)
+    mock = MiniTest::Mock.new
+    mock.expect(:call, false, [message])
+    @verifier.stub(:valid_message?, mock) do
+      assert_raise(ActiveSupport::MessageVerifier::InvalidSignature) do
+        @verifier.verify(message)
+      end
     end
+    mock.verify
   end
 
   def test_alternative_serialization_method

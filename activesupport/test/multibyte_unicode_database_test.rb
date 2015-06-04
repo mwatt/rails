@@ -11,8 +11,12 @@ class MultibyteUnicodeDatabaseTest < ActiveSupport::TestCase
 
   UnicodeDatabase::ATTRIBUTES.each do |attribute|
     define_method "test_lazy_loading_on_attribute_access_of_#{attribute}" do
-      @ucd.expects(:load)
-      @ucd.send(attribute)
+      mock = MiniTest::Mock.new
+      mock.expect(:call, nil, [])
+      @ucd.stub(:load, mock) do
+        @ucd.send(attribute)
+      end
+      mock.verify
     end
   end
 

@@ -721,12 +721,16 @@ class DependenciesTest < ActiveSupport::TestCase
   end
 
   def test_unloadable_constants_should_receive_callback
-    Object.const_set :C, Class.new
+    Object.const_set :C, Class.new { def self.before_remove_const; end }
     C.unloadable
-    C.expects(:before_remove_const).once
-    assert C.respond_to?(:before_remove_const)
-    ActiveSupport::Dependencies.clear
-    assert !defined?(C)
+    mock = MiniTest::Mock.new
+    mock.expect(:call, nil, [])
+    C.stub(:before_remove_const, mock) do
+      assert C.respond_to?(:before_remove_const)
+      ActiveSupport::Dependencies.clear
+      assert !defined?(C)
+    end
+    mock.verify
   ensure
     remove_constants(:C)
   end

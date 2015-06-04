@@ -82,10 +82,14 @@ class SyncLogSubscriberTest < ActiveSupport::TestCase
 
   def test_does_not_send_the_event_if_logger_is_nil
     ActiveSupport::LogSubscriber.logger = nil
-    @log_subscriber.expects(:some_event).never
-    ActiveSupport::LogSubscriber.attach_to :my_log_subscriber, @log_subscriber
-    instrument "some_event.my_log_subscriber"
-    wait
+    mock = MiniTest::Mock.new
+    mock.expect(:call, nil, [])
+    @log_subscriber.stub(:some_event, mock) do
+      ActiveSupport::LogSubscriber.attach_to :my_log_subscriber, @log_subscriber
+      instrument "some_event.my_log_subscriber"
+      wait
+    end
+    assert_equal "expected call() => nil, got []", assert_raises(MockExpectationError) { mock.verify }.message
   end
 
   def test_does_not_fail_with_non_namespaced_events

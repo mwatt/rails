@@ -2,6 +2,7 @@ require 'logger'
 require 'abstract_unit'
 require 'active_support/cache'
 require 'dependencies_test_helpers'
+require 'mocha/setup' # FIXME: stop using mocha
 
 module ActiveSupport
   module Cache

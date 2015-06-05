@@ -459,7 +459,9 @@ module ActiveRecord
       end
 
       if result.size == expected_size
-        result
+        return result if self.values[:order]
+        records_by_id = result.index_by(&:id)
+        ids.first(expected_size).collect { |id| records_by_id[id.to_i] }
       else
         raise_record_not_found_exception!(ids, result.size, expected_size)
       end

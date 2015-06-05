@@ -1,3 +1,11 @@
+*   ActiveRecord::Relation#count: raise an ArgumentError when finder options
+    are specified or an ActiveRecord::StatementInvalid when an invalid type
+    is provided for a column name (e.g. a Hash).
+
+    Fixes #20434
+
+    *Konstantinos Rousis*
+
 *   Ensure symbols passed to `ActiveRecord::Relation#select` are always treated
     as columns.
 

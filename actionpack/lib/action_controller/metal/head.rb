@@ -17,8 +17,12 @@ module ActionController
     #
     # See Rack::Utils::SYMBOL_TO_STATUS_CODE for a full list of valid +status+ symbols.
     def head(status, options = {})
-      options, status = status, nil if status.is_a?(Hash)
-      status ||= options.delete(:status) || :ok
+      if status.is_a?(Hash)
+        msg = "Passing Hash as first parameter"
+        msg << " and the implicit :ok status" unless status.key?(:status)
+        options, status = status, (status.delete(:status) || :ok)
+        ActiveSupport::Deprecation.warn(msg + " for `head` has been deprecated and will be removed in Rails 5.1.")
+      end
       location = options.delete(:location)
       content_type = options.delete(:content_type)
 

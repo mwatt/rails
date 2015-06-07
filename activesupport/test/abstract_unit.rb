@@ -38,4 +38,3 @@ def jruby_skip(message = '')
 end
 
 require 'minitest/mock'
-require 'mocha/setup' # FIXME: stop using mocha

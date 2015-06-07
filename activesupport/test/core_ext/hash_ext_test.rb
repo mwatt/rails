@@ -961,10 +961,14 @@ class HashExtTest < ActiveSupport::TestCase
     assert_raise(RuntimeError) { original.except!(:a) }
   end
 
-  def test_except_with_mocha_expectation_on_original
+  def test_except_does_not_delete_values_in_original
     original = { :a => 'x', :b => 'y' }
-    original.expects(:delete).never
-    original.except(:a)
+    mock = Minitest::Mock.new
+    mock.expect(:call, nil, [])
+    original.stub(:delete, mock) do
+      original.except(:a)
+    end
+    assert_equal "expected call() => nil, got []", assert_raises(MockExpectationError) { mock.verify }.message
   end
 
   def test_compact

@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+$: << File.expand_path("../../test", __FILE__)
+require File.expand_path("../../../tools/test", __FILE__)

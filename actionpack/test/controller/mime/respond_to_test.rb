@@ -794,7 +794,7 @@ class RespondToControllerTest < ActionController::TestCase
   end
 end
 
-class RespondToWithBlockOnDefaultrenderController < ActionController::Base
+class RespondToWithBlockOnDefaultRenderController < ActionController::Base
   def show
     default_render do
       render text: 'default_render yielded'
@@ -802,7 +802,7 @@ class RespondToWithBlockOnDefaultrenderController < ActionController::Base
   end
 end
 
-class RespondToWithBlockOnDefaultrenderControllerTest < ActionController::TestCase
+class RespondToWithBlockOnDefaultRenderControllerTest < ActionController::TestCase
   def setup
     super
     @request.host = "www.example.com"

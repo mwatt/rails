@@ -70,6 +70,23 @@ class ConcernTest < ActiveSupport::TestCase
     assert_equal ConcernTest::Baz::ClassMethods, (class << @klass; self.included_modules; end)[0]
   end
 
+  def test_class_methods_are_extended_only_on_expected_objects
+    ::Object.__send__(:include, Bar)
+    # module needs to be created after Bar is included in Object or bug won't
+    # be triggered
+    qux = Module.new do
+      extend ActiveSupport::Concern
+
+      class_methods do
+        def qux
+        end
+      end
+    end
+    @klass.include qux
+    assert_equal false, Object.respond_to?(:qux)
+
+  end
+
   def test_included_block_is_ran
     @klass.include(Baz)
     assert_equal true, @klass.included_ran

@@ -75,19 +75,22 @@ module ActiveRecord
   #
   #   Conversation.where("status <> ?", Conversation.statuses[:archived])
   #
-  # You can use <tt>:prefix</tt> option then you need to define multiple enums
-  # with same values. If prefix is <tt>true</tt>, the methods are prefixed with
-  # the name of the enum.
+  # You can use <tt>:enum_prefix</tt>/<tt>:enum_suffix</tt> option then you need
+  # to define multiple enums with same values. If option value is <tt>true</tt>,
+  # the methods are prefixed/suffixed with the name of the enum.
   #
   #   class Invoice < ActiveRecord::Base
-  #     enum({verification: [:done, :fail]}, prefix: true)
+  #     enum {verification: [:done, :fail]}, enum_prefix: true
   #   end
   #
   # It is also possible to supply a custom prefix.
   #
   #   class Invoice < ActiveRecord::Base
-  #     enum({verification: [:done, :fail]}, prefix: 'verification_status')
+  #     enum {verification: [:done, :fail]}, enum_prefix: :verification_status
   #   end
+  #
+  # Note that <tt>:enum_prefix</tt>/<tt>:enum_postfix</tt> are reserved keywords
+  # and can not be used as an enum name.
 
   module Enum
     def self.extended(base) # :nodoc:
@@ -132,9 +135,10 @@ module ActiveRecord
       attr_reader :name, :mapping
     end
 
-    def enum(definitions, options = {})
+    def enum(definitions)
       klass = self
-      prefix = options[:prefix]
+      enum_prefix = definitions.delete(:enum_prefix)
+      enum_suffix = definitions.delete(:enum_suffix)
       definitions.each do |name, values|
         # statuses = { }
         enum_values = ActiveSupport::HashWithIndifferentAccess.new
@@ -152,13 +156,18 @@ module ActiveRecord
         _enum_methods_module.module_eval do
           pairs = values.respond_to?(:each_pair) ? values.each_pair : values.each_with_index
           pairs.each do |value, i|
-            value_prefix = \
-              if prefix
-                "#{prefix == true ? name : prefix}_"
-              else
-                ''
-              end
-            value_method_name = "#{value_prefix}#{value}"
+            if enum_prefix == true
+              prefix = "#{name}_"
+            elsif enum_prefix
+              prefix = "#{enum_prefix}_"
+            end
+            if enum_suffix == true
+              suffix = "_#{name}"
+            elsif enum_suffix
+              suffix = "_#{enum_suffix}"
+            end
+
+            value_method_name = "#{prefix}#{value}#{suffix}"
             enum_values[value] = i
 
             # def active?() status == 0 end

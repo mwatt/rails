@@ -17,6 +17,7 @@ class EnumTest < ActiveRecord::TestCase
     assert @book.in_english?
     assert @book.author_visibility_visible?
     assert @book.illustrator_visibility_visible?
+    assert @book.with_medium_font_size?
   end
 
   test "query state with strings" do

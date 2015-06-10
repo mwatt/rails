@@ -120,14 +120,73 @@ class LoggerTest < ActiveSupport::TestCase
     byte_string.force_encoding("ASCII-8BIT")
     assert byte_string.include?(BYTE_STRING)
   end
-  
+
   def test_silencing_everything_but_errors
     @logger.silence do
       @logger.debug "NOT THERE"
       @logger.error "THIS IS HERE"
     end
-    
+
     assert !@output.string.include?("NOT THERE")
     assert @output.string.include?("THIS IS HERE")
   end
+
+  def test_logger_thread_safety
+    @logger.level = Logger::INFO
+
+    assert_level(Logger::INFO)
+
+    threads = (1..2).collect do |i|
+      # stagger the threads out using sleep so that they overlap during
+      # log level changes, e.g.:
+      #
+      #    Time | Thread_1        | Thread_2
+      #   ------+-----------------+-----------------
+      #    ~0.0 | 1st sleep start | 1st sleep start
+      #    ~0.1 | 1st sleep end   | <sleeping>
+      #    ~0.1 | #with_level()   | <sleeping>
+      #    ~0.1 | 2nd sleep start | <sleeping>
+      #    ~0.2 | <sleeping>      | #with_level()
+      #    ~0.2 | <sleeping>      | 2nd sleep start
+      #    ~0.3 | 2nd sleep end   | <sleeping>
+      #    ~0.4 | <dead>          | 2nd sleep end
+
+      Thread.new do
+        sleep 0.1 * i
+
+        assert_level(Logger::INFO)
+
+        with_level(Logger::ERROR) do
+          assert_level(Logger::ERROR)
+          sleep 0.2
+        end
+
+        assert_level(Logger::INFO)
+      end
+    end
+
+    threads.collect(&:join)
+
+    assert_level(Logger::INFO)
+  end
+
+  private
+
+  def with_level(level)
+    old_level, @logger.level = @logger.level, level
+    yield
+  ensure
+    @logger.level = old_level
+  end
+
+  def level_name(level)
+    ::Logger::Severity.constants.find do |severity|
+      Logger.const_get(severity) == level
+    end.to_s
+  end
+
+  def assert_level(level)
+    assert @logger.level == level, "Expected level #{level_name(level)}, got #{level_name(@logger.level)}"
+  end
+
 end

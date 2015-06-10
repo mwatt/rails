@@ -1,3 +1,8 @@
+*   Add missing :hit attribute in instrumentation payload on cache#fetch
+    when invoked with a block
+
+    *Vivien Barousse*
+
 *   Fix a range of values for parameters of the Time#change
 
     *Nikolay Kondratyev*

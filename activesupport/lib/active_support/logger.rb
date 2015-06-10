@@ -46,6 +46,31 @@ module ActiveSupport
       @formatter = SimpleFormatter.new
     end
 
+    def level
+      # The log level should initially be setup in the main thread during startup,
+      # which means that if our current thread doesn't have a local level set, then
+      # we attempt to use the main thread's level, falling back to the class default
+      # otherwise.
+      Thread.current[:logger_level] || Thread.main[:logger_level] || super
+    end
+
+    def level=(l)
+      Thread.current[:logger_level] = l
+    end
+
+    def add(severity, message = nil, progname = nil, &block)
+      return true if @logdev.nil? or (severity || UNKNOWN) < level
+      super
+    end
+
+    Logger::Severity.constants.each do |severity|
+      class_eval(<<-EOT, __FILE__, __LINE__ + 1)
+        def #{severity.downcase}?                # def debug?
+          Logger::#{severity} >= level           #   DEBUG >= level
+        end                                      # end
+      EOT
+    end
+
     # Simple formatter which only displays the message.
     class SimpleFormatter < ::Logger::Formatter
       # This method is invoked when a log event occurs

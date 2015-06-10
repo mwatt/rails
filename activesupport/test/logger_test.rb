@@ -16,6 +16,21 @@ class LoggerTest < ActiveSupport::TestCase
     @logger  = Logger.new(@output)
   end
 
+  def with_level(level = Logger::INFO)
+    begin
+      old_level, @logger.level = @logger.level, level
+      yield
+    ensure
+      @logger.level = old_level
+    end
+  end
+
+  def level_name(level)
+    ::Logger::Severity.constants.find do |severity|
+      Logger.const_get(severity) == level
+    end.to_s
+  end
+
   def test_write_binary_data_to_existing_file
     t = Tempfile.new ['development', 'log']
     t.binmode
@@ -120,14 +135,57 @@ class LoggerTest < ActiveSupport::TestCase
     byte_string.force_encoding("ASCII-8BIT")
     assert byte_string.include?(BYTE_STRING)
   end
-  
+
   def test_silencing_everything_but_errors
     @logger.silence do
       @logger.debug "NOT THERE"
       @logger.error "THIS IS HERE"
     end
-    
+
     assert !@output.string.include?("NOT THERE")
     assert @output.string.include?("THIS IS HERE")
+  end
+
+  def test_logger_thread_safety
+    @logger.level = Logger::INFO
+
+    assert @logger.level == Logger::INFO,
+           "Expected level INFO, got #{level_name(@logger.level)} (before threads)"
+
+    threads = (1..2).collect do |i|
+      # stagger the threads out using sleep so that they overlap during
+      # log level changes, e.g.:
+      #
+      #    Time | Thread_1        | Thread_2
+      #   ------+-----------------+-----------------
+      #    ~0.0 | 1st sleep start | 1st sleep start
+      #    ~0.1 | 1st sleep end   | <sleeping>
+      #    ~0.1 | #with_level()   | <sleeping>
+      #    ~0.1 | 2nd sleep start | <sleeping>
+      #    ~0.2 | <sleeping>      | #with_level()
+      #    ~0.2 | <sleeping>      | 2nd sleep start
+      #    ~0.3 | 2nd sleep end   | <sleeping>
+      #    ~0.4 | <dead>          | 2nd sleep end
+
+      Thread.new do
+        sleep 0.1 * i
+
+        assert @logger.level == Logger::INFO,
+               "Expected level INFO, got #{level_name(@logger.level)} (at start of thread #{i})"
+
+        with_level(Logger::ERROR) do
+          assert @logger.level == Logger::ERROR,
+                 "Expected level ERROR, got #{level_name(@logger.level)} (during with_level yield in thread #{i})"
+          sleep 0.2
+        end
+
+        assert @logger.level == Logger::INFO,
+              "Expected level INFO, got #{level_name(@logger.level)} (at end of thread #{i})"
+      end
+    end
+
+    threads.collect(&:join)
+
+    assert @logger.level == Logger::INFO, "Expected level INFO, got #{level_name(@logger.level)} (in main thread)"
   end
 end

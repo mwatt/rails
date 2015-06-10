@@ -46,6 +46,19 @@ module ActiveSupport
       @formatter = SimpleFormatter.new
     end
 
+    def add(severity, message = nil, progname = nil, &block)
+      return true if @logdev.nil? || (severity || UNKNOWN) < level
+      super
+    end
+
+    Logger::Severity.constants.each do |severity|
+      class_eval(<<-EOT, __FILE__, __LINE__ + 1)
+        def #{severity.downcase}?                # def debug?
+          Logger::#{severity} >= level           #   DEBUG >= level
+        end                                      # end
+      EOT
+    end
+
     # Simple formatter which only displays the message.
     class SimpleFormatter < ::Logger::Formatter
       # This method is invoked when a log event occurs

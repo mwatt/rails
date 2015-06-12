@@ -1,3 +1,9 @@
+*   Add the template digest to the cache key for collection caching.
+
+    Fixes #20535
+
+    *Roque Pinel*
+
 *   Raise an ArgumentError when a false value for `include_blank` is passed to a
     required select field (to comply with the HTML5 spec).
 

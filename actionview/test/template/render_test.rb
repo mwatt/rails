@@ -616,7 +616,7 @@ class CachedCollectionViewRenderTest < CachedViewRenderTest
 
   test "with custom key" do
     customer = Customer.new("david")
-    key = ActionController::Base.new.fragment_cache_key([customer, 'key'])
+    key = ActionController::Base.new.fragment_cache_key(['test/_customer', customer, 'key'])
 
     ActionView::PartialRenderer.collection_cache.write(key, 'Hello')
 
@@ -626,7 +626,7 @@ class CachedCollectionViewRenderTest < CachedViewRenderTest
 
   test "automatic caching with inferred cache name" do
     customer = CachedCustomer.new("david")
-    key = ActionController::Base.new.fragment_cache_key(customer)
+    key = ActionController::Base.new.fragment_cache_key(['test/_cached_customer', customer])
 
     ActionView::PartialRenderer.collection_cache.write(key, 'Cached')
 
@@ -636,7 +636,7 @@ class CachedCollectionViewRenderTest < CachedViewRenderTest
 
   test "automatic caching with as name" do
     customer = CachedCustomer.new("david")
-    key = ActionController::Base.new.fragment_cache_key(customer)
+    key = ActionController::Base.new.fragment_cache_key(['test/_cached_customer_as', customer])
 
     ActionView::PartialRenderer.collection_cache.write(key, 'Cached')
 

@@ -184,7 +184,7 @@ module ActionView
         if skip_digest
           name
         else
-          fragment_name_with_digest(name)
+          fragment_name_with_digest(name, virtual_path: options.try(:[], :virtual_path))
         end
       end
 
@@ -198,10 +198,12 @@ module ActionView
 
     private
 
-      def fragment_name_with_digest(name) #:nodoc:
-        if @virtual_path
+      def fragment_name_with_digest(name, virtual_path: nil) #:nodoc:
+        virtual_path ||= @virtual_path
+        if virtual_path
           names  = Array(name.is_a?(Hash) ? controller.url_for(name).split("://").last : name)
-          digest = Digestor.digest name: @virtual_path, finder: lookup_context, dependencies: view_cache_dependencies
+          dependencies = defined?(view_cache_dependencies) ? view_cache_dependencies : []
+          digest = Digestor.digest name: virtual_path, finder: lookup_context, dependencies: dependencies
 
           [ *names, digest ]
         else

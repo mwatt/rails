@@ -410,4 +410,12 @@ class AutomaticCollectionCacheTest < ActionController::TestCase
     get :index_with_comment
     assert_equal 1, @controller.partial_rendered_times
   end
+
+  def test_caching_works_when_different_partial_have_same_collection
+    get :index_explicit_render
+    assert_equal 1, @controller.partial_rendered_times
+
+    get :index_with_comment
+    assert_equal 2, @controller.partial_rendered_times
+  end
 end

@@ -1,3 +1,8 @@
+*   Take into account UTC offset when assigning string representation of
+    timestamp with offset specified to attribute of time type.
+
+    *Andrey Novikov*
+
 *   Fixed an error which would occur in dirty checking when calling
     `update_attributes` from a getter.
 

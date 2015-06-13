@@ -19,6 +19,9 @@ require 'models/invoice'
 require 'models/line_item'
 require 'models/column'
 require 'models/record'
+require 'models/admin'
+require 'models/admin/user'
+require 'models/admin/region'
 
 class BelongsToAssociationsTest < ActiveRecord::TestCase
   fixtures :accounts, :companies, :developers, :projects, :topics,
@@ -145,6 +148,11 @@ class BelongsToAssociationsTest < ActiveRecord::TestCase
   def test_type_mismatch
     assert_raise(ActiveRecord::AssociationTypeMismatch) { Account.find(1).firm = 1 }
     assert_raise(ActiveRecord::AssociationTypeMismatch) { Account.find(1).firm = Project.find(1) }
+  end
+
+  def test_type_mismatch_with_namespaced_class
+    assert_nil defined?(Region), "This test should be done with a only namespaced class"
+    assert_raise(ActiveRecord::AssociationTypeMismatch) { Admin::User.new(region: 'wrong value') }
   end
 
   def test_natural_assignment

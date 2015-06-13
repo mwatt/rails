@@ -14,6 +14,7 @@ class Admin::User < ActiveRecord::Base
   end
 
   belongs_to :account
+  belongs_to :region
   store :params, accessors: [ :token ], coder: YAML
   store :settings, :accessors => [ :color, :homepage ]
   store_accessor :settings, :favorite_food

@@ -211,9 +211,15 @@ module ActiveRecord
         # the kind of the class of the associated objects. Meant to be used as
         # a sanity check when you are about to assign an associated record.
         def raise_on_type_mismatch!(record)
-          unless record.is_a?(reflection.klass) || record.is_a?(reflection.class_name.constantize)
+          unless record.is_a?(reflection.klass) || valid_reloaded_class_for?(record)
             message = "#{reflection.class_name}(##{reflection.klass.object_id}) expected, got #{record.class}(##{record.class.object_id})"
             raise ActiveRecord::AssociationTypeMismatch, message
+          end
+        end
+
+        def valid_reloaded_class_for?(record)
+          if klass = reflection.class_name.safe_constantize
+            record.is_a?(klass)
           end
         end
 

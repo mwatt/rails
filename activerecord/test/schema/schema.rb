@@ -23,6 +23,10 @@ ActiveRecord::Schema.define do
     t.string :name
   end
 
+  create_table :admin_region, force: true do |t|
+    t.string :name
+  end
+
   create_table :admin_users, force: true do |t|
     t.string :name
     t.string :settings, null: true, limit: 1024
@@ -33,6 +37,7 @@ ActiveRecord::Schema.define do
     t.string :json_data_empty, null: true, default: "", limit: 1024
     t.text :params
     t.references :account
+    t.references :region
   end
 
   create_table :aircraft, force: true do |t|

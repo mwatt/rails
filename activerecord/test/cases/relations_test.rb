@@ -1062,7 +1062,9 @@ class RelationTest < ActiveRecord::TestCase
 
   def test_size_with_group
     posts = Post.select("author_id").group("author_id")
+
     assert_queries(1) { assert_equal 4, posts.size }
+    assert ! posts.loaded?
   end
 
   def test_size_with_group_and_having
@@ -1073,7 +1075,16 @@ class RelationTest < ActiveRecord::TestCase
     assert_queries(1) { assert_equal 1, posts.size }
   end
 
-  def test_size_with_group_having_and_count
+  def test_size_with_group_order_and_count_in_select
+    posts = Post.select("author_id, count(author_id) AS author_count")
+      .order("author_count DESC")
+      .group("author_id")
+
+    assert_queries(1) { assert_equal 4, posts.size }
+    assert ! posts.loaded?
+  end
+
+  def test_size_with_group_having_and_count_in_select
     relation = Post.select("author_id, count(author_id) AS author_count")
       .order("author_count DESC")
       .group("author_id")
@@ -1134,18 +1145,20 @@ class RelationTest < ActiveRecord::TestCase
     assert ! no_posts.loaded?
   end
 
-  def test_empty_complex_chained_relations_with_group_order_and_count
+  def test_empty_with_group_order_and_count_in_select
     posts = Post.select("author_id, count(author_id) AS author_count")
       .order("author_count DESC")
       .group("author_id")
 
-    #assert_queries(1) { assert_equal false, posts.empty? }
+    assert_queries(1) { assert_equal false, posts.empty? }
+    assert ! posts.loaded?
 
     no_posts = posts.where(title: "")
     assert_queries(1) { assert_equal true, no_posts.empty? }
+    assert ! posts.loaded?
   end
 
-  def test_empty_complex_chained_relations_with_group_having_and_count
+  def test_empty_with_group_having_and_count_in_select
     relation = Post.select("author_id, count(author_id) AS author_count")
       .order("author_count DESC")
       .group("author_id")

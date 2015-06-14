@@ -397,11 +397,11 @@ class RelationTest < ActiveRecord::TestCase
 
   def test_null_relation_size
     ac = Aircraft.new
-    assert_equal Hash.new, ac.engines.group(:id).size
-    assert_equal        0, ac.engines.size
+    assert_equal 0, ac.engines.group(:id).size
+    assert_equal 0, ac.engines.size
     ac.save
-    assert_equal Hash.new, ac.engines.group(:id).size
-    assert_equal        0, ac.engines.size
+    assert_equal 0, ac.engines.group(:id).size
+    assert_equal 0, ac.engines.size
   end
 
   def test_null_relation_average
@@ -1058,6 +1058,40 @@ class RelationTest < ActiveRecord::TestCase
 
     posts.to_a # force load
     assert_no_queries { assert_equal 0, posts.size }
+  end
+
+  def test_size_with_group
+    posts = Post.select("author_id").group("author_id")
+    assert_queries(1) { assert_equal 4, posts.size }
+  end
+
+  def test_size_with_group_and_having
+    posts = Post.select("author_id").group("author_id").having("count(author_id) >= 1")
+    assert_queries(1) { assert_equal 4, posts.size }
+
+    posts = Post.select("author_id").group("author_id").having("count(author_id) > 4")
+    assert_queries(1) { assert_equal 1, posts.size }
+  end
+
+  def test_size_with_group_having_and_count
+    relation = Post.select("author_id, count(author_id) AS author_count")
+      .order("author_count DESC")
+      .group("author_id")
+
+    posts = if current_adapter?(:PostgreSQLAdapter)
+             relation.having("count(author_id) >= 1")
+           else
+             relation.having("author_count >= 1")
+           end
+
+    assert_queries(1) { assert_equal 4, posts.size }
+
+    no_posts = if current_adapter?(:PostgreSQLAdapter)
+             relation.having("count(author_id) > 5")
+           else
+             relation.having("author_count > 5")
+           end
+    assert_queries(1) { assert_equal 0, no_posts.size }
   end
 
   def test_empty_with_zero_limit

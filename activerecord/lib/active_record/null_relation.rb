@@ -23,7 +23,7 @@ module ActiveRecord
     end
 
     def size
-      calculate :size, nil
+      0
     end
 
     def empty?

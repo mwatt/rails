@@ -258,7 +258,14 @@ module ActiveRecord
 
     # Returns size of the records.
     def size
-      loaded? ? @records.length : count(:all)
+      load if group_values.any?
+
+      if loaded?
+        @records.length
+      else
+        c = count(:all)
+        c.respond_to?(:length) ? c.length : c
+      end
     end
 
     # Returns true if there are no records.

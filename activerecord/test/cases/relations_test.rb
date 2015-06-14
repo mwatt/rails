@@ -1100,6 +1100,38 @@ class RelationTest < ActiveRecord::TestCase
     assert ! no_posts.loaded?
   end
 
+  def test_empty_complex_chained_relations_with_group_order_and_count
+    posts = Post.select("author_id, count(author_id) AS author_count")
+      .order("author_count DESC")
+      .group("author_id")
+
+    #assert_queries(1) { assert_equal false, posts.empty? }
+
+    no_posts = posts.where(title: "")
+    assert_queries(1) { assert_equal true, no_posts.empty? }
+  end
+
+  def test_empty_complex_chained_relations_with_group_having_and_count
+    relation = Post.select("author_id, count(author_id) AS author_count")
+      .order("author_count DESC")
+      .group("author_id")
+
+    posts = if current_adapter?(:PostgreSQLAdapter)
+             relation.having("count(author_id) >= 1")
+           else
+             relation.having("author_count >= 1")
+           end
+
+    assert_queries(1) { assert_equal false, posts.empty? }
+
+    no_posts = if current_adapter?(:PostgreSQLAdapter)
+             relation.having("count(author_id) > 5")
+           else
+             relation.having("author_count > 5")
+           end
+    assert_queries(1) { assert_equal true, no_posts.empty? }
+  end
+
   def test_any
     posts = Post.all
 

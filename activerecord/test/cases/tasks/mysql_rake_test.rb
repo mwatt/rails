@@ -331,7 +331,7 @@ module ActiveRecord
       filename = "awesome-file.sql"
       Kernel.expects(:system)
         .with('mysql', '--execute', %{SET FOREIGN_KEY_CHECKS = 0; SOURCE #{filename}; SET FOREIGN_KEY_CHECKS = 1}, "--database", "test-db")
-        ..returns(true)
+        .returns(true)
 
       ActiveRecord::Tasks::DatabaseTasks.structure_load(@configuration, filename)
     end

@@ -789,15 +789,11 @@ module ActiveRecord
         register_integer_type m, %r(^tinyint)i,   limit: 1
 
         m.alias_type %r(tinyint\(1\))i,  'boolean' if emulate_booleans
-        m.alias_type %r(set)i,           'varchar'
         m.alias_type %r(year)i,          'integer'
         m.alias_type %r(bit)i,           'binary'
 
-        m.register_type(%r(enum)i) do |sql_type|
-          limit = sql_type[/^enum\((.+)\)/i, 1]
-            .split(',').map{|enum| enum.strip.length - 2}.max
-          MysqlString.new(limit: limit)
-        end
+        m.register_type %r(set)i, create_multi_value_to_string_block(:set)
+        m.register_type %r(enum)i, create_multi_value_to_string_block(:enum)
       end
 
       def register_integer_type(mapping, key, options) # :nodoc:
@@ -1031,6 +1027,13 @@ module ActiveRecord
         when 0x10000..0xffffff;     'mediumtext'
         when 0x1000000..0xffffffff; 'longtext'
         else raise(ActiveRecordError, "No text type has character length #{limit}")
+        end
+      end
+
+      def create_multi_value_to_string_block(key)
+        lambda(sql_type) do
+          limit = sql_type[/^#{key}\((.+)\)/i, 1].split(',').map { |elm| elm.strip.length - 2 }.max
+          MysqlString.new(limit: limit)
         end
       end
 

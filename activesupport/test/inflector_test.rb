@@ -99,85 +99,93 @@ class InflectorTest < ActiveSupport::TestCase
   end
 
   def test_acronyms
-    ActiveSupport::Inflector.inflections do |inflect|
-      inflect.acronym("API")
-      inflect.acronym("HTML")
-      inflect.acronym("HTTP")
-      inflect.acronym("RESTful")
-      inflect.acronym("W3C")
-      inflect.acronym("PhD")
-      inflect.acronym("RoR")
-      inflect.acronym("SSL")
-    end
+    with_dup do
+      ActiveSupport::Inflector.inflections do |inflect|
+        inflect.acronym("API")
+        inflect.acronym("HTML")
+        inflect.acronym("HTTP")
+        inflect.acronym("RESTful")
+        inflect.acronym("W3C")
+        inflect.acronym("PhD")
+        inflect.acronym("RoR")
+        inflect.acronym("SSL")
+      end
 
-    #  camelize             underscore            humanize              titleize
-    [
-      ["API",               "api",                "API",                "API"],
-      ["APIController",     "api_controller",     "API controller",     "API Controller"],
-      ["Nokogiri::HTML",    "nokogiri/html",      "Nokogiri/HTML",      "Nokogiri/HTML"],
-      ["HTTPAPI",           "http_api",           "HTTP API",           "HTTP API"],
-      ["HTTP::Get",         "http/get",           "HTTP/get",           "HTTP/Get"],
-      ["SSLError",          "ssl_error",          "SSL error",          "SSL Error"],
-      ["RESTful",           "restful",            "RESTful",            "RESTful"],
-      ["RESTfulController", "restful_controller", "RESTful controller", "RESTful Controller"],
-      ["Nested::RESTful",   "nested/restful",     "Nested/RESTful",     "Nested/RESTful"],
-      ["IHeartW3C",         "i_heart_w3c",        "I heart W3C",        "I Heart W3C"],
-      ["PhDRequired",       "phd_required",       "PhD required",       "PhD Required"],
-      ["IRoRU",             "i_ror_u",            "I RoR u",            "I RoR U"],
-      ["RESTfulHTTPAPI",    "restful_http_api",   "RESTful HTTP API",   "RESTful HTTP API"],
-      ["HTTP::RESTful",     "http/restful",       "HTTP/RESTful",       "HTTP/RESTful"],
-      ["HTTP::RESTfulAPI",  "http/restful_api",   "HTTP/RESTful API",   "HTTP/RESTful API"],
-      ["APIRESTful",        "api_restful",        "API RESTful",        "API RESTful"],
+      #  camelize             underscore            humanize              titleize
+      [
+        ["API",               "api",                "API",                "API"],
+        ["APIController",     "api_controller",     "API controller",     "API Controller"],
+        ["Nokogiri::HTML",    "nokogiri/html",      "Nokogiri/HTML",      "Nokogiri/HTML"],
+        ["HTTPAPI",           "http_api",           "HTTP API",           "HTTP API"],
+        ["HTTP::Get",         "http/get",           "HTTP/get",           "HTTP/Get"],
+        ["SSLError",          "ssl_error",          "SSL error",          "SSL Error"],
+        ["RESTful",           "restful",            "RESTful",            "RESTful"],
+        ["RESTfulController", "restful_controller", "RESTful controller", "RESTful Controller"],
+        ["Nested::RESTful",   "nested/restful",     "Nested/RESTful",     "Nested/RESTful"],
+        ["IHeartW3C",         "i_heart_w3c",        "I heart W3C",        "I Heart W3C"],
+        ["PhDRequired",       "phd_required",       "PhD required",       "PhD Required"],
+        ["IRoRU",             "i_ror_u",            "I RoR u",            "I RoR U"],
+        ["RESTfulHTTPAPI",    "restful_http_api",   "RESTful HTTP API",   "RESTful HTTP API"],
+        ["HTTP::RESTful",     "http/restful",       "HTTP/RESTful",       "HTTP/RESTful"],
+        ["HTTP::RESTfulAPI",  "http/restful_api",   "HTTP/RESTful API",   "HTTP/RESTful API"],
+        ["APIRESTful",        "api_restful",        "API RESTful",        "API RESTful"],
 
-      # misdirection
-      ["Capistrano",        "capistrano",         "Capistrano",       "Capistrano"],
-      ["CapiController",    "capi_controller",    "Capi controller",  "Capi Controller"],
-      ["HttpsApis",         "https_apis",         "Https apis",       "Https Apis"],
-      ["Html5",             "html5",              "Html5",            "Html5"],
-      ["Restfully",         "restfully",          "Restfully",        "Restfully"],
-      ["RoRails",           "ro_rails",           "Ro rails",         "Ro Rails"]
-    ].each do |camel, under, human, title|
-      assert_equal(camel, ActiveSupport::Inflector.camelize(under))
-      assert_equal(camel, ActiveSupport::Inflector.camelize(camel))
-      assert_equal(under, ActiveSupport::Inflector.underscore(under))
-      assert_equal(under, ActiveSupport::Inflector.underscore(camel))
-      assert_equal(title, ActiveSupport::Inflector.titleize(under))
-      assert_equal(title, ActiveSupport::Inflector.titleize(camel))
-      assert_equal(human, ActiveSupport::Inflector.humanize(under))
+        # misdirection
+        ["Capistrano",        "capistrano",         "Capistrano",       "Capistrano"],
+        ["CapiController",    "capi_controller",    "Capi controller",  "Capi Controller"],
+        ["HttpsApis",         "https_apis",         "Https apis",       "Https Apis"],
+        ["Html5",             "html5",              "Html5",            "Html5"],
+        ["Restfully",         "restfully",          "Restfully",        "Restfully"],
+        ["RoRails",           "ro_rails",           "Ro rails",         "Ro Rails"]
+      ].each do |camel, under, human, title|
+        assert_equal(camel, ActiveSupport::Inflector.camelize(under))
+        assert_equal(camel, ActiveSupport::Inflector.camelize(camel))
+        assert_equal(under, ActiveSupport::Inflector.underscore(under))
+        assert_equal(under, ActiveSupport::Inflector.underscore(camel))
+        assert_equal(title, ActiveSupport::Inflector.titleize(under))
+        assert_equal(title, ActiveSupport::Inflector.titleize(camel))
+        assert_equal(human, ActiveSupport::Inflector.humanize(under))
+      end
     end
   end
 
   def test_acronym_override
-    ActiveSupport::Inflector.inflections do |inflect|
-      inflect.acronym("API")
-      inflect.acronym("LegacyApi")
-    end
+    with_dup do
+      ActiveSupport::Inflector.inflections do |inflect|
+        inflect.acronym("API")
+        inflect.acronym("LegacyApi")
+      end
 
-    assert_equal("LegacyApi", ActiveSupport::Inflector.camelize("legacyapi"))
-    assert_equal("LegacyAPI", ActiveSupport::Inflector.camelize("legacy_api"))
-    assert_equal("SomeLegacyApi", ActiveSupport::Inflector.camelize("some_legacyapi"))
-    assert_equal("Nonlegacyapi", ActiveSupport::Inflector.camelize("nonlegacyapi"))
+      assert_equal("LegacyApi", ActiveSupport::Inflector.camelize("legacyapi"))
+      assert_equal("LegacyAPI", ActiveSupport::Inflector.camelize("legacy_api"))
+      assert_equal("SomeLegacyApi", ActiveSupport::Inflector.camelize("some_legacyapi"))
+      assert_equal("Nonlegacyapi", ActiveSupport::Inflector.camelize("nonlegacyapi"))
+    end
   end
 
   def test_acronyms_camelize_lower
-    ActiveSupport::Inflector.inflections do |inflect|
-      inflect.acronym("API")
-      inflect.acronym("HTML")
-    end
+    with_dup do
+      ActiveSupport::Inflector.inflections do |inflect|
+        inflect.acronym("API")
+        inflect.acronym("HTML")
+      end
 
-    assert_equal("htmlAPI", ActiveSupport::Inflector.camelize("html_api", false))
-    assert_equal("htmlAPI", ActiveSupport::Inflector.camelize("htmlAPI", false))
-    assert_equal("htmlAPI", ActiveSupport::Inflector.camelize("HTMLAPI", false))
+      assert_equal("htmlAPI", ActiveSupport::Inflector.camelize("html_api", false))
+      assert_equal("htmlAPI", ActiveSupport::Inflector.camelize("htmlAPI", false))
+      assert_equal("htmlAPI", ActiveSupport::Inflector.camelize("HTMLAPI", false))
+    end
   end
 
   def test_underscore_acronym_sequence
-    ActiveSupport::Inflector.inflections do |inflect|
-      inflect.acronym("API")
-      inflect.acronym("JSON")
-      inflect.acronym("HTML")
-    end
+    with_dup do
+      ActiveSupport::Inflector.inflections do |inflect|
+        inflect.acronym("API")
+        inflect.acronym("JSON")
+        inflect.acronym("HTML")
+      end
 
-    assert_equal("json_html_api", ActiveSupport::Inflector.underscore("JSONHTMLAPI"))
+      assert_equal("json_html_api", ActiveSupport::Inflector.underscore("JSONHTMLAPI"))
+    end
   end
 
   def test_underscore
@@ -300,20 +308,24 @@ class InflectorTest < ActiveSupport::TestCase
   end
 
   def test_humanize_by_rule
-    ActiveSupport::Inflector.inflections do |inflect|
-      inflect.human(/_cnt$/i, '\1_count')
-      inflect.human(/^prefx_/i, '\1')
+    with_dup do
+      ActiveSupport::Inflector.inflections do |inflect|
+        inflect.human(/_cnt$/i, '\1_count')
+        inflect.human(/^prefx_/i, '\1')
+      end
+      assert_equal("Jargon count", ActiveSupport::Inflector.humanize("jargon_cnt"))
+      assert_equal("Request", ActiveSupport::Inflector.humanize("prefx_request"))
     end
-    assert_equal("Jargon count", ActiveSupport::Inflector.humanize("jargon_cnt"))
-    assert_equal("Request", ActiveSupport::Inflector.humanize("prefx_request"))
   end
 
   def test_humanize_by_string
-    ActiveSupport::Inflector.inflections do |inflect|
-      inflect.human("col_rpted_bugs", "Reported bugs")
+    with_dup do
+      ActiveSupport::Inflector.inflections do |inflect|
+        inflect.human("col_rpted_bugs", "Reported bugs")
+      end
+      assert_equal("Reported bugs", ActiveSupport::Inflector.humanize("col_rpted_bugs"))
+      assert_equal("Col rpted bugs", ActiveSupport::Inflector.humanize("COL_rpted_bugs"))
     end
-    assert_equal("Reported bugs", ActiveSupport::Inflector.humanize("col_rpted_bugs"))
-    assert_equal("Col rpted bugs", ActiveSupport::Inflector.humanize("COL_rpted_bugs"))
   end
 
   def test_constantize
@@ -376,32 +388,34 @@ class InflectorTest < ActiveSupport::TestCase
   end
 
   def test_inflector_locality
-    ActiveSupport::Inflector.inflections(:es) do |inflect|
-      inflect.plural(/$/, 's')
-      inflect.plural(/z$/i, 'ces')
+    with_dup do
+      ActiveSupport::Inflector.inflections(:es) do |inflect|
+        inflect.plural(/$/, 's')
+        inflect.plural(/z$/i, 'ces')
 
-      inflect.singular(/s$/, '')
-      inflect.singular(/es$/, '')
+        inflect.singular(/s$/, '')
+        inflect.singular(/es$/, '')
 
-      inflect.irregular('el', 'los')
+        inflect.irregular('el', 'los')
+      end
+
+      assert_equal('hijos', 'hijo'.pluralize(:es))
+      assert_equal('luces', 'luz'.pluralize(:es))
+      assert_equal('luzs', 'luz'.pluralize)
+
+      assert_equal('sociedad', 'sociedades'.singularize(:es))
+      assert_equal('sociedade', 'sociedades'.singularize)
+
+      assert_equal('los', 'el'.pluralize(:es))
+      assert_equal('els', 'el'.pluralize)
+
+      ActiveSupport::Inflector.inflections(:es) { |inflect| inflect.clear }
+
+      assert ActiveSupport::Inflector.inflections(:es).plurals.empty?
+      assert ActiveSupport::Inflector.inflections(:es).singulars.empty?
+      assert !ActiveSupport::Inflector.inflections.plurals.empty?
+      assert !ActiveSupport::Inflector.inflections.singulars.empty?
     end
-
-    assert_equal('hijos', 'hijo'.pluralize(:es))
-    assert_equal('luces', 'luz'.pluralize(:es))
-    assert_equal('luzs', 'luz'.pluralize)
-
-    assert_equal('sociedad', 'sociedades'.singularize(:es))
-    assert_equal('sociedade', 'sociedades'.singularize)
-
-    assert_equal('los', 'el'.pluralize(:es))
-    assert_equal('els', 'el'.pluralize)
-
-    ActiveSupport::Inflector.inflections(:es) { |inflect| inflect.clear }
-
-    assert ActiveSupport::Inflector.inflections(:es).plurals.empty?
-    assert ActiveSupport::Inflector.inflections(:es).singulars.empty?
-    assert !ActiveSupport::Inflector.inflections.plurals.empty?
-    assert !ActiveSupport::Inflector.inflections.singulars.empty?
   end
 
   def test_clear_all
@@ -477,26 +491,28 @@ class InflectorTest < ActiveSupport::TestCase
   end
 
   [ :all, [] ].each do |scope|
-    ActiveSupport::Inflector.inflections do |inflect|
-      define_method("test_clear_inflections_with_#{scope.kind_of?(Array) ? "no_arguments" : scope}") do
-        # save all the inflections
-        singulars, plurals, uncountables = inflect.singulars, inflect.plurals, inflect.uncountables
+    define_method("test_clear_inflections_with_#{scope.kind_of?(Array) ? "no_arguments" : scope}") do
+      with_dup do
+        ActiveSupport::Inflector.inflections do |inflect|
+          # save all the inflections
+          singulars, plurals, uncountables = inflect.singulars, inflect.plurals, inflect.uncountables
 
-        # clear all the inflections
-        inflect.clear(*scope)
+          # clear all the inflections
+          inflect.clear(*scope)
 
-        assert_equal [], inflect.singulars
-        assert_equal [], inflect.plurals
-        assert_equal [], inflect.uncountables
+          assert_equal [], inflect.singulars
+          assert_equal [], inflect.plurals
+          assert_equal [], inflect.uncountables
 
-        # restore all the inflections
-        singulars.reverse_each { |singular| inflect.singular(*singular) }
-        plurals.reverse_each   { |plural|   inflect.plural(*plural) }
-        inflect.uncountable(uncountables)
+          # restore all the inflections
+          singulars.reverse_each { |singular| inflect.singular(*singular) }
+          plurals.reverse_each   { |plural|   inflect.plural(*plural) }
+          inflect.uncountable(uncountables)
 
-        assert_equal singulars, inflect.singulars
-        assert_equal plurals, inflect.plurals
-        assert_equal uncountables, inflect.uncountables
+          assert_equal singulars, inflect.singulars
+          assert_equal plurals, inflect.plurals
+          assert_equal uncountables, inflect.uncountables
+        end
       end
     end
   end

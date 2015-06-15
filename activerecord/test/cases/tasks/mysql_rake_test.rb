@@ -265,20 +265,37 @@ module ActiveRecord
 
     def test_structure_dump
       filename = "awesome-file.sql"
-      Kernel.expects(:system).with("mysqldump", "--result-file", filename, "--no-data", "--routines", "test-db").returns(true)
+      Kernel.expects(:system)
+        .with("mysqldump", "--result-file", filename, "--no-data", "--routines", "test-db")
+        .returns(true)
 
       ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, filename)
     end
 
     def test_warn_when_external_structure_dump_fails
       filename = "awesome-file.sql"
-      Kernel.expects(:system).with("mysqldump", "--result-file", filename, "--no-data", "--routines", "test-db").returns(false)
+      Kernel.expects(:system)
+        .with("mysqldump", "--result-file", filename, "--no-data", "--routines", "test-db")
+        .returns(false)
 
       warnings = capture(:stderr) do
         ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, filename)
       end
 
-      assert_match(/Could not dump the database structure/, warnings)
+      assert_match(/Error dumping database structure, mysqldump exited with status/, warnings)
+    end
+    
+    def test_warn_when_external_structure_dump_command_execution_fails
+      filename = "awesome-file.sql"
+      Kernel.expects(:system)
+        .with("mysqldump", "--result-file", filename, "--no-data", "--routines", "test-db")
+        .returns(nil)
+
+      warnings = capture(:stderr) do
+        ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, filename)
+      end
+
+      assert_match(/is mysqldump installed/, warnings)
     end
 
     def test_structure_dump_with_port_number
@@ -292,7 +309,9 @@ module ActiveRecord
 
     def test_structure_dump_with_ssl
       filename = "awesome-file.sql"
-      Kernel.expects(:system).with("mysqldump", "--ssl-ca=ca.crt", "--result-file", filename, "--no-data", "--routines", "test-db").returns(true)
+      Kernel.expects(:system)
+        .with("mysqldump", "--ssl-ca=ca.crt", "--result-file", filename, "--no-data", "--routines", "test-db")
+        .returns(true)
 
       ActiveRecord::Tasks::DatabaseTasks.structure_dump(
         @configuration.merge("sslca" => "ca.crt"),
@@ -310,7 +329,9 @@ module ActiveRecord
 
     def test_structure_load
       filename = "awesome-file.sql"
-      Kernel.expects(:system).with('mysql', '--execute', %{SET FOREIGN_KEY_CHECKS = 0; SOURCE #{filename}; SET FOREIGN_KEY_CHECKS = 1}, "--database", "test-db")
+      Kernel.expects(:system)
+        .with('mysql', '--execute', %{SET FOREIGN_KEY_CHECKS = 0; SOURCE #{filename}; SET FOREIGN_KEY_CHECKS = 1}, "--database", "test-db")
+        ..returns(true)
 
       ActiveRecord::Tasks::DatabaseTasks.structure_load(@configuration, filename)
     end

@@ -61,9 +61,12 @@ module ActiveRecord
         args.concat(["--no-data"])
         args.concat(["--routines"])
         args.concat(["#{configuration['database']}"])
-        unless Kernel.system(*args)
-          $stderr.puts "Could not dump the database structure. "\
-                       "Make sure `mysqldump` is in your PATH and check the command output for warnings."
+        
+        case Kernel.system(*args)
+        when nil
+          raise "Could not dump the database structure. is mysqldump installed and in your PATH?"
+        when false
+          raise "Error dumping database structure, mysqldump exited with status #{$?.exitstatus}"
         end
       end
 
@@ -71,7 +74,13 @@ module ActiveRecord
         args = prepare_command_options('mysql')
         args.concat(['--execute', %{SET FOREIGN_KEY_CHECKS = 0; SOURCE #{filename}; SET FOREIGN_KEY_CHECKS = 1}])
         args.concat(["--database", "#{configuration['database']}"])
-        Kernel.system(*args)
+        
+        case Kernel.system(*args)
+        when nil
+          raise "Unable to load structure, is mysql installed?"
+        when false
+          raise "Error loading structure, mysql exited with status #{$?.exitstatus}"
+        end
       end
 
       private

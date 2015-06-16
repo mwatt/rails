@@ -24,7 +24,6 @@ module ActiveRecord
         rows.each(&block)
       end
 
-
       private
         def rows
           return @rows if @rows

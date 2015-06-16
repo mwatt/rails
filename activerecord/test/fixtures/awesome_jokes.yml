@@ -1,0 +1,5 @@
+_fixture:
+  model_class: AJoke
+
+an_awesome_joke:
+  name: I forgot

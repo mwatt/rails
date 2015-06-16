@@ -1,3 +1,18 @@
+*   Allow fixtures YAML files to set the model class in the file itself.
+
+    To load the fixtures file `accounts.yml` as the `User` model, use:
+
+        ```yaml
+          _fixture:
+            model_class: User
+          david:
+            name: David
+        ```
+
+    Fixes #9516.
+
+    *Roque Pinel*
+
 *   Descriptive error message when fixtures contain a missing column.
 
     Closes #21201.

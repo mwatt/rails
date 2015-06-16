@@ -5,11 +5,14 @@ task routes: :environment do
   all_routes = Rails.application.routes.routes
   require 'action_dispatch/routing/inspector'
   inspector = ActionDispatch::Routing::RoutesInspector.new(all_routes)
-  options = { filter: ENV['CONTROLLER'] }
+  options = { controller: ENV['CONTROLLER'] }
 
   OptionParser.new do |opts|
     opts.banner = "Usage: rake routes [options]"
-    opts.on("-g", "--grep PATTERN", String) do |pattern|
+    opts.on("-c", "--controller [PATTERN]", String) do |pattern|
+      options[:controller] = pattern
+    end
+    opts.on("-g", "--grep [PATTERN]", String) do |pattern|
       options[:pattern] = pattern
     end
   end.parse!(ARGV.reject { |x| x == "routes" })

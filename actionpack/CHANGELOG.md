@@ -1,5 +1,6 @@
-*   Add `-g` option for `rake routes` task. This option returns the url `name`,
-    `verb`, `path` and `reqs` field that match the pattern.
+*   Add `-g` and `-c` options for `rake routes` task. This options returns the url `name`,
+    `verb`, `path` and `reqs` field that match the pattern or returns routers for specific
+    controller.
 
     See #18902.
 

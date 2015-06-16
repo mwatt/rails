@@ -64,10 +64,8 @@ module ActionDispatch
       end
 
       def format(formatter, **options)
-        routes_to_display = filter_routes(options[:filter])
-
+        routes_to_display = filter_routes(options)
         routes = collect_routes(routes_to_display)
-        routes = grep_routes(routes, options[:pattern])
 
         if routes.none?
           formatter.no_routes
@@ -87,16 +85,15 @@ module ActionDispatch
 
       private
 
-      def grep_routes(routes, pattern)
-        routes.select { |r| /#{pattern}/ =~ r.values.join(' ') }
-      end
-
-      def filter_routes(filter)
-        if filter
-          @routes.select { |route| route.defaults[:controller] == filter }
+      def filter_routes(options)
+        routes = if options[:controller]
+          filter = options[:controller].downcase.sub(/_?controller\z/, '')
+          @routes.select { |r| r.defaults[:controller] == filter }
         else
           @routes
         end
+
+        routes.select { |r| /#{options[:pattern]}/ =~ r.defaults.values.join(' ') }
       end
 
       def collect_routes(routes)

@@ -1,4 +1,4 @@
-# encoding: UTF-8
+# encoding: utf-8
 require 'abstract_unit'
 
 module ActionDispatch
@@ -217,6 +217,13 @@ module ActionDispatch
         assert_equal ['Not Found'], resp.last
         assert_equal 'pass', resp[1]['X-Cascade']
         assert_equal 404, resp.first
+      end
+
+      def test_invalid_url_path
+        routes = Class.new { include ActionDispatch::Routing::Redirection }.new
+        route = routes.redirect("/foo/bar/%{id}")
+        resp = route.serve(rails_env({ 'REQUEST_METHOD' => 'GET', 'PATH_INFO' => '/foo/(function(){})' }))
+        assert_equal 400, resp.first
       end
 
       def test_clear_trailing_slash_from_script_name_on_root_unanchored_routes

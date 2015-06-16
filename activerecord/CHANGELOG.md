@@ -1,3 +1,18 @@
+*   Allow fixtures YAML files to set the model class using `set_model_class`.
+
+    To load the fixtures file `accounts.yml` as the `User` model, use:
+
+        ```
+          <% set_model_class 'User' %>
+
+          david:
+            name: David
+        ```
+
+    Fixes #9516.
+
+    *Roque Pinel*
+
 *   Make `remove_index :table, :column` reversible.
 
     *Yves Senn*

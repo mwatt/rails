@@ -81,6 +81,10 @@ ActiveRecord::Schema.define do
     t.integer     :value
   end
 
+  create_table :awesome_jokes, force: true do |t|
+    t.string :name
+  end
+
   create_table :binaries, force: true do |t|
     t.string :name
     t.binary :data
@@ -360,6 +364,11 @@ ActiveRecord::Schema.define do
 
   create_table :jobs, force: true do |t|
     t.integer :ideal_reference_id
+  end
+
+  create_table :joke_comments, force: true do |t|
+    t.string  :content
+    t.integer :joke_id
   end
 
   create_table :keyboards, force: true, id: false do |t|

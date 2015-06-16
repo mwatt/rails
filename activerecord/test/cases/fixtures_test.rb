@@ -13,6 +13,7 @@ require 'models/course'
 require 'models/developer'
 require 'models/computer'
 require 'models/joke'
+require 'models/joke_comment'
 require 'models/matey'
 require 'models/parrot'
 require 'models/pirate'
@@ -504,6 +505,40 @@ class OverRideFixtureMethodTest < ActiveRecord::TestCase
   def test_fixture_methods_can_be_overridden
     x = topics :first
     assert_equal 'omg', x.title
+  end
+end
+
+class FixtureWithSetModelClassTest < ActiveRecord::TestCase
+  fixtures :awesome_jokes, :joke_comments
+
+  # Set to false to blow away fixtures cache and ensure our fixtures are loaded
+  # and thus takes into account the +set_model_class+.
+  self.use_transactional_tests = false
+
+  def test_table_method
+    assert_kind_of AJoke, awesome_jokes(:an_awesome_joke)
+  end
+
+  def test_loads_the_associations_to_fixtures_with_set_model_class
+    joke = awesome_jokes(:an_awesome_joke)
+    comment = joke_comments(:from_john_doe)
+    assert_equal [comment], joke.comments
+    assert_equal joke, comment.joke
+  end
+end
+
+class FixtureWithSetModelClassPrevailsTest < ActiveRecord::TestCase
+  set_fixture_class items: Book,
+                    awesome_jokes: Joke # It should be ignored.
+  fixtures :awesome_jokes, :items
+
+  # Set to false to blow away fixtures cache and ensure our fixtures are loaded
+  # and thus takes into account the +set_model_class+.
+  self.use_transactional_tests = false
+
+  def test_table_method
+    assert_kind_of AJoke, awesome_jokes(:an_awesome_joke)
+    assert_kind_of Book, items(:dvd)
   end
 end
 

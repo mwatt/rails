@@ -123,6 +123,20 @@ END
         end
       end
 
+      def test_model_class_is_not_set
+        yaml = "one:\n  name: foo\n"
+        tmp_yaml ['curious', 'yml'], yaml do |t|
+          assert_nil File.open(t.path).model_class
+        end
+      end
+
+      def test_model_class_is_set
+        yaml = "one:\n  name: foo\n<% set_model_class 'Book' %>\n"
+        tmp_yaml ['curious', 'yml'], yaml do |t|
+          assert_equal 'Book', File.open(t.path).model_class
+        end
+      end
+
       private
       def tmp_yaml(name, contents)
         t = Tempfile.new name

@@ -18,12 +18,17 @@ module ActiveRecord
       def initialize(file)
         @file = file
         @rows = nil
+        @model_class = nil
       end
 
       def each(&block)
         rows.each(&block)
       end
 
+      def model_class
+        rows # Ensure the YAML was loaded.
+        @model_class
+      end
 
       private
         def rows
@@ -39,7 +44,9 @@ module ActiveRecord
 
         def render(content)
           context = ActiveRecord::FixtureSet::RenderContext.create_subclass.new
-          ERB.new(content).result(context.get_binding)
+          ERB.new(content).result(context.get_binding).tap do
+            @model_class = context.get_binding.eval("@model_class")
+          end
         end
 
         # Validate our unmarshalled data.

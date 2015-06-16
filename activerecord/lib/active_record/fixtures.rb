@@ -578,21 +578,16 @@ module ActiveRecord
       @name     = name
       @path     = path
       @config   = config
-      @model_class = nil
 
-      if class_name.is_a?(Class) # TODO: Should be an AR::Base type class, or any?
-        @model_class = class_name
-      else
-        @model_class = class_name.safe_constantize if class_name
-      end
+      self.model_class = class_name
+
+      @fixtures = read_fixture_files(path)
 
       @connection  = connection
 
       @table_name = ( model_class.respond_to?(:table_name) ?
                       model_class.table_name :
                       self.class.default_fixture_table_name(name, config) )
-
-      @fixtures = read_fixture_files path, @model_class
     end
 
     def [](x)
@@ -759,13 +754,25 @@ module ActiveRecord
         @column_names ||= @connection.columns(@table_name).collect(&:name)
       end
 
-      def read_fixture_files(path, model_class)
+      def model_class=(class_name)
+        if class_name.is_a?(Class) # TODO: Should be an AR::Base type class, or any?
+          @model_class = class_name
+        else
+          @model_class = class_name.safe_constantize if class_name
+        end
+      end
+
+      # Loads the fixtures from the YAML file at +path+.
+      # If the file sets the +model_class+, then it overrides
+      # the current instance value.
+      def read_fixture_files(path)
         yaml_files = Dir["#{path}/{**,*}/*.yml"].select { |f|
           ::File.file?(f)
         } + [yaml_file_path(path)]
 
         yaml_files.each_with_object({}) do |file, fixtures|
           FixtureSet::File.open(file) do |fh|
+            self.model_class = fh.model_class if fh.model_class
             fh.each do |fixture_name, row|
               fixtures[fixture_name] = ActiveRecord::Fixture.new(row, model_class)
             end
@@ -1016,8 +1023,17 @@ end
 class ActiveRecord::FixtureSet::RenderContext # :nodoc:
   def self.create_subclass
     Class.new ActiveRecord::FixtureSet.context_class do
+      def initialize
+        super
+        @model_class = nil
+      end
+
       def get_binding
         binding()
+      end
+
+      def set_model_class(model_class)
+        @model_class = model_class
       end
     end
   end

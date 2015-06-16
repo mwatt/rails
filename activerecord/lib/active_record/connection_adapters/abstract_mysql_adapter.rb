@@ -769,6 +769,8 @@ module ActiveRecord
       def initialize_type_map(m) # :nodoc:
         super
 
+        m.alias_type %r(set)i,           'varchar'
+
         register_class_with_limit m, %r(char)i, MysqlString
 
         m.register_type %r(tinytext)i,   Type::Text.new(limit: 2**8 - 1)
@@ -789,7 +791,6 @@ module ActiveRecord
         register_integer_type m, %r(^tinyint)i,   limit: 1
 
         m.alias_type %r(tinyint\(1\))i,  'boolean' if emulate_booleans
-        m.alias_type %r(set)i,           'varchar'
         m.alias_type %r(year)i,          'integer'
         m.alias_type %r(bit)i,           'binary'
 

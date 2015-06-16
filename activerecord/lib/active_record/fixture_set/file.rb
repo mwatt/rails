@@ -18,12 +18,25 @@ module ActiveRecord
       def initialize(file)
         @file = file
         @rows = nil
+        @model_class = nil
       end
 
       def each(&block)
         rows.each(&block)
       end
 
+      def model_class
+        return @model_class if @model_class
+
+        rows.delete_if do |fixture_name, row|
+          if ret = fixture_name == '_fixture'
+            @model_class = row['model_class']
+          end
+          ret
+        end
+
+        @model_class
+      end
 
       private
         def rows

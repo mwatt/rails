@@ -10,7 +10,7 @@ require 'models/person'
 require 'models/reference'
 
 class RelationScopingTest < ActiveRecord::TestCase
-  fixtures :authors, :developers, :projects, :comments, :posts, :developers_projects
+  fixtures :authors, :author_addresses, :developers, :projects, :comments, :posts, :developers_projects
 
   setup do
     developers(:david)
@@ -217,7 +217,7 @@ class RelationScopingTest < ActiveRecord::TestCase
 end
 
 class NestedRelationScopingTest < ActiveRecord::TestCase
-  fixtures :authors, :developers, :projects, :comments, :posts
+  fixtures :authors, :author_addresses, :developers, :projects, :comments, :posts
 
   def test_merge_options
     Developer.where('salary = 80000').scoping do

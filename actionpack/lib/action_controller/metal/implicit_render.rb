@@ -6,11 +6,17 @@ module ActionController
       ret
     end
 
-    # Perform the default rendering for the given action and variant.
-    # Essentially calls +render+ with +args+ if there is an appropriate template for the request.
+    # Renders the template corresponding to the controller action, if it exists.
+    # The action name, format, and variant are all taken into account.
+    # For example, the "new" action with an HTML format and variant "phone" 
+    # would try to render the <tt>new.html+phone.erb</tt> template.
     #
-    # If there is no appropriate template, and no block is given, defers to
-    # +default_missing_template_action+.  Otherwise, executes the block.
+    # If no template is found +default_missing_template_action+ is called, unless
+    # a block is passed. In that case, it will override +default_missing_template_action+:
+    #
+    #   default_render do
+    #     head 404 # No template was found
+    #   end
     #
     # +args+:: passed through to render
     def default_render(*args)
@@ -25,8 +31,8 @@ module ActionController
       end
     end
 
-    # When there is no template for a given action, returns an empty HEAD.  To override,
-    # pass a block to +default_render+
+    # Called when +default_render+ cannot find a template to render.
+    # Renders `head :no_content`.
     #
     # +args+:: passed through from default_render
     def default_missing_template_action(*args)

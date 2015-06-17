@@ -142,11 +142,11 @@ module ActiveSupport
     #
     #   Time.zone.now.xmlschema  # => "2014-12-04T11:02:37-05:00"
     def xmlschema(fraction_digits = 0)
-      fraction = if fraction_digits.to_i > 0
-        (".%06i" % time.usec)[0, fraction_digits.to_i + 1]
-      end
+      fraction_digits = fraction_digits.to_i
+      format = "%FT%T"
+      format << ".%#{fraction_digits}N" if fraction_digits > 0
 
-      "#{time.strftime("%Y-%m-%dT%H:%M:%S")}#{fraction}#{formatted_offset(true, 'Z')}"
+      "#{time.strftime(format)}#{formatted_offset(true, 'Z')}"
     end
     alias_method :iso8601, :xmlschema
 

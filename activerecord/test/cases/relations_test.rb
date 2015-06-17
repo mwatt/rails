@@ -1105,6 +1105,14 @@ class RelationTest < ActiveRecord::TestCase
     assert_queries(1) { assert_equal 0, no_posts.size }
   end
 
+  def test_size_before_and_after_load
+    posts = Post.select("author_id").group("author_id")
+
+    posts_before_load = posts.size
+    posts_after_load = posts.to_a.size
+    assert_equal posts_before_load, posts_after_load
+  end
+
   def test_empty_with_zero_limit
     posts = Post.limit(0)
 

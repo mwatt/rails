@@ -17,8 +17,6 @@ module ActionController
     #   default_render do
     #     head 404 # No template was found
     #   end
-    #
-    # +args+:: passed through to render
     def default_render(*args)
       if template_exists?(action_name.to_s, _prefixes, variants: request.variant)
         render(*args)
@@ -26,16 +24,14 @@ module ActionController
         if block_given?
           yield(*args)
         else
-          default_missing_template_action(*args)
+          default_missing_template_action
         end
       end
     end
 
     # Called when +default_render+ cannot find a template to render.
     # Renders `head :no_content`.
-    #
-    # +args+:: passed through from default_render
-    def default_missing_template_action(*args)
+    def default_missing_template_action
       logger.info "No template found for #{self.class.name}\##{action_name}, rendering head :no_content" if logger
       head :no_content
     end

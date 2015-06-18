@@ -1,3 +1,10 @@
+*   Add `ActiveSupport::TimeZone.country_zones` helper to retrieve time zones
+    for every country that tzdata knows about.
+
+    Make `ActiveSupport::TimeZone.us_zones` helper use it.
+
+    *Andrey Novikov*
+
 *   Fix `TimeWithZone#eql?` to properly handle `TimeWithZone` created from `DateTime`:
         twz = DateTime.now.in_time_zone
         twz.eql?(twz.dup) => true

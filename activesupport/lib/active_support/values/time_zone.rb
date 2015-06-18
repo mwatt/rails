@@ -190,6 +190,7 @@ module ActiveSupport
     UTC_OFFSET_WITHOUT_COLON = UTC_OFFSET_WITH_COLON.tr(':', '')
 
     @lazy_zones_map = ThreadSafe::Cache.new
+    @country_zones  = ThreadSafe::Cache.new
 
     class << self
       # Assumes self represents an offset from UTC in seconds (as returned from
@@ -248,7 +249,19 @@ module ActiveSupport
       # A convenience method for returning a collection of TimeZone objects
       # for time zones in the USA.
       def us_zones
-        @us_zones ||= all.find_all { |z| z.name =~ /US|Arizona|Indiana|Hawaii|Alaska/ }
+        country_zones(:us)
+      end
+
+      # A convenience method for returning a collection of TimeZone objects
+      # for time zones in the country specified by its ISO 3166-1 Alpha2 code.
+      def country_zones(country_code)
+        code = country_code.to_s.upcase
+        @country_zones[code] ||=
+          TZInfo::Country.get(code).zone_identifiers.select do |tz_id|
+            MAPPING.key(tz_id)
+          end.map do |tz_id|
+            self[MAPPING.key(tz_id)]
+          end.sort
       end
 
       private

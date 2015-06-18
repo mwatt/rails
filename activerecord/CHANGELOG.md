@@ -1,3 +1,7 @@
+*   Made Uniqueness Validator pass scope values to the error message
+
+    *Isaac Betesh*
+
 *   Correct query for PostgreSQL 8.2 compatibility.
 
     *Ben Murphy*, *Matthew Draper*

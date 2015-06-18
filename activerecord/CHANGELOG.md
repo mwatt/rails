@@ -1,3 +1,7 @@
+*   Made Uniqueness Validator pass scope values to the error message
+
+    *Isaac Betesh*
+
 *   Make `remove_index :table, :column` reversible.
 
     *Yves Senn*

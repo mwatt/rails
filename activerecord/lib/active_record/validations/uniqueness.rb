@@ -18,12 +18,14 @@ module ActiveRecord
 
         relation = build_relation(finder_class, table, attribute, value)
         relation = relation.where.not(finder_class.primary_key => record.id) if record.persisted?
-        relation = scope_relation(record, table, relation)
+        scope_hash = scope_relation(record)
+        relation = relation.where(scope_hash) unless scope_hash.empty?
         relation = relation.merge(options[:conditions]) if options[:conditions]
 
         if relation.exists?
           error_options = options.except(:case_sensitive, :scope, :conditions)
           error_options[:value] = value
+          error_options[:scopes] = scope_hash unless scope_hash.empty?
 
           record.errors.add(attribute, :taken, error_options)
         end
@@ -80,18 +82,17 @@ module ActiveRecord
         klass.none
       end
 
-      def scope_relation(record, table, relation)
-        Array(options[:scope]).each do |scope_item|
+      def scope_relation(record)
+        Array(options[:scope]).inject({}) do |hash, scope_item|
           if reflection = record.class._reflect_on_association(scope_item)
             scope_value = record.send(reflection.foreign_key)
             scope_item  = reflection.foreign_key
           else
             scope_value = record._read_attribute(scope_item)
           end
-          relation = relation.where(scope_item => scope_value)
+          hash[scope_item] = scope_value
+          hash
         end
-
-        relation
       end
 
       def map_enum_attribute(klass, attribute, value)

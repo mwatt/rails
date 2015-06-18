@@ -1,3 +1,7 @@
+*   Added `index` option to add_column migration.
+
+    *Mehmet Emin İNAÇ*
+
 *   Make `remove_index :table, :column` reversible.
 
     *Yves Senn*

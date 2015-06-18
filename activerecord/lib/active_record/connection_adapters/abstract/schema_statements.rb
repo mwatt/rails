@@ -417,6 +417,10 @@ module ActiveRecord
         at = create_alter_table table_name
         at.add_column(column_name, type, options)
         execute schema_creation.accept at
+        if(options[:index])
+          index_options = options[:index].is_a?(Hash) ? options[:index] : {}
+          add_index(table_name, column_name, index_options)
+        end
       end
 
       # Removes the given columns from the table definition.

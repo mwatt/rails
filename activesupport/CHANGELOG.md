@@ -1,3 +1,8 @@
+*   Add `ActiveSupport::TimeZone.country_zones` helper to retrieve time zones
+    for every country that tzdata knows about.
+
+    *Andrey Novikov*
+
 *   Fix a range of values for parameters of the Time#change
 
     *Nikolay Kondratyev*

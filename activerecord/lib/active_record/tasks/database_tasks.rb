@@ -36,7 +36,6 @@ module ActiveRecord
     #   DatabaseTasks.create_current('production')
     module DatabaseTasks
       extend self
-
       attr_writer :current_config, :db_dir, :migrations_paths, :fixtures_path, :root, :env, :seed_loader
       attr_accessor :database_configuration
 
@@ -250,6 +249,17 @@ module ActiveRecord
                 "loader with ActiveRecord::Tasks::DatabaseTasks.seed_loader = your_seed_loader\n" +
                 "Seed loader should respond to load_seed method"
         end
+      end
+
+      def self.run_cmd(cmd, args, action)
+        fail run_cmd_error(cmd, args, action) unless Kernel.system(cmd, *args)
+      end
+
+      def run_cmd_error(cmd, args, action)
+        msg = "Error #{action} database: failed to execute "
+        msg << "`#{cmd} #{args.join(' ')}`. Please "
+        msg << "check that #{cmd} is present on this system, is in your PATH"
+        msg << ', and has proper permissions.'
       end
 
       private

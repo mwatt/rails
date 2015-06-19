@@ -203,7 +203,7 @@ module ActiveRecord
 
     def test_structure_dump
       filename = "awesome-file.sql"
-       args = [ ["pg_dump", "pg_dump"], 
+       args = [ "pg_dump", 
                 "-i", 
                 "-s", 
                 "-x", 

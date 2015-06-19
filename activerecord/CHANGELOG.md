@@ -1,3 +1,10 @@
+*   Added run_cmd class method to ActiveRecord::Tasks::DatabaseTasks for
+    drying up Kernel.system() calls within this namespace and to avoid
+    shell expansion by using a paramter list instead of string as arguments
+    for Kernel.system()
+
+    *Bryan Paxton*
+
 *   Let `WITH` queries (Common Table Expressions) be explainable.
 
     *Vladimir Kochnev*

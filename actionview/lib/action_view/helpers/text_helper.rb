@@ -204,7 +204,7 @@ module ActionView
 
       # Attempts to pluralize the +singular+ word unless +count+ is 1. If
       # +plural+ is supplied, it will use that when count is > 1, otherwise
-      # it will use the Inflector to determine the plural form.
+      # it will use the Inflector to determine the plural form for the current locale.
       #
       #   pluralize(1, 'person')
       #   # => 1 person
@@ -221,7 +221,7 @@ module ActionView
         word = if (count == 1 || count =~ /^1(\.0+)?$/)
           singular
         else
-          plural || singular.pluralize
+          plural || singular.pluralize(I18n.locale)
         end
 
         "#{count || 0} #{word}"

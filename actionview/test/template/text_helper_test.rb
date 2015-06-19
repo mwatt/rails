@@ -383,6 +383,23 @@ class TextHelperTest < ActionView::TestCase
     assert_equal("12 berries", pluralize(12, "berry"))
   end
 
+  def test_localized_pluralization
+    old_locale = I18n.locale
+
+    begin
+      I18n.locale = :de
+
+      ActiveSupport::Inflector.inflections(:de) do |inflect|
+        inflect.irregular 'region', 'regionen'
+      end
+
+      assert_equal("1 region",   pluralize(1, "region"))
+      assert_equal("2 regionen", pluralize(2, "region"))
+    ensure
+      I18n.locale = old_locale
+    end
+  end
+
   def test_cycle_class
     value = Cycle.new("one", 2, "3")
     assert_equal("one", value.to_s)

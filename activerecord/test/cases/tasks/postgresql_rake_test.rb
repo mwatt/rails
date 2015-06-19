@@ -195,54 +195,30 @@ module ActiveRecord
         'adapter'  => 'postgresql',
         'database' => 'my-app-db'
       }
-      @filename = "awesome-file.sql"
 
       ActiveRecord::Base.stubs(:connection).returns(@connection)
       ActiveRecord::Base.stubs(:establish_connection).returns(true)
       Kernel.stubs(:system)
-      File.stubs(:open)
     end
 
     def test_structure_dump
-      Kernel.expects(:system).with("pg_dump -i -s -x -O -f #{@filename}  my-app-db").returns(true)
+      filename = "awesome-file.sql"
+       args = [ ["pg_dump", "pg_dump"], 
+                "-i", 
+                "-s", 
+                "-x", 
+                "-O", 
+                "-f", 
+                filename, 
+                "my-app-db"
+       ]
+      Kernel.expects(:system).with(*args).returns(true)
+      @connection.expects(:schema_search_path).returns("foo")
 
-      ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, @filename)
-    end
-
-    def test_structure_dump_with_schema_search_path
-      @configuration['schema_search_path'] = 'foo,bar'
-
-      Kernel.expects(:system).with("pg_dump -i -s -x -O -f #{@filename} --schema=foo --schema=bar my-app-db").returns(true)
-
-      ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, @filename)
-    end
-
-    def test_structure_dump_with_schema_search_path_and_dump_schemas_all
-      @configuration['schema_search_path'] = 'foo,bar'
-
-      Kernel.expects(:system).with("pg_dump -i -s -x -O -f #{@filename}  my-app-db").returns(true)
-
-      with_dump_schemas(:all) do
-        ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, @filename)
-      end
-    end
-
-    def test_structure_dump_with_dump_schemas_string
-      Kernel.expects(:system).with("pg_dump -i -s -x -O -f #{@filename} --schema=foo --schema=bar my-app-db").returns(true)
-
-      with_dump_schemas('foo,bar') do
-        ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, @filename)
-      end
-    end
-
-    private
-
-    def with_dump_schemas(value, &block)
-      old_dump_schemas = ActiveRecord::Base.dump_schemas
-      ActiveRecord::Base.dump_schemas = value
-      yield
+      ActiveRecord::Tasks::DatabaseTasks.structure_dump(@configuration, filename)
+      assert File.exist?(filename)
     ensure
-      ActiveRecord::Base.dump_schemas = old_dump_schemas
+      FileUtils.rm(filename)
     end
   end
 
@@ -261,15 +237,15 @@ module ActiveRecord
 
     def test_structure_load
       filename = "awesome-file.sql"
-      Kernel.expects(:system).with("psql -X -q -f #{filename} my-app-db")
-
+      args = [['psql', 'psql',], '-q', '-f', filename, 'my-app-db']
+      Kernel.expects(:system).with(*args).returns(true)
       ActiveRecord::Tasks::DatabaseTasks.structure_load(@configuration, filename)
     end
 
     def test_structure_load_accepts_path_with_spaces
       filename = "awesome file.sql"
-      Kernel.expects(:system).with("psql -X -q -f awesome\\ file.sql my-app-db")
-
+      args = [['psql', 'psql'], '-q', '-f', filename, 'my-app-db']
+      Kernel.expects(:system).with(*args).returns(true)
       ActiveRecord::Tasks::DatabaseTasks.structure_load(@configuration, filename)
     end
   end

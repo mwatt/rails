@@ -416,12 +416,12 @@ module ActiveRecord
         register_class_with_limit m, %r(float)i,         Type::Float
         register_class_with_limit m, %r(int)i,           Type::Integer
 
-        m.alias_type %r(blob)i,      'binary'
-        m.alias_type %r(clob)i,      'text'
-        m.alias_type %r(timestamp)i, 'datetime'
-        m.alias_type %r(numeric)i,   'decimal'
-        m.alias_type %r(number)i,    'decimal'
-        m.alias_type %r(double)i,    'float'
+        m.alias_type %r(^blob)i,      'binary'
+        m.alias_type %r(^clob)i,      'text'
+        m.alias_type %r(^timestamp)i, 'datetime'
+        m.alias_type %r(^numeric)i,   'decimal'
+        m.alias_type %r(^number)i,    'decimal'
+        m.alias_type %r(^double)i,    'float'
 
         m.register_type(%r(decimal)i) do |sql_type|
           scale = extract_scale(sql_type)

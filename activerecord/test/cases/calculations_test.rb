@@ -353,6 +353,11 @@ class CalculationsTest < ActiveRecord::TestCase
     assert_equal 6, Account.select("DISTINCT accounts.id").includes(:firm).count
   end
 
+  def test_count_with_arel_attribute
+    assert_equal 5, Account.select(Account.arel_table[:firm_id]).count
+    assert_equal 4, Account.distinct.select(Account.arel_table[:firm_id]).count
+  end
+
   def test_count_with_column_parameter
     assert_equal 5, Account.count(:firm_id)
   end
@@ -376,6 +381,11 @@ class CalculationsTest < ActiveRecord::TestCase
   def test_should_count_field_in_joined_table
     assert_equal 5, Account.joins(:firm).count('companies.id')
     assert_equal 4, Account.joins(:firm).distinct.count('companies.id')
+  end
+
+  def test_count_field_in_joined_table_with_arel_attribute
+    assert_equal 5, Account.joins(:firm).select(Company.arel_table[:id]).count
+    assert_equal 4, Account.joins(:firm).distinct.select(Company.arel_table[:id]).count
   end
 
   def test_should_count_field_in_joined_table_with_group_by

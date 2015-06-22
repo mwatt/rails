@@ -433,6 +433,11 @@ class AssetTagHelperTest < ActionView::TestCase
     ImagePathToTag.each { |method, tag| assert_dom_equal(tag, eval(method)) }
   end
 
+  def test_image_path_raises_an_error_for_nil_source
+    exception = assert_raise(ArgumentError) { image_path(nil) }
+    assert_equal("Cannot pass nil as image source", exception.message)
+  end
+
   def test_path_to_image_alias_for_image_path
     PathToImageToTag.each { |method, tag| assert_dom_equal(tag, eval(method)) }
   end

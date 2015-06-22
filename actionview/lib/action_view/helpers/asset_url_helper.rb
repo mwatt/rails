@@ -299,6 +299,10 @@ module ActionView
       # The alias +path_to_image+ is provided to avoid that. Rails uses the alias internally, and
       # plugin authors are encouraged to do so.
       def image_path(source, options = {})
+        if source.nil?
+          raise ArgumentError, "Cannot pass nil as image source"
+        end
+
         path_to_asset(source, {type: :image}.merge!(options))
       end
       alias_method :path_to_image, :image_path # aliased to avoid conflicts with an image_path named route

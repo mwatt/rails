@@ -1426,7 +1426,27 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
     assert firm.companies.exists?(:name => 'child')
   end
 
+  def test_restrict_with_error_is_deprecated_using_key_many
+    firm = RestrictedWithErrorFirm.create!(:name => 'restrict')
+    firm.companies.create(:name => 'child')
+
+    assert !firm.companies.empty?
+
+    assert_deprecated { firm.destroy }
+
+    assert !firm.errors.empty?
+
+    assert_equal "Cannot delete record because dependent companies exist", firm.errors[:base].first
+    assert RestrictedWithErrorFirm.exists?(:name => 'restrict')
+    assert firm.companies.exists?(:name => 'child')
+  end
+
   def test_restrict_with_error
+    # force the translations load
+    I18n.backend.send(:init_translations)
+    # remove the deprecated key from the loaded translations
+    I18n.backend.send(:translations)[:en][:activerecord][:errors][:messages][:restrict_dependent_destroy].delete(:many)
+
     firm = RestrictedWithErrorFirm.create!(:name => 'restrict')
     firm.companies.create(:name => 'child')
 
@@ -1439,6 +1459,8 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
     assert_equal "Cannot delete record because dependent companies exist", firm.errors[:base].first
     assert RestrictedWithErrorFirm.exists?(:name => 'restrict')
     assert firm.companies.exists?(:name => 'child')
+  ensure
+    I18n.backend.reload!
   end
 
   def test_included_in_collection

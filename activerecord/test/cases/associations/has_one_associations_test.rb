@@ -178,7 +178,26 @@ class HasOneAssociationsTest < ActiveRecord::TestCase
     assert firm.account.present?
   end
 
+  def test_restrict_with_error_is_deprecated_using_key_one
+    firm = RestrictedWithErrorFirm.create!(:name => 'restrict')
+    firm.create_account(:credit_limit => 10)
+
+    assert_not_nil firm.account
+
+    assert_deprecated { firm.destroy }
+
+    assert !firm.errors.empty?
+    assert_equal "Cannot delete record because a dependent account exists", firm.errors[:base].first
+    assert RestrictedWithErrorFirm.exists?(:name => 'restrict')
+    assert firm.account.present?
+  end
+
   def test_restrict_with_error
+    # force the translations load
+    I18n.backend.send(:init_translations)
+    # remove the deprecated key from the loaded translations
+    I18n.backend.send(:translations)[:en][:activerecord][:errors][:messages][:restrict_dependent_destroy].delete(:one)
+
     firm = RestrictedWithErrorFirm.create!(:name => 'restrict')
     firm.create_account(:credit_limit => 10)
 
@@ -190,6 +209,8 @@ class HasOneAssociationsTest < ActiveRecord::TestCase
     assert_equal "Cannot delete record because a dependent account exists", firm.errors[:base].first
     assert RestrictedWithErrorFirm.exists?(:name => 'restrict')
     assert firm.account.present?
+  ensure
+    I18n.backend.reload!
   end
 
   def test_successful_build_association

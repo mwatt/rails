@@ -1,3 +1,7 @@
+*   Adding support for passing a block to the `add_source` action of a custom generator
+
+    *Mike Dalton*, *Hirofumi Wakasugi*
+
 *   Add the `method_source` gem to the default Gemfile for apps
 
     *Sean Griffin*

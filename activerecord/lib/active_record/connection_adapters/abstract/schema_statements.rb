@@ -93,6 +93,17 @@ module ActiveRecord
                                       (!options.key?(:null)      || c.null == options[:null]) }
       end
 
+      # Returns just a table's primary key
+      def primary_key(table_name)
+        pks = primary_keys(table_name)
+        return nil if pks.nil? || pks.size != 1
+        pks.first
+      end
+
+      def primary_keys(table_name) # :nodoc:
+        raise NotImplementedError, "#primary_keys is not implemented"
+      end
+
       # Creates a new table with the name +table_name+. +table_name+ may either
       # be a String or a Symbol.
       #
@@ -215,7 +226,9 @@ module ActiveRecord
       def create_table(table_name, options = {})
         td = create_table_definition table_name, options[:temporary], options[:options], options[:as]
 
-        if options[:id] != false && !options[:as]
+        if options[:id] == false
+          td.primary_keys options[:primary_key] if options[:primary_key].is_a?(Array)
+        elsif !options[:as]
           pk = options.fetch(:primary_key) do
             Base.get_primary_key table_name.to_s.singularize
           end

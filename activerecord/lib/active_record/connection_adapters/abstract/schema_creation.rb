@@ -43,6 +43,7 @@ module ActiveRecord
             create_sql = "CREATE#{' TEMPORARY' if o.temporary} TABLE #{quote_table_name(o.name)} "
 
             statements = o.columns.map { |c| accept c }
+            statements << accept(o.primary_keys) if o.primary_keys
 
             if supports_indexes_in_create?
               statements += o.indexes.map { |column_name, options| index_in_create(o.name, column_name, options) }
@@ -52,6 +53,10 @@ module ActiveRecord
             create_sql << "#{o.options}"
             create_sql << " AS #{@conn.to_sql(o.as)}" if o.as
             create_sql
+          end
+
+          def visit_PrimaryKeyDefinition(o)
+            "PRIMARY KEY (#{o.name.join(', ')})"
           end
 
           def visit_AddForeignKey(o)

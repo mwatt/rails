@@ -1,3 +1,9 @@
+*   Remove `config` options from `default_options`
+
+    Fixes #20345.
+
+    *Nuri Hodges*
+
 *   Adding support for passing a block to the `add_source` action of a custom generator
 
     *Mike Dalton*, *Hirofumi Wakasugi*

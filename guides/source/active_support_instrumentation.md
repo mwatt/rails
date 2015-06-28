@@ -266,6 +266,32 @@ INFO. The adapters will add their own data as well.
 }
 ```
 
+### connection.active_record
+
+Notifies subscribers each time
+`ActiveRecord::ConnectionHandler#establish_connection` is called.
+
+| Key              | Value                                     |
+| ---------------- | ----------------------------------------- |
+| `:class_name`    | Record's class                            |
+| `:config`        | Connection configuration details          |
+| `:connection_id` | `self.object_id`                          |
+
+INFO. Configuration details are adapter specific.
+
+```ruby
+{
+  class_name: "Post",
+  config:
+  {
+    database: "fixture_database.sqlite3",
+    timeout: 5000
+    adapter: "sqlite3"
+  },
+  connection_id: 86846670
+}
+```
+
 Action Mailer
 -------------
 

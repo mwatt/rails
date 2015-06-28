@@ -958,10 +958,20 @@ module ActiveRecord
           @loaded_fixtures = load_fixtures(config)
           @@already_loaded_fixtures[self.class] = @loaded_fixtures
         end
+
+        # Begin transactions for connections already established
         @fixture_connections = enlist_fixture_connections
         @fixture_connections.each do |connection|
           connection.begin_transaction joinable: false
         end
+
+        # When connections are established in the future, begin a transaction too
+        ActiveSupport::Notifications.subscribe('connection.active_record') do |_, _, _, _, payload|
+          connection = ActiveRecord::Base.connection_handler.retrieve_connection(payload[:class_name].constantize)
+          connection.begin_transaction joinable: false
+          @fixture_connections << connection
+        end
+
       # Load fixtures for every test.
       else
         ActiveRecord::FixtureSet.reset_cache

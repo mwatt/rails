@@ -4,7 +4,7 @@ require 'test_helper'
 class <%= controller_class_name %>ControllerTest < ActionController::TestCase
   setup do
     @<%= singular_table_name %> = <%= fixture_name %>(:one)
-<% if defined?(ENGINE_ROOT) -%>
+<% if mountable? -%>
     @routes = Engine.routes
 <% end -%>
   end

@@ -840,7 +840,19 @@ module ActiveRecord
       def establish_connection(owner, spec)
         @class_to_pool.clear
         raise RuntimeError, "Anonymous class is not allowed." unless owner.name
-        owner_to_pool[owner.name] = ConnectionAdapters::ConnectionPool.new(spec)
+
+        message_bus = ActiveSupport::Notifications.instrumenter
+        payload = {
+          class_name: owner.try(:name),
+          config: spec.try(:config),
+          connection_id: object_id
+        }
+
+        message_bus.instrument('connection.active_record', payload) do
+          owner_to_pool[owner.name] = ConnectionAdapters::ConnectionPool.new(spec)
+        end
+
+        owner_to_pool[owner.name]
       end
 
       # Returns true if there are any active connections among the connection

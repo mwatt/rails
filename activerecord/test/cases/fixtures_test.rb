@@ -577,6 +577,38 @@ class TransactionalFixturesOnCustomConnectionTest < ActiveRecord::TestCase
   end
 end
 
+class TransactionalFixturesOnConnectionNotification < ActiveRecord::TestCase
+  self.use_transactional_tests = true
+  self.use_instantiated_fixtures = false
+
+  def test_transaction_on_connection_notification
+    connection = stub(:transaction_open? => false)
+    connection.expects(:begin_transaction).with(joinable: false)
+    fire_connection_notification(connection)
+  end
+
+  def test_notification_established_connections_rolled_back
+    connection = stub(:transaction_open? => true)
+    connection.stubs(:begin_transaction)
+    # This should be #expects but that causes a SystemStackError under mocha 0.14.0
+    connection.stubs(:rollback_transaction)
+    fire_connection_notification(connection)
+    # teardown_fixtures is called when the tests complete
+  end
+
+  def fire_connection_notification(connection)
+    ActiveRecord::Base.connection_handler.stubs(:retrieve_connection).with(Book).returns(connection)
+    message_bus = ActiveSupport::Notifications.instrumenter
+    payload = {
+      class_name: 'Book',
+      config: nil,
+      connection_id: connection.object_id
+    }
+
+    message_bus.instrument('connection.active_record', payload) {}
+  end
+end
+
 class InvalidTableNameFixturesTest < ActiveRecord::TestCase
   fixtures :funny_jokes
   # Set to false to blow away fixtures cache and ensure our fixtures are loaded

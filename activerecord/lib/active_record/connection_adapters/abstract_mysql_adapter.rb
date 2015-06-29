@@ -323,7 +323,7 @@ module ActiveRecord
       end
 
       def supports_datetime_with_precision?
-        (version[0] == 5 && version[1] >= 6) || version[0] >= 6
+        (version[0] == 5 && version[1] == 6 && version[2] >= 4) || version[0] >= 6
       end
 
       def native_database_types

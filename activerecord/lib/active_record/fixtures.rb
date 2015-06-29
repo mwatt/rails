@@ -883,7 +883,11 @@ module ActiveRecord
       def fixtures(*fixture_set_names)
         if fixture_set_names.first == :all
           fixture_set_names = Dir["#{fixture_path}/{**,*}/*.{yml}"]
-          fixture_set_names.map! { |f| f[(fixture_path.to_s.size + 1)..-5] }
+          fixture_path_globs = Dir[fixture_path].uniq.compact.sort_by!(&:length).reverse!
+          fixture_set_names.map! do |f|
+            glob = fixture_path_globs.find { |glob| f.start_with? glob }
+            f.match(/#{Regexp.quote(glob)}\/(.+)\.yml\z/).captures.first
+          end
         else
           fixture_set_names = fixture_set_names.flatten.map(&:to_s)
         end

@@ -52,10 +52,16 @@ class TranslationHelperTest < ActiveSupport::TestCase
     localize @time
   end
 
-  def test_returns_missing_translation_message_wrapped_into_span
-    expected = '<span class="translation_missing" title="translation missing: en.translations.missing">Missing</span>'
+  def test_returns_missing_translation_message
+    expected = 'translation missing: en.translations.missing'
     assert_equal expected, translate(:"translations.missing")
-    assert_equal true, translate(:"translations.missing").html_safe?
+    assert_equal false, translate(:"translations.missing").html_safe?
+  end
+
+  def test_returns_missing_translation_message_wrapped_into_span_for_html_keys
+    expected = '<span class="translation_missing" title="translation missing: en.translations.missing_html">Missing</span>'
+    assert_equal expected, translate(:"translations.missing_html")
+    assert_equal true, translate(:"translations.missing_html").html_safe?
   end
 
   def test_raises_missing_translation_message_with_raise_config_option

@@ -51,6 +51,7 @@ module Rails
         @secret_key_base               = nil
         @api_only                      = false
         @x                             = Custom.new
+        @file_watcher                  = ActiveSupport::FileEventedUpdateChecker if defined?(Listen)
       end
 
       def encoding=(value)

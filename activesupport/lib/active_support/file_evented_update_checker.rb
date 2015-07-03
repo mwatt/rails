@@ -39,12 +39,9 @@ module ActiveSupport
     	end
 
 		def watching?(file)
-			puts "Listener watching"
-			puts file
-			puts "Listener watching"
 			return true if @files.include?(file)
 			cfile = file
-			while !cfile.eql? "/"
+			while !cfile.eql? "/" 
 				cfile = File.expand_path("#{cfile}/..")
 				if !@dirs[cfile].nil? and file.end_with?(*(@dirs[cfile].map {|ext| ".#{ext.to_s}"}))
 					return true
@@ -67,12 +64,10 @@ module ActiveSupport
 
 		def base_directories
 			# TODO :- To add nearest parent directory which exists for watching when watching directory does not exist
-			values = (@files.map { |f| File.expand_path("#{f}/..") if File.exists?(f) } + @dirs.keys.map {|dir| dir if File.directory?(dir)} if @dirs).uniq
-			values = values[1..values.length]
+			values = (@files.map { |f| File.expand_path("#{f}/..") if File.exist?(f) } + @dirs.keys.map {|dir| dir if File.directory?(dir)} if @dirs).uniq
 			#(@files.map { |f| File.expand_path("#{f}/..") if File.exists?(f) } + @dirs.keys.map {|dir| dir if File.directory?(dir)} if @dirs).uniq
+			values = values.map {|v| v if !v.nil?}
 			values
 		end
-
-
 	end
 end

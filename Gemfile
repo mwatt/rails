@@ -38,7 +38,9 @@ end
 
 # ActiveSupport
 gem 'dalli', '>= 2.2.1'
-
+group :test do
+  gem 'listen', '~>1.0'
+end
 # ActiveJob
 group :job do
   gem 'resque', require: false

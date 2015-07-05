@@ -9,34 +9,34 @@ module ActiveSupport
 			@files = files.map { |f| File.expand_path(f)}
 			@dirs = Hash.new
 			dirs.map do |key,value|
-				@dirs[File.expand_path(key)] = Array(value) if !Array(value).empty?
+			 @dirs[File.expand_path(key)] = Array(value) if !Array(value).empty?
 			end
 			@block = block
 			@modified = false
 			@listener = Listen.to(*base_directories, relative_paths: false)
 			@listener.change(&method(:changed))
-          	@listener.start
+      @listener.start
 		end
 
 		def updated?
-			@modified
+		  @modified
 		end
 
 		def execute
-		    @block.call
+		  @block.call
 		ensure
-		    @modified = false  
+		  @modified = false  
 		end
 
 		# Execute the block given if updated.
-    	def execute_if_updated
-      		if updated?
-        		execute
-        		true
-      		else
-        		false
-      		end
-    	end
+    def execute_if_updated
+      if updated?
+        execute
+        true
+      else
+        false
+      end
+    end
 
 		def watching?(file)
 			return true if @files.include?(file)
@@ -57,10 +57,10 @@ module ActiveSupport
 
 		def changed(modified, added, removed)
 			return if @modified
-        	if (modified + added + removed).any? { |f| watching? f }
-            	@modified = true
-          	end
-      	end
+        if (modified + added + removed).any? { |f| watching? f }
+          @modified = true
+        end
+    end
 
 		def base_directories
 			# TODO :- To add nearest parent directory which exists for watching when watching directory does not exist

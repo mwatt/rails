@@ -1,8 +1,8 @@
 require 'listen'
 
 module ActiveSupport
-	class FileEventedUpdateChecker
-		attr_reader :listener
+  class FileEventedUpdateChecker
+  	attr_reader :listener
 
 		def initialize(files, dirs={}, &block)
 			@files = Set.new
@@ -25,7 +25,7 @@ module ActiveSupport
 		def execute
 		  @block.call
 		ensure
-		  @modified = false  
+		  @modified = false
 		end
 
 		# Execute the block given if updated.
@@ -41,7 +41,7 @@ module ActiveSupport
 		def watching?(file)
 			return true if @files.include?(file)
 			cfile = file
-			while !cfile.eql? "/" 
+			while !cfile.eql? "/"
 				cfile = File.expand_path("#{cfile}/..")
 				if !@dirs[cfile].nil? and file.end_with?(*(@dirs[cfile].map {|ext| ".#{ext.to_s}"}))
 					return true

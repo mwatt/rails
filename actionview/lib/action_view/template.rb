@@ -130,7 +130,7 @@ module ActionView
       @source            = source
       @identifier        = identifier
       @handler           = handler
-      @cache_name        = extract_resource_cache_call_name
+      @cache_name        = extract_resource_cache_name
       @compiled          = false
       @original_encoding = nil
       @locals            = details[:locals] || []
@@ -351,9 +351,21 @@ module ActionView
         ActiveSupport::Notifications.instrument("#{action}.action_view", payload, &block)
       end
 
-      def extract_resource_cache_call_name
-        $1 if @handler.respond_to?(:resource_cache_call_pattern) &&
-          @source =~ @handler.resource_cache_call_pattern
+      EXPLICIT_COLLECTION = /# Template Collection: (?<resource_name>\w+)/
+
+      def extract_resource_cache_name
+        if match = @source.match(EXPLICIT_COLLECTION)
+          match[:resource_name]
+        else
+          extract_resource_from_cache_call
+        end
+      end
+
+      def extract_resource_from_cache_call
+        if @handler.respond_to?(:resource_cache_call_pattern) &&
+           match = @source.match(@handler.resource_cache_call_pattern)
+          match[:resource_name]
+        end
       end
 
       def inferred_cache_name

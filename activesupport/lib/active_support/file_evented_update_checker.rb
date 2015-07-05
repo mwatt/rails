@@ -63,7 +63,7 @@ module ActiveSupport
     end
 
 		def base_directories
-			# TODO :- To add nearest parent directory which exists for watching when watching directory does not exist
+			# TODO :- To add nearest parent directory which exists for watching when watching directory does not exist.
 			values = (@files.map { |f| File.expand_path("#{f}/..") if File.exist?(f) } + @dirs.keys.map {|dir| dir if File.directory?(dir)} if @dirs).uniq
 			#(@files.map { |f| File.expand_path("#{f}/..") if File.exists?(f) } + @dirs.keys.map {|dir| dir if File.directory?(dir)} if @dirs).uniq
 			values = values.map {|v| v if !v.nil?}

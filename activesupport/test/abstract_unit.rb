@@ -8,6 +8,7 @@ ensure
 end
 
 require 'active_support/core_ext/kernel/reporting'
+require 'active_support/testing/method_call_assertions'
 
 silence_warnings do
   Encoding.default_internal = "UTF-8"
@@ -39,3 +40,7 @@ end
 
 require 'minitest/mock'
 require 'mocha/setup' # FIXME: stop using mocha
+
+class ActiveSupport::TestCase
+  include ActiveSupport::Testing::MethodCallAssertions
+end

@@ -103,6 +103,87 @@ class AssertDifferenceTest < ActiveSupport::TestCase
       end
     end
   end
+
+  def test_assert_called_with_defaults_to_expect_once
+    assert_called @object, :increment do
+      @object.increment
+    end
+  end
+
+  def test_assert_called_more_than_once
+    assert_called(@object, :increment, times: 2) do
+      @object.increment
+      @object.increment
+    end
+  end
+
+  def test_assert_called_failure
+    error = assert_raises(Minitest::Assertion) do
+      assert_called(@object, :increment) do
+        # Call nothing...
+      end
+    end
+
+    assert_equal "Expected increment to be called 1 times, but was called 0 times.\nExpected: 1\n  Actual: 0", error.message
+  end
+
+  def test_assert_called_with_message
+    error = assert_raises(Minitest::Assertion) do
+      assert_called(@object, :increment, 'dang it') do
+        # Call nothing...
+      end
+    end
+
+    assert_match(/dang it.\nExpected increment/, error.message)
+  end
+
+  def test_assert_called_with
+    assert_called_with(@object, :increment) do
+      @object.increment
+    end
+  end
+
+  def test_assert_called_with_arguments
+    arr = [ 1 ]
+
+    assert_called_with(arr, :<<, [ 2 ]) do
+      arr << 2
+    end
+  end
+
+  def test_assert_called_with_failure
+    arr = [ 1 ]
+
+    assert_raises(MockExpectationError) do
+      assert_called_with(arr, :<<, [ 4567 ]) do
+        arr << 2
+      end
+    end
+  end
+
+  def test_assert_called_with_returns
+    arr = [ 1 ]
+
+    assert_called_with(arr, :itself, returns: arr) do
+      arr.itself
+    end
+  end
+
+  def test_assert_not_called
+    assert_not_called(@object, :decrement) do
+      @object.increment
+    end
+  end
+
+  def test_assert_not_called_failure
+    error = assert_raises(Minitest::Assertion) do
+      assert_not_called(@object, :increment) do
+        @object.increment
+      end
+    end
+
+    assert_equal "Expected increment to be called 0 times, but was called 1 times.\nExpected: 0\n  Actual: 1", error.message
+  end
 end
 
 class AlsoDoingNothingTest < ActiveSupport::TestCase

@@ -7,7 +7,7 @@ require 'listen'
       	@files = files.map { |f| File.expand_path(f)}
       	@dirs = Hash.new
       	dirs.map do |key,value|
-      		@dirs[File.expand_path(key)] = Array(value) if !Array(value).empty?
+          @dirs[File.expand_path(key)] = Array(value) if !Array(value).empty?
       	end
       	@block = block
       	@modified = false
@@ -17,34 +17,34 @@ require 'listen'
       end
 
       def updated?
-      	@modified
+        @modified
       end
 
       def execute
-      	@block.call
+        @block.call
       ensure
-      	@modified = false
+        @modified = false
       end
 
       # Execute the block given if updated.
       def execute_if_updated
-      	if updated?
-      		execute
-      		true
-      	else
-      		false
-      	end
+        if updated?
+          execute
+          true
+        else
+          false
+        end
       end
 
       def watching?(file)
-      	return true if @files.include?(file)
-      	cfile = file
-      	while !cfile.eql? "/"
-      		cfile = File.expand_path("#{cfile}/..")
-      		if !@dirs[cfile].nil? and file.end_with?(*(@dirs[cfile].map {|ext| ".#{ext.to_s}"}))
-      			return true
-      		end
-      	end
+        return true if @files.include?(file)
+        cfile = file
+        while !cfile.eql? "/"
+          cfile = File.expand_path("#{cfile}/..")
+          if !@dirs[cfile].nil? and file.end_with?(*(@dirs[cfile].map {|ext| ".#{ext.to_s}"}))
+            return true
+          end
+        end
       	# @dirs.map do |key,value|
       	# 	if file.start_with?(key) and file.end_with?(*(value.map {|ext| ".#{ext.to_s}"}))
       	# 		return true
@@ -54,10 +54,10 @@ require 'listen'
       end
 
       def changed(modified, added, removed)
-      	return if @modified
-      	if (modified + added + removed).any? { |f| watching? f }
-      		@modified = true
-      	end
+        return if @modified
+        if (modified + added + removed).any? { |f| watching? f }
+          @modified = true
+        end
       end
 
       def base_directories

@@ -39,3 +39,29 @@ end
 
 require 'minitest/mock'
 require 'mocha/setup' # FIXME: stop using mocha
+
+class ActiveSupport::TestCase
+  def assert_called(object, method_name, message = nil, times: 1) # :nodoc:
+    times_called = 0
+
+    object.stub(method_name, -> { times_called += 1 }) { yield }
+
+    error = "Expected #{method_name} to be called #{times} times, " \
+      "but was called #{times_called} times"
+    error = "#{message}.\n#{error}" if message
+    assert_equal times, times_called, error
+  end
+
+  def assert_called_with(object, method_name, args = []) # :nodoc:
+    mock = Minitest::Mock.new
+    mock.expect(:call, nil, args)
+
+    object.stub(method_name, mock) { yield }
+
+    mock.verify
+  end
+
+  def assert_not_called(object, method_name, message = nil, &block) # :nodoc:
+    assert_called(object, method_name, message, times: 0, &block)
+  end
+end

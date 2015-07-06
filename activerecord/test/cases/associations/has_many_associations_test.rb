@@ -31,6 +31,10 @@ require 'models/student'
 require 'models/pirate'
 require 'models/ship'
 require 'models/tyre'
+require 'models/subscriber'
+require 'models/subscription'
+require 'models/zine'
+require 'models/interest'
 
 class HasManyAssociationsTestForReorderWithJoinDependency < ActiveRecord::TestCase
   fixtures :authors, :posts, :comments
@@ -43,12 +47,59 @@ class HasManyAssociationsTestForReorderWithJoinDependency < ActiveRecord::TestCa
   end
 end
 
+class HasManyAssociationsTestPrimaryKeys < ActiveRecord::TestCase
+  fixtures :authors, :essays, :subscribers, :subscriptions, :people
+
+  def test_custom_primary_key_on_new_record_should_fetch_with_query
+    subscriber = Subscriber.new(nick: 'webster132')
+    assert !subscriber.subscriptions.loaded?
+
+    assert_queries 1 do
+      assert_equal 2, subscriber.subscriptions.size
+    end
+
+    assert_equal subscriber.subscriptions, Subscription.where(subscriber_id: 'webster132')
+  end
+
+  def test_association_primary_key_on_new_record_should_fetch_with_query
+    author = Author.new(:name => "David")
+    assert !author.essays.loaded?
+
+    assert_queries 1 do
+      assert_equal 1, author.essays.size
+    end
+
+    assert_equal author.essays, Essay.where(writer_id: "David")
+  end
+
+  def test_has_many_custom_primary_key
+    david = authors(:david)
+    assert_equal david.essays, Essay.where(writer_id: "David")
+  end
+
+  def test_has_many_assignment_with_custom_primary_key
+    david = people(:david)
+
+    assert_equal ["A Modest Proposal"], david.essays.map(&:name)
+    david.essays = [Essay.create!(name: "Remote Work" )]
+    assert_equal ["Remote Work"], david.essays.map(&:name)
+  end
+
+  def test_blank_custom_primary_key_on_new_record_should_not_run_queries
+    author = Author.new
+    assert !author.essays.loaded?
+
+    assert_queries 0 do
+      assert_equal 0, author.essays.size
+    end
+  end
+end
 
 class HasManyAssociationsTest < ActiveRecord::TestCase
   fixtures :accounts, :categories, :companies, :developers, :projects,
            :developers_projects, :topics, :authors, :comments,
-           :people, :posts, :readers, :taggings, :cars, :essays,
-           :categorizations, :jobs, :tags
+           :posts, :readers, :taggings, :cars, :jobs, :tags,
+           :categorizations, :zines, :interests
 
   def setup
     Client.destroyed_client_ids.clear
@@ -67,9 +118,9 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
 
       developer_project = Class.new(ActiveRecord::Base) {
         self.table_name = 'developers_projects'
-        belongs_to :developer, :class => dev
+        belongs_to :developer, :anonymous_class => dev
       }
-      has_many :developer_projects, :class => developer_project, :foreign_key => 'developer_id'
+      has_many :developer_projects, :anonymous_class => developer_project, :foreign_key => 'developer_id'
     }
     dev = developer.first
     named = Developer.find(dev.id)
@@ -88,13 +139,13 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
       comments = Class.new(ActiveRecord::Base) {
         self.table_name = 'comments'
         self.inheritance_column = 'not_there'
-        belongs_to :post, :class => post
+        belongs_to :post, :anonymous_class => post
         default_scope -> {
           counter += 1
           where("id = :inc", :inc => counter)
         }
       }
-      has_many :comments, :class => comments, :foreign_key => 'post_id'
+      has_many :comments, :anonymous_class => comments, :foreign_key => 'post_id'
     }
     assert_equal 0, counter
     post = posts.first
@@ -384,6 +435,45 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
   def test_dynamic_find_should_respect_association_order
     assert_equal companies(:another_first_firm_client), companies(:first_firm).clients_sorted_desc.where("type = 'Client'").first
     assert_equal companies(:another_first_firm_client), companies(:first_firm).clients_sorted_desc.find_by_type('Client')
+  end
+
+  def test_taking
+    posts(:other_by_bob).destroy
+    assert_equal posts(:misc_by_bob), authors(:bob).posts.take
+    assert_equal posts(:misc_by_bob), authors(:bob).posts.take!
+    authors(:bob).posts.to_a
+    assert_equal posts(:misc_by_bob), authors(:bob).posts.take
+    assert_equal posts(:misc_by_bob), authors(:bob).posts.take!
+  end
+
+  def test_taking_not_found
+    authors(:bob).posts.delete_all
+    assert_raise(ActiveRecord::RecordNotFound) { authors(:bob).posts.take! }
+    authors(:bob).posts.to_a
+    assert_raise(ActiveRecord::RecordNotFound) { authors(:bob).posts.take! }
+  end
+
+  def test_taking_with_a_number
+    # taking from unloaded Relation
+    bob = Author.find(authors(:bob).id)
+    assert_equal [posts(:misc_by_bob)], bob.posts.take(1)
+    bob = Author.find(authors(:bob).id)
+    assert_equal [posts(:misc_by_bob), posts(:other_by_bob)], bob.posts.take(2)
+
+    # taking from loaded Relation
+    bob.posts.to_a
+    assert_equal [posts(:misc_by_bob)], authors(:bob).posts.take(1)
+    assert_equal [posts(:misc_by_bob), posts(:other_by_bob)], authors(:bob).posts.take(2)
+  end
+
+  def test_taking_with_inverse_of
+    interests(:woodsmanship).destroy
+    interests(:survival).destroy
+
+    zine = zines(:going_out)
+    interest = zine.interests.take
+    assert_equal interests(:hunting), interest
+    assert_same zine, interest.zine
   end
 
   def test_cant_save_has_many_readonly_association
@@ -1578,39 +1668,6 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
     end
   end
 
-  def test_custom_primary_key_on_new_record_should_fetch_with_query
-    author = Author.new(:name => "David")
-    assert !author.essays.loaded?
-
-    assert_queries 1 do
-      assert_equal 1, author.essays.size
-    end
-
-    assert_equal author.essays, Essay.where(writer_id: "David")
-  end
-
-  def test_has_many_custom_primary_key
-    david = authors(:david)
-    assert_equal david.essays, Essay.where(writer_id: "David")
-  end
-
-  def test_has_many_assignment_with_custom_primary_key
-    david = people(:david)
-
-    assert_equal ["A Modest Proposal"], david.essays.map(&:name)
-    david.essays = [Essay.create!(name: "Remote Work" )]
-    assert_equal ["Remote Work"], david.essays.map(&:name)
-  end
-
-  def test_blank_custom_primary_key_on_new_record_should_not_run_queries
-    author = Author.new
-    assert !author.essays.loaded?
-
-    assert_queries 0 do
-      assert_equal 0, author.essays.size
-    end
-  end
-
   def test_calling_first_or_last_with_integer_on_association_should_not_load_association
     firm = companies(:first_firm)
     firm.clients.create(:name => 'Foo')
@@ -1960,11 +2017,12 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
     car = Car.create!
     original_child = FailedBulb.create!(car: car)
 
-    assert_raise(ActiveRecord::RecordNotDestroyed) do
+    error = assert_raise(ActiveRecord::RecordNotDestroyed) do
       car.failed_bulbs = [FailedBulb.create!]
     end
 
     assert_equal [original_child], car.reload.failed_bulbs
+    assert_equal "Failed to destroy the record", error.message
   end
 
   test 'updates counter cache when default scope is given' do

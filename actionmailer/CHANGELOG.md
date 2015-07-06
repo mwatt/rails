@@ -1,3 +1,39 @@
+## Rails 4.2.3 (June 25, 2015) ##
+
+*   `assert_emails` in block form use the given number as expected value.
+    This makes the error message much easier to understand.
+
+    *Yuji Yaginuma*
+
+*   Mailer preview now uses `url_for` to fix links to emails for apps running on
+    a subdirectory.
+
+    *Remo Mueller*
+
+*   Mailer previews no longer crash when the `mail` method wasn't called
+    (`NullMail`).
+
+    Fixes #19849.
+
+    *Yves Senn*
+
+*   Make sure labels and values line up in mailer previews.
+
+    *Yves Senn*
+
+
+## Rails 4.2.2 (June 16, 2015) ##
+
+* No Changes *
+
+
+## Rails 4.2.1 (March 19, 2015) ##
+
+* No Changes *
+
+
+## Rails 4.2.0 (December 20, 2014) ##
+
 *   `MailerGenerator` now generates layouts by default. The HTML mailer layout
     now includes `<html>` and `<body>` tags which improve the spam rating in
     some spam detection engines. Mailers now inherit from `ApplicationMailer`

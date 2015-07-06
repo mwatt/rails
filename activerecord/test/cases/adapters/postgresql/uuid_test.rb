@@ -110,6 +110,23 @@ class PostgresqlUUIDTest < ActiveRecord::TestCase
       assert_equal "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", uuid.guid
     end
   end
+
+  def test_uniqueness_validation_ignores_uuid
+    klass = Class.new(ActiveRecord::Base) do
+      self.table_name = "uuid_data_type"
+      validates :guid, uniqueness: { case_sensitive: false }
+
+      def self.name
+        "UUIDType"
+      end
+    end
+
+    record = klass.create!(guid: "a0ee-bc99-9c0b-4ef8-bb6d-6bb9-bd38-0a11")
+    duplicate = klass.new(guid: record.guid)
+
+    assert record.guid.present? # Ensure we actually are testing a UUID
+    assert_not duplicate.valid?
+  end
 end
 
 class PostgresqlLargeKeysTest < ActiveRecord::TestCase
@@ -209,6 +226,7 @@ end
 
 class PostgresqlUUIDTestNilDefault < ActiveRecord::TestCase
   include PostgresqlUUIDHelper
+  include SchemaDumpingHelper
 
   setup do
     enable_extension!('uuid-ossp', connection)
@@ -231,6 +249,11 @@ class PostgresqlUUIDTestNilDefault < ActiveRecord::TestCase
                                     LEFT JOIN pg_attrdef d ON a.attrelid = d.adrelid AND a.attnum = d.adnum
                                     WHERE a.attname='id' AND a.attrelid = 'pg_uuids'::regclass").first
       assert_nil col_desc["default"]
+    end
+
+    def test_schema_dumper_for_uuid_primary_key_with_default_override_via_nil
+      schema = dump_table_schema "pg_uuids"
+      assert_match(/\bcreate_table "pg_uuids", id: :uuid, default: nil/, schema)
     end
   end
 end

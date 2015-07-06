@@ -562,6 +562,39 @@ class TransactionTest < ActiveRecord::TestCase
     assert !@second.destroyed?, 'not destroyed'
   end
 
+  def test_restore_frozen_state_after_double_destroy
+    topic = Topic.create
+    reply = topic.replies.create
+
+    Topic.transaction do
+      topic.destroy # calls #destroy on reply (since dependent: destroy)
+      reply.destroy
+
+      raise ActiveRecord::Rollback
+    end
+
+    assert_not reply.frozen?
+    assert_not topic.frozen?
+  end
+
+  def test_rollback_of_frozen_records
+    topic = Topic.create.freeze
+    Topic.transaction do
+      topic.destroy
+      raise ActiveRecord::Rollback
+    end
+    assert topic.frozen?, 'frozen'
+  end
+
+  def test_rollback_for_freshly_persisted_records
+    topic = Topic.create
+    Topic.transaction do
+      topic.destroy
+      raise ActiveRecord::Rollback
+    end
+    assert topic.persisted?, 'persisted'
+  end
+
   def test_sqlite_add_column_in_transaction
     return true unless current_adapter?(:SQLite3Adapter)
 
@@ -626,6 +659,27 @@ class TransactionTest < ActiveRecord::TestCase
 
     assert !transaction.state.rolledback?
     assert transaction.state.committed?
+  end
+
+  def test_transaction_rollback_with_primarykeyless_tables
+    connection = ActiveRecord::Base.connection
+    connection.create_table(:transaction_without_primary_keys, force: true, id: false) do |t|
+       t.integer :thing_id
+    end
+
+    klass = Class.new(ActiveRecord::Base) do
+      self.table_name = 'transaction_without_primary_keys'
+      after_commit { } # necessary to trigger the has_transactional_callbacks branch
+    end
+
+    assert_no_difference(-> { klass.count }) do
+      ActiveRecord::Base.transaction do
+        klass.create!
+        raise ActiveRecord::Rollback
+      end
+    end
+  ensure
+    connection.drop_table("transaction_without_primary_keys") if connection.table_exists? "transaction_without_primary_keys"
   end
 
   private

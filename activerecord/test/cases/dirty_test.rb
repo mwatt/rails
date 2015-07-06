@@ -688,7 +688,14 @@ class DirtyTest < ActiveRecord::TestCase
       serialize :data
     end
 
-    klass.create!(data: "foo")
+    binary = klass.create!(data: "\\\\foo")
+
+    assert_not binary.changed?
+
+    binary.data = binary.data.dup
+
+    assert_not binary.changed?
+
     binary = klass.last
 
     assert_not binary.changed?
@@ -711,6 +718,43 @@ class DirtyTest < ActiveRecord::TestCase
 
     model = klass.new(first_name: "Jim")
     assert model.first_name_changed?
+  end
+
+  test "attribute_will_change! doesn't try to save non-persistable attributes" do
+    klass = Class.new(ActiveRecord::Base) do
+      self.table_name = 'people'
+      attribute :non_persisted_attribute, ActiveRecord::Type::String.new
+    end
+
+    record = klass.new(first_name: "Sean")
+    record.non_persisted_attribute_will_change!
+
+    assert record.non_persisted_attribute_changed?
+    assert record.save
+  end
+
+  test "mutating and then assigning doesn't remove the change" do
+    pirate = Pirate.create!(catchphrase: "arrrr")
+    pirate.catchphrase << " matey!"
+    pirate.catchphrase = "arrrr matey!"
+
+    assert pirate.catchphrase_changed?(from: "arrrr", to: "arrrr matey!")
+  end
+
+  test "getters with side effects are allowed" do
+    klass = Class.new(Pirate) do
+      def catchphrase
+        if super.blank?
+          update_attribute(:catchphrase, "arr") # what could possibly go wrong?
+        end
+        super
+      end
+    end
+
+    pirate = klass.create!(catchphrase: "lol")
+    pirate.update_attribute(:catchphrase, nil)
+
+    assert_equal "arr", pirate.catchphrase
   end
 
   private

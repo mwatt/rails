@@ -281,6 +281,11 @@ ActiveRecord::Schema.define do
     t.string  :alias
   end
 
+  create_table :doubloons, force: true do |t|
+    t.integer :pirate_id
+    t.integer :weight
+  end
+
   create_table :edges, force: true, id: false do |t|
     t.column :source_id, :integer, null: false
     t.column :sink_id,   :integer, null: false
@@ -726,7 +731,7 @@ ActiveRecord::Schema.define do
     t.string   :author_name
     t.string   :author_email_address
     if mysql_56?
-      t.datetime :written_on, limit: 6
+      t.datetime :written_on, precision: 6
     else
       t.datetime :written_on
     end
@@ -770,6 +775,7 @@ ActiveRecord::Schema.define do
     t.column :type, :string
     t.column :looter_id, :integer
     t.column :looter_type, :string
+    t.belongs_to :ship
   end
 
   create_table :tyres, force: true do |t|

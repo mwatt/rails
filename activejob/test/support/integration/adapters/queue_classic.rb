@@ -1,5 +1,8 @@
 module QueueClassicJobsManager
   def setup
+    return if ENV['AJ_QC_WAS_SETUP'] # skip setup if it ran already
+    ENV['AJ_QC_WAS_SETUP'] = "1"
+
     ENV['QC_DATABASE_URL'] ||= 'postgres:///active_jobs_qc_int_test'
     ENV['QC_LISTEN_TIME']    = "0.5"
     uri = URI.parse(ENV['QC_DATABASE_URL'])
@@ -20,7 +23,10 @@ module QueueClassicJobsManager
   end
 
   def start_workers
-    QC::Conn.disconnect
+    unless QC.respond_to?(:default_conn_adapter)
+      QC::Conn.disconnect
+    end
+
     @pid = fork do
       worker = QC::Worker.new(q_name: 'integration_tests')
       worker.start

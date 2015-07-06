@@ -1,5 +1,6 @@
 require 'active_support/core_ext/object/json'
 require 'active_support/core_ext/module/delegation'
+require 'active_support/deprecation'
 
 module ActiveSupport
   class << self
@@ -57,6 +58,10 @@ module ActiveSupport
               else
                 super.gsub ESCAPE_REGEX_WITHOUT_HTML_ENTITIES, ESCAPED_CHARS
               end
+            end
+
+            def to_s
+              self
             end
           end
 

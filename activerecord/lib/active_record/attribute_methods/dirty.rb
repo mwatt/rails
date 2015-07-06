@@ -108,7 +108,8 @@ module ActiveRecord
       end
 
       def save_changed_attribute(attr, old_value)
-        if attribute_changed?(attr)
+        clear_changed_attributes_cache
+        if attribute_changed_by_setter?(attr)
           clear_attribute_changes(attr) unless _field_changed?(attr, old_value)
         else
           set_attribute_was(attr, old_value) if _field_changed?(attr, old_value)
@@ -134,7 +135,7 @@ module ActiveRecord
       # Serialized attributes should always be written in case they've been
       # changed in place.
       def keys_for_partial_write
-        changed
+        changed & persistable_attribute_names
       end
 
       def _field_changed?(attr, old_value)
@@ -165,7 +166,7 @@ module ActiveRecord
       end
 
       def store_original_raw_attribute(attr_name)
-        original_raw_attributes[attr_name] = @attributes[attr_name].value_for_database
+        original_raw_attributes[attr_name] = @attributes[attr_name].value_for_database rescue nil
       end
 
       def store_original_raw_attributes
@@ -178,7 +179,11 @@ module ActiveRecord
         @cached_changed_attributes = changed_attributes
         yield
       ensure
-        remove_instance_variable(:@cached_changed_attributes)
+        clear_changed_attributes_cache
+      end
+
+      def clear_changed_attributes_cache
+        remove_instance_variable(:@cached_changed_attributes) if defined?(@cached_changed_attributes)
       end
     end
   end

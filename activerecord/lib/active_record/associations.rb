@@ -116,6 +116,7 @@ module ActiveRecord
     autoload :Association,           'active_record/associations/association'
     autoload :SingularAssociation,   'active_record/associations/singular_association'
     autoload :CollectionAssociation, 'active_record/associations/collection_association'
+    autoload :ForeignAssociation,    'active_record/associations/foreign_association'
     autoload :CollectionProxy,       'active_record/associations/collection_proxy'
 
     autoload :BelongsToAssociation,            'active_record/associations/belongs_to_association'
@@ -1011,7 +1012,7 @@ module ActiveRecord
     # record(s) being removed so that callbacks are run. However <tt>delete</tt> and <tt>delete_all</tt> will either
     # do the deletion according to the strategy specified by the <tt>:dependent</tt> option, or
     # if no <tt>:dependent</tt> option is given, then it will follow the default strategy.
-    # The default strategy is <tt>:nullify</tt> (set the foreign keys to <tt>nil</tt>), except for
+    # The default strategy is to do nothing (leave the foreign keys with the parent ids set), except for
     # +has_many+ <tt>:through</tt>, where the default strategy is <tt>delete_all</tt> (delete
     # the join records, without running their callbacks).
     #
@@ -1377,7 +1378,7 @@ module ActiveRecord
       #   has_one :last_comment, -> { order 'posted_on' }, class_name: "Comment"
       #   has_one :project_manager, -> { where role: 'project_manager' }, class_name: "Person"
       #   has_one :attachment, as: :attachable
-      #   has_one :boss, readonly: :true
+      #   has_one :boss, -> { readonly }
       #   has_one :club, through: :membership
       #   has_one :primary_address, -> { where primary: true }, through: :addressables, source: :addressable
       #   has_one :credit_card, required: true
@@ -1505,7 +1506,7 @@ module ActiveRecord
       #   belongs_to :valid_coupon, ->(o) { where "discounts > ?", o.payments_count },
       #                             class_name: "Coupon", foreign_key: "coupon_id"
       #   belongs_to :attachable, polymorphic: true
-      #   belongs_to :project, readonly: true
+      #   belongs_to :project, -> { readonly }
       #   belongs_to :post, counter_cache: true
       #   belongs_to :company, touch: true
       #   belongs_to :company, touch: :employees_last_updated_at
@@ -1712,7 +1713,7 @@ module ActiveRecord
         hm_options[:through] = middle_reflection.name
         hm_options[:source] = join_model.right_reflection.name
 
-        [:before_add, :after_add, :before_remove, :after_remove, :autosave, :validate, :join_table, :class_name].each do |k|
+        [:before_add, :after_add, :before_remove, :after_remove, :autosave, :validate, :join_table, :class_name, :extend].each do |k|
           hm_options[k] = options[k] if options.key? k
         end
 

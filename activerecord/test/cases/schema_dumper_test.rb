@@ -225,10 +225,22 @@ class SchemaDumperTest < ActiveRecord::TestCase
       assert_match %r{t.text\s+"long_text",\s+limit: 4294967295$}, output
     end
 
+    def test_schema_does_not_include_limit_for_emulated_mysql_boolean_fields
+      output = standard_dump
+      assert_no_match %r{t\.boolean\s+"has_fun",.+limit: 1}, output
+    end
+
     def test_schema_dumps_index_type
       output = standard_dump
       assert_match %r{add_index "key_tests", \["awesome"\], name: "index_key_tests_on_awesome", type: :fulltext}, output
       assert_match %r{add_index "key_tests", \["pizza"\], name: "index_key_tests_on_pizza", using: :btree}, output
+    end
+  end
+
+  if mysql_56?
+    def test_schema_dump_includes_datetime_precision
+      output = standard_dump
+      assert_match %r{t.datetime\s+"written_on",\s+precision: 6$}, output
     end
   end
 

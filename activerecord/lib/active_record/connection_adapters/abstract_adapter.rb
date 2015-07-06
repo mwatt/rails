@@ -341,9 +341,6 @@ module ActiveRecord
       def create_savepoint(name = nil)
       end
 
-      def rollback_to_savepoint(name = nil)
-      end
-
       def release_savepoint(name = nil)
       end
 
@@ -385,7 +382,7 @@ module ActiveRecord
       end
 
       def column_name_for_operation(operation, node) # :nodoc:
-        node.to_sql
+        visitor.accept(node, collector).value
       end
 
       protected
@@ -445,11 +442,21 @@ module ActiveRecord
       end
 
       def extract_limit(sql_type) # :nodoc:
-        $1.to_i if sql_type =~ /\((.*)\)/
+        case sql_type
+        when /^bigint/i
+          8
+        when /\((.*)\)/
+          $1.to_i
+        end
       end
 
       def translate_exception_class(e, sql)
-        message = "#{e.class.name}: #{e.message}: #{sql}"
+        begin
+          message = "#{e.class.name}: #{e.message}: #{sql}"
+        rescue Encoding::CompatibilityError
+          message = "#{e.class.name}: #{e.message.force_encoding sql.encoding}: #{sql}"
+        end
+
         @logger.error message if @logger
         exception = translate_exception(e, message)
         exception.set_backtrace e.backtrace

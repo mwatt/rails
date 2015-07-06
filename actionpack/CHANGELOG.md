@@ -1,3 +1,132 @@
+*   Fix to keep original header instance in `ActionDispatch::SSL`
+
+    `ActionDispatch::SSL` changes headers to `Hash`.
+    So some headers will be broken if there are some middlewares
+    on `ActionDispatch::SSL` and if it uses `Rack::Utils::HeaderHash`.
+
+    *Fumiaki Matsushima*
+
+
+## Rails 4.2.3 (June 25, 2015) ##
+
+*   Fix rake routes not showing the right format when
+    nesting multiple routes.
+
+    See #18373.
+
+    *Ravil Bayramgalin*
+
+*   Fix regression where a gzip file response would have a Content-type,
+    even when it was a 304 status code.
+
+    See #19271.
+
+    *Kohei Suzuki*
+
+*   Fix handling of empty X_FORWARDED_HOST header in raw_host_with_port
+
+    Previously, an empty X_FORWARDED_HOST header would cause
+    Actiondispatch::Http:URL.raw_host_with_port to return nil, causing
+    Actiondispatch::Http:URL.host to raise a NoMethodError.
+
+    *Adam Forsyth*
+
+*   Fallback to `ENV['RAILS_RELATIVE_URL_ROOT']` in `url_for`.
+
+    Fixed an issue where the `RAILS_RELATIVE_URL_ROOT` environment variable is not
+    prepended to the path when `url_for` is called. If `SCRIPT_NAME` (used by Rack)
+    is set, it takes precedence.
+
+    Fixes #5122.
+
+    *Yasyf Mohamedali*
+
+*   Fix regression in functional tests. Responses should have default headers
+    assigned.
+
+    See #18423.
+
+    *Jeremy Kemper*, *Yves Senn*
+
+
+## Rails 4.2.2 (June 16, 2015) ##
+
+* No Changes *
+
+
+## Rails 4.2.1 (March 19, 2015) ##
+
+*   Non-string authenticity tokens do not raise NoMethodError when decoding
+    the masked token.
+
+    *Ville Lautanala*
+
+*   Explicitly ignored wildcard verbs when searching for HEAD routes before fallback
+
+    Fixes an issue where a mounted rack app at root would intercept the HEAD
+    request causing an incorrect behavior during the fall back to GET requests.
+
+    Example:
+    ```ruby
+    draw do
+        get '/home' => 'test#index'
+        mount rack_app, at: '/'
+    end
+    head '/home'
+    assert_response :success
+    ```
+    In this case, a HEAD request runs through the routes the first time and fails
+    to match anything. Then, it runs through the list with the fallback and matches
+    `get '/home'`. The original behavior would match the rack app in the first pass.
+
+    *Terence Sun*
+
+*   Preserve default format when generating URLs
+
+    Fixes an issue that would cause the format set in default_url_options to be
+    lost when generating URLs with fewer positional arguments than parameters in
+    the route definition.
+
+    Backport of #18627
+
+    *Tekin Suleyman*, *Dominic Baggott*
+
+*   Default headers, removed in controller actions, are no longer reapplied on
+    the test response.
+
+    *Jonas Baumann*
+
+*   Ensure `append_info_to_payload` is called even if an exception is raised.
+
+    Fixes an issue where when an exception is raised in the request the additonal
+    payload data is not available.
+
+    See:
+    * #14903
+    * https://github.com/roidrage/lograge/issues/37
+
+    *Dieter Komendera*, *Margus Pärt*
+
+*   Correctly rely on the response's status code to handle calls to `head`.
+
+    *Robin Dupret*
+
+*   Using `head` method returns empty response_body instead
+    of returning a single space " ".
+
+    The old behavior was added as a workaround for a bug in an early
+    version of Safari, where the HTTP headers are not returned correctly
+    if the response body has a 0-length. This is been fixed since and
+    the workaround is no longer necessary.
+
+    Fixes #18253.
+
+    *Prathamesh Sonpatki*
+
+*   Fix how polymorphic routes works with objects that implement `to_model`.
+
+    *Travis Grathwell*
+
 *   Fixed handling of positional url helper arguments when `format: false`.
 
     Fixes #17819.
@@ -7,6 +136,9 @@
 *   Fixed usage of optional scopes in URL helpers.
 
     *Alex Robbin*
+
+
+## Rails 4.2.0 (December 20, 2014) ##
 
 *   Add `ActionController::Parameters#to_unsafe_h` to return an unfiltered
     `Hash` representation of Parameters object. This is now a preferred way to

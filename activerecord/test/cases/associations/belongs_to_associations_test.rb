@@ -19,6 +19,8 @@ require 'models/invoice'
 require 'models/line_item'
 require 'models/column'
 require 'models/record'
+require 'models/admin'
+require 'models/admin/user'
 
 class BelongsToAssociationsTest < ActiveRecord::TestCase
   fixtures :accounts, :companies, :developers, :projects, :topics,
@@ -74,9 +76,9 @@ class BelongsToAssociationsTest < ActiveRecord::TestCase
           where("id = :inc", :inc => counter)
         }
 
-        has_many :comments, :class => comments
+        has_many :comments, :anonymous_class => comments
       }
-      belongs_to :post, :class => posts, :inverse_of => false
+      belongs_to :post, :anonymous_class => posts, :inverse_of => false
     }
 
     assert_equal 0, counter
@@ -95,6 +97,30 @@ class BelongsToAssociationsTest < ActiveRecord::TestCase
   def test_type_mismatch
     assert_raise(ActiveRecord::AssociationTypeMismatch) { Account.find(1).firm = 1 }
     assert_raise(ActiveRecord::AssociationTypeMismatch) { Account.find(1).firm = Project.find(1) }
+  end
+
+  def test_raises_type_mismatch_with_namespaced_class
+    assert_nil defined?(Region), "This test requires that there is no top-level Region class"
+
+    ActiveRecord::Base.connection.instance_eval do
+      create_table(:admin_regions) { |t| t.string :name }
+      add_column :admin_users, :region_id, :integer
+    end
+    Admin.const_set "RegionalUser", Class.new(Admin::User) { belongs_to(:region) }
+    Admin.const_set "Region", Class.new(ActiveRecord::Base)
+
+    e = assert_raise(ActiveRecord::AssociationTypeMismatch) {
+      Admin::RegionalUser.new(region: 'wrong value')
+    }
+    assert_match(/^Region\([^)]+\) expected, got String\([^)]+\)$/, e.message)
+  ensure
+    Admin.send :remove_const, "Region" if Admin.const_defined?("Region")
+    Admin.send :remove_const, "RegionalUser" if Admin.const_defined?("RegionalUser")
+
+    ActiveRecord::Base.connection.instance_eval do
+      remove_column :admin_users, :region_id if column_exists?(:admin_users, :region_id)
+      drop_table :admin_regions, if_exists: true
+    end
   end
 
   def test_natural_assignment
@@ -122,14 +148,14 @@ class BelongsToAssociationsTest < ActiveRecord::TestCase
     Firm.create("name" => "Apple")
     Client.create("name" => "Citibank", :firm_name => "Apple")
     citibank_result = Client.all.merge!(:where => {:name => "Citibank"}, :includes => :firm_with_primary_key).first
-    assert citibank_result.association_cache.key?(:firm_with_primary_key)
+    assert citibank_result.association(:firm_with_primary_key).loaded?
   end
 
   def test_eager_loading_with_primary_key_as_symbol
     Firm.create("name" => "Apple")
     Client.create("name" => "Citibank", :firm_name => "Apple")
     citibank_result = Client.all.merge!(:where => {:name => "Citibank"}, :includes => :firm_with_primary_key_symbols).first
-    assert citibank_result.association_cache.key?(:firm_with_primary_key_symbols)
+    assert citibank_result.association(:firm_with_primary_key_symbols).loaded?
   end
 
   def test_creating_the_belonging_object
@@ -238,9 +264,11 @@ class BelongsToAssociationsTest < ActiveRecord::TestCase
   def test_polymorphic_association_class
     sponsor = Sponsor.new
     assert_nil sponsor.association(:sponsorable).send(:klass)
+    assert_nil sponsor.sponsorable(force_reload: true)
 
     sponsor.sponsorable_type = '' # the column doesn't have to be declared NOT NULL
     assert_nil sponsor.association(:sponsorable).send(:klass)
+    assert_nil sponsor.sponsorable(force_reload: true)
 
     sponsor.sponsorable = Member.new :name => "Bert"
     assert_equal Member, sponsor.association(:sponsorable).send(:klass)

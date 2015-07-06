@@ -1,3 +1,5 @@
+require 'active_support/core_ext/hash/keys'
+
 module ActiveJob
   # Provides helper methods for testing Active Job
   module TestHelper
@@ -45,7 +47,7 @@ module ActiveJob
           original_count = enqueued_jobs.size
           yield
           new_count = enqueued_jobs.size
-          assert_equal original_count + number, new_count,
+          assert_equal number, new_count - original_count,
                        "#{number} jobs expected, but #{new_count - original_count} were enqueued"
         else
           enqueued_jobs_size = enqueued_jobs.size
@@ -112,7 +114,7 @@ module ActiveJob
           original_count = performed_jobs.size
           perform_enqueued_jobs { yield }
           new_count = performed_jobs.size
-          assert_equal original_count + number, new_count,
+          assert_equal number, new_count - original_count,
                        "#{number} jobs expected, but #{new_count - original_count} were performed"
         else
           performed_jobs_size = performed_jobs.size
@@ -157,9 +159,10 @@ module ActiveJob
         original_enqueued_jobs = enqueued_jobs.dup
         clear_enqueued_jobs
         args.assert_valid_keys(:job, :args, :at, :queue)
+        serialized_args = serialize_args_for_assertion(args)
         yield
         matching_job = enqueued_jobs.any? do |job|
-          args.all? { |key, value| value == job[key] }
+          serialized_args.all? { |key, value| value == job[key] }
         end
         assert matching_job, "No enqueued job found with #{args}"
       ensure
@@ -177,9 +180,10 @@ module ActiveJob
         original_performed_jobs = performed_jobs.dup
         clear_performed_jobs
         args.assert_valid_keys(:job, :args, :at, :queue)
+        serialized_args = serialize_args_for_assertion(args)
         perform_enqueued_jobs { yield }
         matching_job = performed_jobs.any? do |job|
-          args.all? { |key, value| value == job[key] }
+          serialized_args.all? { |key, value| value == job[key] }
         end
         assert matching_job, "No performed job found with #{args}"
       ensure
@@ -212,6 +216,14 @@ module ActiveJob
 
         def clear_performed_jobs
           performed_jobs.clear
+        end
+
+        def serialize_args_for_assertion(args)
+          serialized_args = args.dup
+          if job_args = serialized_args.delete(:args)
+            serialized_args[:args] = ActiveJob::Arguments.serialize(job_args)
+          end
+          serialized_args
         end
     end
   end

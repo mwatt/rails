@@ -199,7 +199,7 @@ module ActiveRecord
   # == Canceling callbacks
   #
   # If a <tt>before_*</tt> callback returns +false+, all the later callbacks and the associated action are
-  # cancelled. If an <tt>after_*</tt> callback returns +false+, all the later callbacks are cancelled.
+  # cancelled.
   # Callbacks are generally run in the order they are defined, with the exception of callbacks defined as
   # methods on the model, which are called last.
   #
@@ -289,25 +289,25 @@ module ActiveRecord
     end
 
     def destroy #:nodoc:
-      _run_destroy_callbacks { super }
+      run_callbacks(:destroy) { super }
     end
 
     def touch(*) #:nodoc:
-      _run_touch_callbacks { super }
+      run_callbacks(:touch) { super }
     end
 
   private
 
     def create_or_update #:nodoc:
-      _run_save_callbacks { super }
+      run_callbacks(:save) { super }
     end
 
     def _create_record #:nodoc:
-      _run_create_callbacks { super }
+      run_callbacks(:create) { super }
     end
 
     def _update_record(*) #:nodoc:
-      _run_update_callbacks { super }
+      run_callbacks(:update) { super }
     end
   end
 end

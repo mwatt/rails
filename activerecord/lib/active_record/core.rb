@@ -114,16 +114,16 @@ module ActiveRecord
         super
       end
 
-      def initialize_find_by_cache
+      def initialize_find_by_cache # :nodoc:
         self.find_by_statement_cache = {}.extend(Mutex_m)
       end
 
-      def inherited(child_class)
+      def inherited(child_class) # :nodoc:
         child_class.initialize_find_by_cache
         super
       end
 
-      def find(*ids)
+      def find(*ids) # :nodoc:
         # We don't have cache keys for this stuff yet
         return super unless ids.length == 1
         # Allow symbols to super to maintain compatibility for deprecated finders until Rails 5
@@ -159,7 +159,7 @@ module ActiveRecord
         raise RecordNotFound, "Couldn't find #{name} with an out of range value for '#{primary_key}'"
       end
 
-      def find_by(*args)
+      def find_by(*args) # :nodoc:
         return super if current_scope || !(Hash === args.first) || reflect_on_all_aggregations.any?
         return super if default_scopes.any?
 
@@ -192,11 +192,11 @@ module ActiveRecord
         end
       end
 
-      def find_by!(*args)
+      def find_by!(*args) # :nodoc:
         find_by(*args) or raise RecordNotFound.new("Couldn't find #{name}")
       end
 
-      def initialize_generated_modules
+      def initialize_generated_modules # :nodoc:
         generated_association_methods
       end
 
@@ -271,28 +271,32 @@ module ActiveRecord
     #   User.new(first_name: 'Jamie')
     def initialize(attributes = nil, options = {})
       @attributes = self.class._default_attributes.dup
+      self.class.define_attribute_methods
 
       init_internals
       initialize_internals_callback
 
-      self.class.define_attribute_methods
       # +options+ argument is only needed to make protected_attributes gem easier to hook.
       # Remove it when we drop support to this gem.
       init_attributes(attributes, options) if attributes
 
       yield self if block_given?
-      _run_initialize_callbacks
+      run_callbacks :initialize
     end
 
-    # Initialize an empty model object from +coder+. +coder+ must contain
-    # the attributes necessary for initializing an empty model object. For
-    # example:
+    # Initialize an empty model object from +coder+. +coder+ should be
+    # the result of previously encoding an Active Record model, using
+    # `encode_with`
     #
     #   class Post < ActiveRecord::Base
     #   end
     #
+    #   old_post = Post.new(title: "hello world")
+    #   coder = {}
+    #   old_post.encode_with(coder)
+    #
     #   post = Post.allocate
-    #   post.init_with('attributes' => { 'title' => 'hello world' })
+    #   post.init_with(coder)
     #   post.title # => 'hello world'
     def init_with(coder)
       @attributes = coder['attributes']
@@ -303,8 +307,8 @@ module ActiveRecord
 
       self.class.define_attribute_methods
 
-      _run_find_callbacks
-      _run_initialize_callbacks
+      run_callbacks :find
+      run_callbacks :initialize
 
       self
     end
@@ -340,7 +344,7 @@ module ActiveRecord
       @attributes = @attributes.dup
       @attributes.reset(self.class.primary_key)
 
-      _run_initialize_callbacks
+      run_callbacks(:initialize)
 
       @aggregation_cache = {}
       @association_cache = {}
@@ -453,6 +457,7 @@ module ActiveRecord
     # Takes a PP and prettily prints this record to it, allowing you to get a nice result from `pp record`
     # when pp is required.
     def pretty_print(pp)
+      return super if custom_inspect_method_defined?
       pp.object_address_group(self) do
         if defined?(@attributes) && @attributes
           column_names = self.class.column_names.select { |name| has_attribute?(name) || new_record? }
@@ -478,15 +483,15 @@ module ActiveRecord
       Hash[methods.map! { |method| [method, public_send(method)] }].with_indifferent_access
     end
 
+    private
+
     def set_transaction_state(state) # :nodoc:
       @transaction_state = state
     end
 
     def has_transactional_callbacks? # :nodoc:
-      !_rollback_callbacks.empty? || !_commit_callbacks.empty? || !_create_callbacks.empty?
+      !_rollback_callbacks.empty? || !_commit_callbacks.empty?
     end
-
-    private
 
     # Updates the attributes on this particular ActiveRecord object so that
     # if it is associated with a transaction, then the state of the AR object
@@ -510,6 +515,8 @@ module ActiveRecord
     end
 
     def update_attributes_from_transaction_state(transaction_state, depth)
+      @reflects_state = [false] if depth == 0
+
       if transaction_state && transaction_state.finalized? && !has_transactional_callbacks?
         unless @reflects_state[depth]
           restore_transaction_record_state if transaction_state.rolledback?
@@ -546,7 +553,6 @@ module ActiveRecord
       @txn                      = nil
       @_start_transaction_state = {}
       @transaction_state        = nil
-      @reflects_state           = [false]
     end
 
     def initialize_internals_callback
@@ -562,6 +568,10 @@ module ActiveRecord
       if frozen?
         @attributes = @attributes.dup
       end
+    end
+
+    def custom_inspect_method_defined?
+      self.class.instance_method(:inspect).owner != ActiveRecord::Base.instance_method(:inspect).owner
     end
   end
 end

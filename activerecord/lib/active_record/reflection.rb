@@ -196,7 +196,7 @@ module ActiveRecord
         @scope         = scope
         @options       = options
         @active_record = active_record
-        @klass         = options[:class]
+        @klass         = options[:anonymous_class]
         @plural_name   = active_record.pluralize_table_names ?
                             name.to_s.pluralize : name.to_s
       end
@@ -499,7 +499,7 @@ module ActiveRecord
         # returns either nil or the inverse association name that it finds.
         def automatic_inverse_of
           if can_find_inverse_of_automatically?(self)
-            inverse_name = ActiveSupport::Inflector.underscore(options[:as] || active_record.name).to_sym
+            inverse_name = ActiveSupport::Inflector.underscore(options[:as] || active_record.name.demodulize).to_sym
 
             begin
               reflection = klass._reflect_on_association(inverse_name)
@@ -632,7 +632,7 @@ module ActiveRecord
 
       def initialize(delegate_reflection)
         @delegate_reflection = delegate_reflection
-        @klass         = delegate_reflection.options[:class]
+        @klass         = delegate_reflection.options[:anonymous_class]
         @source_reflection_name = delegate_reflection.options[:source]
       end
 

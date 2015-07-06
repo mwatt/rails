@@ -50,16 +50,6 @@ module ActiveRecord
       end
     end
 
-    class SQLite3String < Type::String # :nodoc:
-      def type_cast_for_database(value)
-        if value.is_a?(::String) && value.encoding == Encoding::ASCII_8BIT
-          value.encode(Encoding::UTF_8)
-        else
-          super
-        end
-      end
-    end
-
     # The SQLite3 adapter works SQLite 3.6.16 or newer
     # with the sqlite3-ruby drivers (available as gem from https://rubygems.org/gems/sqlite3).
     #
@@ -239,6 +229,12 @@ module ActiveRecord
         case value
         when BigDecimal
           value.to_f
+        when String
+          if value.encoding == Encoding::ASCII_8BIT
+            super(value.encode(Encoding::UTF_8))
+          else
+            super
+          end
         else
           super
         end
@@ -361,7 +357,7 @@ module ActiveRecord
         log('commit transaction',nil) { @connection.commit }
       end
 
-      def rollback_db_transaction #:nodoc:
+      def exec_rollback_db_transaction #:nodoc:
         log('rollback transaction',nil) { @connection.rollback }
       end
 
@@ -428,10 +424,9 @@ module ActiveRecord
       end
 
       def primary_key(table_name) #:nodoc:
-        column = table_structure(table_name).find { |field|
-          field['pk'] == 1
-        }
-        column && column['name']
+        pks = table_structure(table_name).select { |f| f['pk'] > 0 }
+        return nil unless pks.count == 1
+        pks[0]['name']
       end
 
       def remove_index!(table_name, index_name) #:nodoc:
@@ -509,7 +504,6 @@ module ActiveRecord
         def initialize_type_map(m)
           super
           m.register_type(/binary/i, SQLite3Binary.new)
-          register_class_with_limit m, %r(char)i, SQLite3String
         end
 
         def table_structure(table_name)

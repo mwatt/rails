@@ -757,6 +757,9 @@ module ActiveRecord
 
     def from!(value, subquery_name = nil) # :nodoc:
       self.from_value = [value, subquery_name]
+      if value.is_a? Relation
+        self.bind_values = value.arel.bind_values + value.bind_values + bind_values
+      end
       self
     end
 
@@ -868,12 +871,11 @@ module ActiveRecord
 
       arel.take(connection.sanitize_limit(limit_value)) if limit_value
       arel.skip(offset_value.to_i) if offset_value
-
-      arel.group(*group_values.uniq.reject(&:blank?)) unless group_values.empty?
+      arel.group(*arel_columns(group_values.uniq.reject(&:blank?))) unless group_values.empty?
 
       build_order(arel)
 
-      build_select(arel, select_values.uniq)
+      build_select(arel)
 
       arel.distinct(distinct_value)
       arel.from(build_from) if from_value
@@ -907,7 +909,7 @@ module ActiveRecord
 
       where_values.reject! do |rel|
         case rel
-        when Arel::Nodes::Between, Arel::Nodes::In, Arel::Nodes::NotIn, Arel::Nodes::Equality, Arel::Nodes::NotEqual, Arel::Nodes::LessThanOrEqual, Arel::Nodes::GreaterThanOrEqual
+        when Arel::Nodes::Between, Arel::Nodes::In, Arel::Nodes::NotIn, Arel::Nodes::Equality, Arel::Nodes::NotEqual, Arel::Nodes::LessThan, Arel::Nodes::LessThanOrEqual, Arel::Nodes::GreaterThan, Arel::Nodes::GreaterThanOrEqual
           subrelation = (rel.left.kind_of?(Arel::Attributes::Attribute) ? rel.left : rel.right)
           subrelation.name == target_value
         end
@@ -963,12 +965,9 @@ module ActiveRecord
 
     def create_binds(opts)
       bindable, non_binds = opts.partition do |column, value|
-        case value
-        when String, Integer, ActiveRecord::StatementCache::Substitute
-          @klass.columns_hash.include? column.to_s
-        else
-          false
-        end
+        PredicateBuilder.can_be_bound?(value) &&
+          @klass.columns_hash.include?(column.to_s) &&
+          !@klass.reflect_on_aggregation(column)
       end
 
       association_binds, non_binds = non_binds.partition do |column, value|
@@ -977,6 +976,8 @@ module ActiveRecord
 
       new_opts = {}
       binds = []
+
+      connection = self.connection
 
       bindable.each do |(column,value)|
         binds.push [@klass.columns_hash[column.to_s], value]
@@ -1006,7 +1007,6 @@ module ActiveRecord
       case opts
       when Relation
         name ||= 'subquery'
-        self.bind_values = opts.bind_values + self.bind_values
         opts.arel.as(name.to_s)
       else
         opts
@@ -1054,19 +1054,23 @@ module ActiveRecord
       manager
     end
 
-    def build_select(arel, selects)
-      if !selects.empty?
-        expanded_select = selects.map do |field|
-          if (Symbol === field || String === field) && columns_hash.key?(field.to_s)
-            arel_table[field]
-          else
-            field
-          end
-        end
-
-        arel.project(*expanded_select)
+    def build_select(arel)
+      if select_values.any?
+        arel.project(*arel_columns(select_values.uniq))
       else
         arel.project(@klass.arel_table[Arel.star])
+      end
+    end
+
+    def arel_columns(columns)
+      columns.map do |field|
+        if (Symbol === field || String === field) && columns_hash.key?(field.to_s) && !from_value
+          arel_table[field]
+        elsif Symbol === field
+          connection.quote_table_name(field.to_s)
+        else
+          field
+        end
       end
     end
 
@@ -1159,13 +1163,11 @@ module ActiveRecord
       end
     end
 
-    # This function is recursive just for better readablity.
-    # #where argument doesn't support more than one level nested hash in real world.
     def add_relations_to_bind_values(attributes)
       if attributes.is_a?(Hash)
         attributes.each_value do |value|
           if value.is_a?(ActiveRecord::Relation)
-            self.bind_values += value.bind_values
+            self.bind_values += value.arel.bind_values + value.bind_values
           else
             add_relations_to_bind_values(value)
           end

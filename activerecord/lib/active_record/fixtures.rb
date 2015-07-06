@@ -534,12 +534,10 @@ module ActiveRecord
                   conn.insert_fixture(row, fixture_set_name)
                 end
               end
-            end
 
-            # Cap primary key sequences to max(pk).
-            if connection.respond_to?(:reset_pk_sequence!)
-              fixture_sets.each do |fs|
-                connection.reset_pk_sequence!(fs.table_name)
+              # Cap primary key sequences to max(pk).
+              if conn.respond_to?(:reset_pk_sequence!)
+                conn.reset_pk_sequence!(fs.table_name)
               end
             end
           end
@@ -633,7 +631,7 @@ module ActiveRecord
 
           # interpolate the fixture label
           row.each do |key, value|
-            row[key] = value.gsub("$LABEL", label) if value.is_a?(String)
+            row[key] = value.gsub("$LABEL", label.to_s) if value.is_a?(String)
           end
 
           # generate a primary key if necessary
@@ -661,7 +659,7 @@ module ActiveRecord
                   row[association.foreign_type] = $1
                 end
 
-                fk_type = association.active_record.columns_hash[fk_name].type
+                fk_type = reflection_class.columns_hash[fk_name].type
                 row[fk_name] = ActiveRecord::FixtureSet.identify(value, fk_type)
               end
             when :has_many
@@ -702,6 +700,10 @@ module ActiveRecord
 
       def lhs_key
         @association.through_reflection.foreign_key
+      end
+
+      def join_table
+        @association.through_reflection.table_name
       end
     end
 

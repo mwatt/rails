@@ -58,7 +58,7 @@ module ActionMailer
   #
   # The mail method, if not passed a block, will inspect your views and send all the views with
   # the same name as the method, so the above action would send the +welcome.text.erb+ view
-  # file as well as the +welcome.text.html.erb+ view file in a +multipart/alternative+ email.
+  # file as well as the +welcome.html.erb+ view file in a +multipart/alternative+ email.
   #
   # If you want to explicitly render only certain templates, pass a block:
   #
@@ -381,8 +381,8 @@ module ActionMailer
   #   * <tt>:password</tt> - If your mail server requires authentication, set the password in this setting.
   #   * <tt>:authentication</tt> - If your mail server requires authentication, you need to specify the
   #     authentication type here.
-  #     This is a symbol and one of <tt>:plain</tt> (will send the password in the clear), <tt>:login</tt> (will
-  #     send password Base64 encoded) or <tt>:cram_md5</tt> (combines a Challenge/Response mechanism to exchange
+  #     This is a symbol and one of <tt>:plain</tt> (will send the password Base64 encoded), <tt>:login</tt> (will
+  #     send the password Base64 encoded) or <tt>:cram_md5</tt> (combines a Challenge/Response mechanism to exchange
   #     information and a cryptographic Message Digest 5 algorithm to hash important information)
   #   * <tt>:enable_starttls_auto</tt> - Detects if STARTTLS is enabled in your SMTP server and starts
   #     to use it. Defaults to <tt>true</tt>.
@@ -600,6 +600,7 @@ module ActionMailer
 
     class NullMail #:nodoc:
       def body; '' end
+      def header; {} end
 
       def respond_to?(string, include_all=false)
         true

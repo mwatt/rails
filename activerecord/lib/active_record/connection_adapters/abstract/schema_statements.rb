@@ -1,4 +1,6 @@
 require 'active_record/migration/join_table'
+require 'active_support/core_ext/string/access'
+require 'digest'
 
 module ActiveRecord
   module ConnectionAdapters # :nodoc:
@@ -204,7 +206,17 @@ module ActiveRecord
         end
 
         result = execute schema_creation.accept td
-        td.indexes.each_pair { |c, o| add_index(table_name, c, o) } unless supports_indexes_in_create?
+
+        unless supports_indexes_in_create?
+          td.indexes.each_pair do |column_name, index_options|
+            add_index(table_name, column_name, index_options)
+          end
+        end
+
+        td.foreign_keys.each_pair do |other_table_name, foreign_key_options|
+          add_foreign_key(table_name, other_table_name, foreign_key_options)
+        end
+
         result
       end
 
@@ -518,6 +530,8 @@ module ActiveRecord
       #
       #   CREATE UNIQUE INDEX index_accounts_on_branch_id_and_party_id ON accounts(branch_id, party_id) WHERE active
       #
+      # Note: Partial indexes are only supported for PostgreSQL and SQLite 3.8.0+.
+      #
       # ====== Creating an index with a specific method
       #
       #   add_index(:developers, :name, using: 'btree')
@@ -576,9 +590,8 @@ module ActiveRecord
       #   rename_index :people, 'index_people_on_last_name', 'index_users_on_last_name'
       #
       def rename_index(table_name, old_name, new_name)
-        if new_name.length > allowed_index_name_length
-          raise ArgumentError, "Index name '#{new_name}' on table '#{table_name}' is too long; the limit is #{allowed_index_name_length} characters"
-        end
+        validate_index_length!(table_name, new_name)
+
         # this is a naive implementation; some DBs may support this more efficiently (Postgres, for instance)
         old_index_def = indexes(table_name).detect { |i| i.name == old_name }
         return unless old_index_def
@@ -610,10 +623,20 @@ module ActiveRecord
         indexes(table_name).detect { |i| i.name == index_name }
       end
 
-      # Adds a reference. Optionally adds a +type+ column, if <tt>:polymorphic</tt> option is provided.
-      # The reference column is an +integer+ by default, the <tt>:type</tt> option can be used to specify
-      # a different type.
+      # Adds a reference. The reference column is an integer by default,
+      # the <tt>:type</tt> option can be used to specify a different type.
+      # Optionally adds a +_type+ column, if <tt>:polymorphic</tt> option is provided.
       # <tt>add_reference</tt> and <tt>add_belongs_to</tt> are acceptable.
+      #
+      # The +options+ hash can include the following keys:
+      # [<tt>:type</tt>]
+      #   The reference column type. Defaults to +:integer+.
+      # [<tt>:index</tt>]
+      #   Add an appropriate index. Defaults to false.
+      # [<tt>:foreign_key</tt>]
+      #   Add an appropriate foreign key. Defaults to false.
+      # [<tt>:polymorphic</tt>]
+      #   Wether an additional +_type+ column should be added. Defaults to false.
       #
       # ====== Create a user_id integer column
       #
@@ -623,11 +646,7 @@ module ActiveRecord
       #
       #   add_reference(:products, :user, type: :string)
       #
-      # ====== Create a supplier_id and supplier_type columns
-      #
-      #   add_belongs_to(:products, :supplier, polymorphic: true)
-      #
-      # ====== Create a supplier_id, supplier_type columns and appropriate index
+      # ====== Create supplier_id, supplier_type columns and appropriate index
       #
       #   add_reference(:products, :supplier, polymorphic: true, index: true)
       #
@@ -635,9 +654,19 @@ module ActiveRecord
         polymorphic = options.delete(:polymorphic)
         index_options = options.delete(:index)
         type = options.delete(:type) || :integer
+        foreign_key_options = options.delete(:foreign_key)
+
+        if polymorphic && foreign_key_options
+          raise ArgumentError, "Cannot add a foreign key to a polymorphic relation"
+        end
+
         add_column(table_name, "#{ref_name}_id", type, options)
         add_column(table_name, "#{ref_name}_type", :string, polymorphic.is_a?(Hash) ? polymorphic : options) if polymorphic
         add_index(table_name, polymorphic ? %w[type id].map{ |t| "#{ref_name}_#{t}" } : "#{ref_name}_id", index_options.is_a?(Hash) ? index_options : {}) if index_options
+        if foreign_key_options
+          to_table = Base.pluralize_table_names ? ref_name.to_s.pluralize : ref_name
+          add_foreign_key(table_name, to_table, foreign_key_options.is_a?(Hash) ? foreign_key_options : {})
+        end
       end
       alias :add_belongs_to :add_reference
 
@@ -652,7 +681,16 @@ module ActiveRecord
       #
       #   remove_reference(:products, :supplier, polymorphic: true)
       #
+      # ====== Remove the reference with a foreign key
+      #
+      #   remove_reference(:products, :user, index: true, foreign_key: true)
+      #
       def remove_reference(table_name, ref_name, options = {})
+        if options[:foreign_key]
+          to_table = Base.pluralize_table_names ? ref_name.to_s.pluralize : ref_name
+          remove_foreign_key(table_name, to_table)
+        end
+
         remove_column(table_name, "#{ref_name}_id")
         remove_column(table_name, "#{ref_name}_type") if options[:polymorphic]
       end
@@ -668,8 +706,8 @@ module ActiveRecord
       # +to_table+ contains the referenced primary key.
       #
       # The foreign key will be named after the following pattern: <tt>fk_rails_<identifier></tt>.
-      # +identifier+ is a 10 character long random string. A custom name can be specified with
-      # the <tt>:name</tt> option.
+      # +identifier+ is a 10 character long string which is deterministically generated from the
+      # +from_table+ and +column+. A custom name can be specified with the <tt>:name</tt> option.
       #
       # ====== Creating a simple foreign key
       #
@@ -681,7 +719,7 @@ module ActiveRecord
       #
       # ====== Creating a foreign key on a specific column
       #
-      #   add_foreign_key :articles, :users, column: :author_id, primary_key: "lng_id"
+      #   add_foreign_key :articles, :users, column: :author_id, primary_key: :lng_id
       #
       # generates:
       #
@@ -764,7 +802,10 @@ module ActiveRecord
       end
 
       def foreign_key_column_for(table_name) # :nodoc:
-        "#{table_name.to_s.singularize}_id"
+        prefix = Base.table_name_prefix
+        suffix = Base.table_name_suffix
+        name = table_name.to_s =~ /#{prefix}(.+)#{suffix}/ ? $1 : table_name.to_s
+        "#{name.singularize}_id"
       end
 
       def dump_schema_information #:nodoc:
@@ -850,7 +891,7 @@ module ActiveRecord
       #   add_timestamps(:suppliers, null: false)
       #
       def add_timestamps(table_name, options = {})
-        emit_warning_if_null_unspecified(options)
+        emit_warning_if_null_unspecified(:add_timestamps, options)
         add_column table_name, :created_at, :datetime, options
         add_column table_name, :updated_at, :datetime, options
       end
@@ -982,8 +1023,16 @@ module ActiveRecord
       end
 
       def foreign_key_name(table_name, options) # :nodoc:
+        identifier = "#{table_name}_#{options.fetch(:column)}_fk"
+        hashed_identifier = Digest::SHA256.hexdigest(identifier).first(10)
         options.fetch(:name) do
-          "fk_rails_#{SecureRandom.hex(5)}"
+          "fk_rails_#{hashed_identifier}"
+        end
+      end
+
+      def validate_index_length!(table_name, new_name)
+        if new_name.length > allowed_index_name_length
+          raise ArgumentError, "Index name '#{new_name}' on table '#{table_name}' is too long; the limit is #{allowed_index_name_length} characters"
         end
       end
     end

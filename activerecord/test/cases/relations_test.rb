@@ -16,7 +16,8 @@ require 'models/engine'
 require 'models/tyre'
 require 'models/minivan'
 require 'models/aircraft'
-
+require "models/possession"
+require "models/reader"
 
 class RelationTest < ActiveRecord::TestCase
   fixtures :authors, :topics, :entrants, :developers, :companies, :developers_projects, :accounts, :categories, :categorizations, :posts, :comments,
@@ -160,6 +161,17 @@ class RelationTest < ActiveRecord::TestCase
     end
   end
 
+  def test_select_with_subquery_in_from_does_not_use_original_table_name
+    relation = Comment.group(:type).select('COUNT(post_id) AS post_count, type')
+    subquery = Comment.from(relation).select('type','post_count')
+    assert_equal(relation.map(&:post_count).sort,subquery.map(&:post_count).sort)
+  end
+
+  def test_group_with_subquery_in_from_does_not_use_original_table_name
+    relation = Comment.group(:type).select('COUNT(post_id) AS post_count,type')
+    subquery = Comment.from(relation).group('type').average("post_count")
+    assert_equal(relation.map(&:post_count).sort,subquery.values.sort)
+  end
 
   def test_finding_with_conditions
     assert_equal ["David"], Author.where(:name => 'David').map(&:name)
@@ -611,6 +623,32 @@ class RelationTest < ActiveRecord::TestCase
     assert_equal 1, query.to_a.size
   end
 
+  def test_preloading_with_associations_and_merges
+    post = Post.create! title: 'Uhuu', body: 'body'
+    reader = Reader.create! post_id: post.id, person_id: 1
+    comment = Comment.create! post_id: post.id, body: 'body'
+
+    assert !comment.respond_to?(:readers)
+
+    post_rel = Post.preload(:readers).joins(:readers).where(title: 'Uhuu')
+    result_comment = Comment.joins(:post).merge(post_rel).to_a.first
+    assert_equal comment, result_comment
+
+    assert_no_queries do
+      assert_equal post, result_comment.post
+      assert_equal [reader], result_comment.post.readers.to_a
+    end
+
+    post_rel = Post.includes(:readers).where(title: 'Uhuu')
+    result_comment = Comment.joins(:post).merge(post_rel).first
+    assert_equal comment, result_comment
+
+    assert_no_queries do
+      assert_equal post, result_comment.post
+      assert_equal [reader], result_comment.post.readers.to_a
+    end
+  end
+
   def test_loading_with_one_association
     posts = Post.preload(:comments)
     post = posts.find { |p| p.id == 1 }
@@ -848,6 +886,12 @@ class RelationTest < ActiveRecord::TestCase
     fake  = Author.where(:name => 'fake author')
     assert ! fake.exists?
     assert ! fake.exists?(authors(:david).id)
+  end
+
+  def test_exists_uses_existing_scope
+    post = authors(:david).posts.first
+    authors = Author.includes(:posts).where(name: "David", posts: { id: post.id })
+    assert authors.exists?(authors(:david).id)
   end
 
   def test_last
@@ -1452,6 +1496,10 @@ class RelationTest < ActiveRecord::TestCase
 
     scope = Post.having([])
     assert_equal [], scope.having_values
+  end
+
+  def test_grouping_by_column_with_reserved_name
+    assert_equal [], Possession.select(:where).group(:where).to_a
   end
 
   def test_references_triggers_eager_loading

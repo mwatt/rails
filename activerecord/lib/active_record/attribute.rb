@@ -51,7 +51,7 @@ module ActiveRecord
     end
 
     def changed_in_place_from?(old_value)
-      type.changed_in_place?(old_value, value)
+      has_been_read? && type.changed_in_place?(old_value, value)
     end
 
     def with_value_from_user(value)
@@ -74,6 +74,10 @@ module ActiveRecord
       true
     end
 
+    def came_from_user?
+      false
+    end
+
     def ==(other)
       self.class == other.class &&
         name == other.name &&
@@ -89,6 +93,12 @@ module ActiveRecord
       end
     end
 
+    private
+
+    def has_been_read?
+      defined?(@value)
+    end
+
     class FromDatabase < Attribute # :nodoc:
       def type_cast(value)
         type.type_cast_from_database(value)
@@ -98,6 +108,10 @@ module ActiveRecord
     class FromUser < Attribute # :nodoc:
       def type_cast(value)
         type.type_cast_from_user(value)
+      end
+
+      def came_from_user?
+        true
       end
     end
 

@@ -58,6 +58,12 @@ module ActiveRecord
         SchemaCreation.new self
       end
 
+      def prepare_column_options(column, types) # :nodoc:
+        spec = super
+        spec.delete(:limit) if :boolean === column.type
+        spec
+      end
+
       class Column < ConnectionAdapters::Column # :nodoc:
         attr_reader :collation, :strict, :extra
 
@@ -324,7 +330,7 @@ module ActiveRecord
         execute "COMMIT"
       end
 
-      def rollback_db_transaction #:nodoc:
+      def exec_rollback_db_transaction #:nodoc:
         execute "ROLLBACK"
       end
 
@@ -492,6 +498,8 @@ module ActiveRecord
 
       def rename_index(table_name, old_name, new_name)
         if supports_rename_index?
+          validate_index_length!(table_name, new_name)
+
           execute "ALTER TABLE #{quote_table_name(table_name)} RENAME INDEX #{quote_table_name(old_name)} TO #{quote_table_name(new_name)}"
         else
           super
@@ -582,6 +590,13 @@ module ActiveRecord
           when 0x1000000..0xffffffff; 'longtext'
           else raise(ActiveRecordError, "No text type has character length #{limit}")
           end
+        when 'datetime'
+          return super unless precision
+
+          case precision
+            when 0..6; "datetime(#{precision})"
+            else raise(ActiveRecordError, "No datetime type has precision of #{precision}. The allowed range of precision is from 0 to 6.")
+          end
         else
           super
         end
@@ -669,6 +684,11 @@ module ActiveRecord
         m.alias_type %r(set)i,           'varchar'
         m.alias_type %r(year)i,          'integer'
         m.alias_type %r(bit)i,           'binary'
+
+        m.register_type(%r(datetime)i) do |sql_type|
+          precision = extract_precision(sql_type)
+          MysqlDateTime.new(precision: precision)
+        end
 
         m.register_type(%r(enum)i) do |sql_type|
           limit = sql_type[/^enum\((.+)\)/i, 1]
@@ -856,6 +876,14 @@ module ActiveRecord
           when 'CASCADE'; :cascade
           when 'SET NULL'; :nullify
           end
+        end
+      end
+
+      class MysqlDateTime < Type::DateTime # :nodoc:
+        private
+
+        def has_precision?
+          precision || 0
         end
       end
 

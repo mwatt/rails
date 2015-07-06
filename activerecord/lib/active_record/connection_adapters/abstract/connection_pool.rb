@@ -236,7 +236,7 @@ module ActiveRecord
         @spec = spec
 
         @checkout_timeout = (spec.config[:checkout_timeout] && spec.config[:checkout_timeout].to_f) || 5
-        @reaper  = Reaper.new self, spec.config[:reaping_frequency]
+        @reaper = Reaper.new(self, (spec.config[:reaping_frequency] && spec.config[:reaping_frequency].to_f))
         @reaper.run
 
         # default max pool size to 5
@@ -361,11 +361,11 @@ module ActiveRecord
         synchronize do
           owner = conn.owner
 
-          conn._run_checkin_callbacks do
+          conn.run_callbacks :checkin do
             conn.expire
           end
 
-          release owner
+          release conn, owner
 
           @available.add conn
         end
@@ -378,7 +378,7 @@ module ActiveRecord
           @connections.delete conn
           @available.delete conn
 
-          release conn.owner
+          release conn, conn.owner
 
           @available.add checkout_new_connection if @available.any_waiting?
         end
@@ -426,10 +426,12 @@ module ActiveRecord
         end
       end
 
-      def release(owner)
+      def release(conn, owner)
         thread_id = owner.object_id
 
-        @reserved_connections.delete thread_id
+        if @reserved_connections[thread_id] == conn
+          @reserved_connections.delete thread_id
+        end
       end
 
       def new_connection
@@ -450,10 +452,14 @@ module ActiveRecord
       end
 
       def checkout_and_verify(c)
-        c._run_checkout_callbacks do
+        c.run_callbacks :checkout do
           c.verify!
         end
         c
+      rescue
+        remove c
+        c.disconnect!
+        raise
       end
     end
 

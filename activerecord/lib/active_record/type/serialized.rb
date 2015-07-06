@@ -27,9 +27,15 @@ module ActiveRecord
         end
       end
 
+      def inspect
+        Kernel.instance_method(:inspect).bind(self).call
+      end
+
       def changed_in_place?(raw_old_value, value)
         return false if value.nil?
-        subtype.changed_in_place?(raw_old_value, coder.dump(value))
+        raw_new_value = type_cast_for_database(value)
+        raw_old_value.nil? != raw_new_value.nil? ||
+          subtype.changed_in_place?(raw_old_value, raw_new_value)
       end
 
       def accessor

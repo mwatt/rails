@@ -1,9 +1,366 @@
+*   Fix through associations using scopes having the scope merged multiple
+    times.
+
+    Fixes #20721.
+    Fixes #20727.
+
+    *Sean Griffin*
+
+*   `ActiveRecord::Base.dump_schema_after_migration` applies migration tasks
+    other than `db:migrate`. (eg. `db:rollback`, `db:migrate:dup`, ...)
+
+    Fixes #20743.
+
+    *Yves Senn*
+
+*   Correctly raise `ActiveRecord::AssociationTypeMismatch` when assigning
+    a wrong type to a namespaced association.
+
+    Fixes #20545.
+
+    *Diego Carrion*
+
+*   Prevent error when using `force_reload: true` on an unassigned polymorphic
+    belongs_to association.
+
+    Fixes #20426.
+
+    *James Dabbs*
+
+
+## Rails 4.2.3 (June 25, 2015) ##
+
+*   Let `WITH` queries (Common Table Expressions) be explainable.
+
+    *Vladimir Kochnev*
+
+*   Fix n+1 query problem when eager loading nil associations (fixes #18312)
+
+    *Sammy Larbi*
+
+*   Fixed an error which would occur in dirty checking when calling
+    `update_attributes` from a getter.
+
+    Fixes #20531.
+
+    *Sean Griffin*
+
+*   Ensure symbols passed to `ActiveRecord::Relation#select` are always treated
+    as columns.
+
+    Fixes #20360.
+
+    *Sean Griffin*
+
+*   Clear query cache when `ActiveRecord::Base#reload` is called.
+
+    *Shane Hender*
+
+*   Pass `:extend` option for `has_and_belongs_to_many` associations to the
+    underlying `has_many :through`.
+
+    *Jaehyun Shin*
+
+*   Make `unscope` aware of "less than" and "greater than" conditions.
+
+    *TAKAHASHI Kazuaki*
+
+*   Revert behavior of `db:schema:load` back to loading the full
+    environment. This ensures that initializers are run.
+
+    Fixes #19545.
+
+    *Yves Senn*
+
+*   Fix missing index when using `timestamps` with the `index` option.
+
+    The `index` option used with `timestamps` should be passed to both
+    `column` definitions for `created_at` and `updated_at` rather than just
+    the first.
+
+    *Paul Mucur*
+
+*   Rename `:class` to `:anonymous_class` in association options.
+
+    Fixes #19659.
+
+    *Andrew White*
+
+*   Fixed a bug where uniqueness validations would error on out of range values,
+    even if an validation should have prevented it from hitting the database.
+
+    *Andrey Voronkov*
+
+*   Foreign key related methods in the migration DSL respect
+    `ActiveRecord::Base.pluralize_table_names = false`.
+
+    Fixes #19643.
+
+    *Mehmet Emin İNAÇ*
+
+*   Reduce memory usage from loading types on pg.
+
+    Fixes #19578.
+
+    *Sean Griffin*
+
+*   Fix referencing wrong table aliases while joining tables of has many through
+    association (only when calling calculation methods).
+
+    Fixes #19276.
+
+    *pinglamb*
+
+*   Don't attempt to update counter caches, when the column wasn't selected.
+
+    Fixes #19437.
+
+    *Sean Griffin*
+
+*   Correctly persist a serialized attribute that has been returned to
+    its default value by an in-place modification.
+
+    Fixes #19467.
+
+    *Matthew Draper*
+
+*   Fix default `format` value in `ActiveRecord::Tasks::DatabaseTasks#schema_file`.
+
+    *James Cox*
+
+*   Dont enroll records in the transaction if they dont have commit callbacks.
+    That was causing a memory grow problem when creating a lot of records inside a transaction.
+
+    Fixes #15549.
+
+    *Will Bryant*, *Aaron Patterson*
+
+*   Correctly create through records when created on a has many through
+    association when using `where`.
+
+    Fixes #19073.
+
+    *Sean Griffin*
+
+
+## Rails 4.2.2 (June 16, 2015) ##
+
+* No Changes *
+
+
+## Rails 4.2.1 (March 19, 2015) ##
+
+*   Fixed ActiveRecord::Relation#becomes! and changed_attributes issues for type column
+
+    Fixes #17139.
+
+    *Miklos Fazekas*
+
+*   `remove_reference` with `foreign_key: true` removes the foreign key before
+    removing the column. This fixes a bug where it was not possible to remove
+    the column on MySQL.
+
+    Fixes #18664.
+
+    *Yves Senn*
+
+*   Add a `:foreign_key` option to `references` and associated migration
+    methods. The model and migration generators now use this option, rather than
+    the `add_foreign_key` form.
+
+    *Sean Griffin*
+
+*   Fix rounding problem for PostgreSQL timestamp column.
+
+    If timestamp column have the precision, it need to format according to
+    the precision of timestamp column.
+
+    *Ryuta Kamizono*
+
+*   Respect the database default charset for `schema_migrations` table.
+
+    The charset of `version` column in `schema_migrations` table is depend
+    on the database default charset and collation rather than the encoding
+    of the connection.
+
+    *Ryuta Kamizono*
+
+*   Respect custom primary keys for associations when calling `Relation#where`
+
+    Fixes #18813.
+
+    *Sean Griffin*
+
+*   Fixed several edge cases which could result in a counter cache updating
+    twice or not updating at all for `has_many` and `has_many :through`.
+
+    Fixes #10865.
+
+    *Sean Griffin*
+
+*   Foreign keys added by migrations were given random, generated names. This
+    meant a different `structure.sql` would be generated every time a developer
+    ran migrations on their machine.
+
+    The generated part of foreign key names is now a hash of the table name and
+    column name, which is consistent every time you run the migration.
+
+    *Chris Sinjakli*
+
+*   Fixed ActiveRecord::Relation#group method when argument is SQL reserved key word:
+
+      SplitTest.group(:key).count
+      Property.group(:value).count
+
+    *Bogdan Gusiev*
+
+*   Don't define autosave association callbacks twice from
+    `accepts_nested_attributes_for`.
+
+    Fixes #18704.
+
+    *Sean Griffin*
+
+*   Integer types will no longer raise a `RangeError` when assigning an
+    attribute, but will instead raise when going to the database.
+
+    Fixes several vague issues which were never reported directly. See the
+    commit message from the commit which added this line for some examples.
+
+    *Sean Griffin*
+
+*   Values which would error while being sent to the database (such as an
+    ASCII-8BIT string with invalid UTF-8 bytes on Sqlite3), no longer error on
+    assignment. They will still error when sent to the database, but you are
+    given the ability to re-assign it to a valid value.
+
+    Fixes #18580.
+
+    *Sean Griffin*
+
+*   Don't remove join dependencies in `Relation#exists?`
+
+    Fixes #18632.
+
+    *Sean Griffin*
+
+*   Invalid values assigned to a JSON column are assumed to be `nil`.
+
+    Fixes #18629.
+
+    *Sean Griffin*
+
+*   No longer issue deprecation warning when including a scope with extensions.
+    Previously every scope with extension methods was transformed into an
+    instance dependent scope. Including such a scope would wrongfully issue a
+    deprecation warning. This is no longer the case.
+
+    Fixes #18467.
+
+    *Yves Senn*
+
+*   Correctly use the type provided by `serialize` when updating records using
+    optimistic locking.
+
+    Fixes #18385.
+
+    *Sean Griffin*
+
+*   `attribute_will_change!` will no longer cause non-persistable attributes to
+    be sent to the database.
+
+    Fixes #18407.
+
+    *Sean Griffin*
+
+*   Format the datetime string according to the precision of the datetime field.
+
+    Incompatible to rounding behavior between MySQL 5.6 and earlier.
+
+    In 5.5, when you insert `2014-08-17 12:30:00.999999` the fractional part
+    is ignored. In 5.6, it's rounded to `2014-08-17 12:30:01`:
+
+    http://bugs.mysql.com/bug.php?id=68760
+
+    *Ryuta Kamizono*
+
+*   Allow precision option for MySQL datetimes.
+
+    *Ryuta Kamizono*
+
+*   Clear query cache on rollback.
+
+    *Florian Weingarten*
+
+*   Fixed setting of foreign_key for through associations while building of new record.
+
+    Fixes #12698.
+
+    *Ivan Antropov*
+
+*   Fixed automatic inverse_of for models nested in module.
+
+    *Andrew McCloud*
+
+*   Fix `reaping_frequency` option when the value is a string.
+
+    This usually happens when it is configured using `DATABASE_URL`.
+
+    *korbin*
+
+*   Fix error message when trying to create an associated record and the foreign
+    key is missing.
+
+    Before this fix the following exception was being raised:
+
+        NoMethodError: undefined method `val' for #<Arel::Nodes::BindParam:0x007fc64d19c218>
+
+    Now the message is:
+
+        ActiveRecord::UnknownAttributeError: unknown attribute 'foreign_key' for Model.
+
+    *Rafael Mendonça França*
+
+*   Fix change detection problem for PostgreSQL bytea type and
+    `ArgumentError: string contains null byte` exception with pg-0.18.
+
+    Fixes #17680.
+
+    *Lars Kanis*
+
+*   When a table has a composite primary key, the `primary_key` method for
+    SQLite3 and PostgreSQL adapters was only returning the first field of the key.
+    Ensures that it will return nil instead, as Active Record doesn't support
+    composite primary keys.
+
+    Fixes #18070.
+
+    *arthurnn*
+
+*   Ensure `first!` and friends work on loaded associations.
+
+    Fixes #18237.
+
+    *Sean Griffin*
+
+*   Dump the default `nil` for PostgreSQL UUID primary key.
+
+    *Ryuta Kamizono*
+
+*   Don't raise when writing an attribute with an out-of-range datetime passed
+    by the user.
+
+    *Grey Baker*
+
 *   Fixes bug with 'ActiveRecord::Type::Numeric' that causes negative values to
     be marked as having changed when set to the same negative value.
 
-    Closes #18161.
+    Fixes #18161.
 
     *Daniel Fox*
+
+
+## Rails 4.2.0 (December 20, 2014) ##
 
 *   Introduce `force: :cascade` option for `create_table`. Using this option
     will recreate tables even if they have dependent objects (like foreign keys).
@@ -16,7 +373,7 @@
     before loading the schema. This is left for the user to do.
     `db:test:prepare` will still purge the database.
 
-    Closes #17945.
+    Fixes #17945.
 
     *Yves Senn*
 

@@ -4,12 +4,32 @@ require 'rbconfig'
 require 'zlib'
 
 module StaticTests
+  def setup
+    @default_internal_encoding = Encoding.default_internal
+    @default_external_encoding = Encoding.default_external
+  end
+
+  def teardown
+    Encoding.default_internal = @default_internal_encoding
+    Encoding.default_external = @default_external_encoding
+  end
+
   def test_serves_dynamic_content
     assert_equal "Hello, World!", get("/nofile").body
   end
 
   def test_handles_urls_with_bad_encoding
     assert_equal "Hello, World!", get("/doorkeeper%E3E4").body
+  end
+
+  def test_handles_urls_with_ascii_8bit
+    assert_equal "Hello, World!", get("/doorkeeper%E3E4".force_encoding('ASCII-8BIT')).body
+  end
+
+  def test_handles_urls_with_ascii_8bit_on_win_31j
+    Encoding.default_internal = "Windows-31J"
+    Encoding.default_external = "Windows-31J"
+    assert_equal "Hello, World!", get("/doorkeeper%E3E4".force_encoding('ASCII-8BIT')).body
   end
 
   def test_sets_cache_control
@@ -145,6 +165,16 @@ module StaticTests
     assert_equal default_response.headers['Content-Type'], response.headers['Content-Type']
   end
 
+  def test_serves_gzip_files_with_not_modified
+    file_name = "/gzip/application-a71b3024f80aea3181c09774ca17e712.js"
+    last_modified = File.mtime(File.join(@root, "#{file_name}.gz"))
+    response = get(file_name, 'HTTP_ACCEPT_ENCODING' => 'gzip', 'HTTP_IF_MODIFIED_SINCE' => last_modified.httpdate)
+    assert_equal 304, response.status
+    assert_equal nil, response.headers['Content-Type']
+    assert_equal nil, response.headers['Content-Encoding']
+    assert_equal nil, response.headers['Vary']
+  end
+
   # Windows doesn't allow \ / : * ? " < > | in filenames
   unless RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
     def test_serves_static_file_with_colon
@@ -200,6 +230,7 @@ class StaticTest < ActiveSupport::TestCase
   }
 
   def setup
+    super
     @root = "#{FIXTURE_LOAD_PATH}/public"
     @app = ActionDispatch::Static.new(DummyApp, @root, "public, max-age=60")
   end
@@ -229,6 +260,7 @@ end
 
 class StaticEncodingTest < StaticTest
   def setup
+    super
     @root = "#{FIXTURE_LOAD_PATH}/公共"
     @app = ActionDispatch::Static.new(DummyApp, @root, "public, max-age=60")
   end

@@ -386,15 +386,15 @@ module ActiveRecord
 
         # Returns just a table's primary key
         def primary_key(table)
-          row = exec_query(<<-end_sql, 'SCHEMA').rows.first
+          pks = exec_query(<<-end_sql, 'SCHEMA').rows
             SELECT attr.attname
             FROM pg_attribute attr
-            INNER JOIN pg_constraint cons ON attr.attrelid = cons.conrelid AND attr.attnum = cons.conkey[1]
+            INNER JOIN pg_constraint cons ON attr.attrelid = cons.conrelid AND attr.attnum = any(cons.conkey)
             WHERE cons.contype = 'p'
               AND cons.conrelid = '#{quote_table_name(table)}'::regclass
           end_sql
-
-          row && row.first
+          return nil unless pks.count == 1
+          pks[0][0]
         end
 
         # Renames a table.
@@ -418,9 +418,7 @@ module ActiveRecord
           rename_table_indexes(table_name, new_name)
         end
 
-        # Adds a new column to the named table.
-        # See TableDefinition#column for details of the options you can use.
-        def add_column(table_name, column_name, type, options = {})
+        def add_column(table_name, column_name, type, options = {}) #:nodoc:
           clear_cache!
           super
         end
@@ -468,7 +466,7 @@ module ActiveRecord
         end
 
         # Renames a column in a table.
-        def rename_column(table_name, column_name, new_column_name)
+        def rename_column(table_name, column_name, new_column_name) #:nodoc:
           clear_cache!
           execute "ALTER TABLE #{quote_table_name(table_name)} RENAME COLUMN #{quote_column_name(column_name)} TO #{quote_column_name(new_column_name)}"
           rename_column_indexes(table_name, column_name, new_column_name)
@@ -484,9 +482,8 @@ module ActiveRecord
         end
 
         def rename_index(table_name, old_name, new_name)
-          if new_name.length > allowed_index_name_length
-            raise ArgumentError, "Index name '#{new_name}' on table '#{table_name}' is too long; the limit is #{allowed_index_name_length} characters"
-          end
+          validate_index_length!(table_name, new_name)
+
           execute "ALTER INDEX #{quote_column_name(old_name)} RENAME TO #{quote_table_name(new_name)}"
         end
 

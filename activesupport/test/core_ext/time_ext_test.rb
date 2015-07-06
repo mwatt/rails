@@ -149,6 +149,9 @@ class TimeExtCalculationsTest < ActiveSupport::TestCase
       assert_equal Time.local(2006,3,19,23,59,59,Rational(999999999, 1000)), Time.local(2006,3,19,10,10,10).end_of_day, 'ends DST'
       assert_equal Time.local(2006,10,1,23,59,59,Rational(999999999, 1000)), Time.local(2006,10,1,10,10,10).end_of_day, 'start DST'
     end
+    with_env_tz 'Asia/Yekaterinburg' do
+      assert_equal Time.local(2015, 2, 8, 23, 59, 59, Rational(999999999, 1000)), Time.new(2015, 2, 8, 8, 0, 0, '+05:00').end_of_day
+    end
   end
 
   def test_end_of_hour
@@ -389,6 +392,7 @@ class TimeExtCalculationsTest < ActiveSupport::TestCase
     assert_equal Time.local(2005,1,2,11,22,33, 8), Time.local(2005,1,2,11,22,33,44).change(:usec => 8)
     assert_equal Time.local(2005,1,2,11,22,33, 8), Time.local(2005,1,2,11,22,33,2).change(:nsec => 8000)
     assert_raise(ArgumentError) { Time.local(2005,1,2,11,22,33, 8).change(:usec => 1, :nsec => 1) }
+    assert_nothing_raised(ArgumentError) { Time.new(2015, 5, 9, 10, 00, 00, '+03:00').change(nsec: 999999999) }
   end
 
   def test_utc_change
@@ -719,6 +723,13 @@ class TimeExtCalculationsTest < ActiveSupport::TestCase
     assert_equal  1, Time.utc(2000) <=> ActiveSupport::TimeWithZone.new( Time.utc(1999, 12, 31, 23, 59, 59), ActiveSupport::TimeZone['UTC'] )
     assert_equal  0, Time.utc(2000) <=> ActiveSupport::TimeWithZone.new( Time.utc(2000, 1, 1, 0, 0, 0), ActiveSupport::TimeZone['UTC'] )
     assert_equal(-1, Time.utc(2000) <=> ActiveSupport::TimeWithZone.new( Time.utc(2000, 1, 1, 0, 0, 1), ActiveSupport::TimeZone['UTC'] ))
+  end
+
+  def test_compare_with_string
+    assert_equal   1, Time.utc(2000) <=> Time.utc(1999, 12, 31, 23, 59, 59, 999).to_s
+    assert_equal   0, Time.utc(2000) <=> Time.utc(2000, 1, 1, 0, 0, 0).to_s
+    assert_equal( -1, Time.utc(2000) <=> Time.utc(2000, 1, 1, 0, 0, 1, 0).to_s)
+    assert_equal nil, Time.utc(2000) <=> 'Invalid as Time'
   end
 
   def test_at_with_datetime

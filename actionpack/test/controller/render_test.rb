@@ -217,6 +217,20 @@ class TestController < ActionController::Base
     head :forbidden, :x_custom_header => "something"
   end
 
+  def head_and_return
+    head :ok and return
+    raise 'should not reach this line'
+  end
+
+  def head_with_no_content
+    # Fill in the headers with dummy data to make
+    # sure they get removed during the testing
+    response.headers["Content-Type"] = "dummy"
+    response.headers["Content-Length"] = 42
+
+    head 204
+  end
+
   private
 
     def set_variable_for_layout
@@ -545,6 +559,14 @@ class HeadRenderTest < ActionController::TestCase
     end
   end
 
+  def test_head_with_no_content
+    get :head_with_no_content
+
+    assert_equal 204, @response.status
+    assert_nil @response.headers["Content-Type"]
+    assert_nil @response.headers["Content-Length"]
+  end
+
   def test_head_with_string_status
     get :head_with_string_status, :status => "404 Eat Dirt"
     assert_equal 404, @response.response_code
@@ -558,5 +580,11 @@ class HeadRenderTest < ActionController::TestCase
     assert_equal "Forbidden", @response.message
     assert_equal "something", @response.headers["X-Custom-Header"]
     assert_response :forbidden
+  end
+
+  def test_head_returns_truthy_value
+    assert_nothing_raised do
+      get :head_and_return
+    end
   end
 end

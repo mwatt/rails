@@ -435,39 +435,13 @@ config.action_controller.asset_host = "assets.example.com"
 image_tag("rails.png") # => <img src="http://assets.example.com/images/rails.png" alt="Rails" />
 ```
 
-#### register_javascript_expansion
-
-Register one or more JavaScript files to be included when symbol is passed to javascript_include_tag. This method is typically intended to be called from plugin initialization to register JavaScript files that the plugin installed in `vendor/assets/javascripts`.
-
-```ruby
-ActionView::Helpers::AssetTagHelper.register_javascript_expansion monkey: ["head", "body", "tail"]
-
-javascript_include_tag :monkey # =>
-  <script src="/assets/head.js"></script>
-  <script src="/assets/body.js"></script>
-  <script src="/assets/tail.js"></script>
-```
-
-#### register_stylesheet_expansion
-
-Register one or more stylesheet files to be included when symbol is passed to `stylesheet_link_tag`. This method is typically intended to be called from plugin initialization to register stylesheet files that the plugin installed in `vendor/assets/stylesheets`.
-
-```ruby
-ActionView::Helpers::AssetTagHelper.register_stylesheet_expansion monkey: ["head", "body", "tail"]
-
-stylesheet_link_tag :monkey # =>
-  <link href="/assets/head.css" media="screen" rel="stylesheet" />
-  <link href="/assets/body.css" media="screen" rel="stylesheet" />
-  <link href="/assets/tail.css" media="screen" rel="stylesheet" />
-```
-
 #### auto_discovery_link_tag
 
 Returns a link tag that browsers and feed readers can use to auto-detect an RSS or Atom feed.
 
 ```ruby
-auto_discovery_link_tag(:rss, "http://www.example.com/feed.rss", {title: "RSS Feed"}) # =>
-  <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="http://www.example.com/feed" />
+auto_discovery_link_tag(:rss, "http://www.example.com/feed.rss", { title: "RSS Feed" }) # =>
+  <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="http://www.example.com/feed.rss" />
 ```
 
 #### image_path
@@ -1136,14 +1110,6 @@ If `@article.author_ids` is [1], this would return:
 <input name="article[author_ids][]" type="hidden" value="" />
 ```
 
-#### country_options_for_select
-
-Returns a string of option tags for pretty much any country in the world.
-
-#### country_select
-
-Returns select and option tags for the given object and method, using country_options_for_select to generate the list of option tags.
-
 #### option_groups_from_collection_for_select
 
 Returns a string of `option` tags, like `options_from_collection_for_select`, but groups them by `optgroup` tags based on the object relationships of the arguments.
@@ -1420,22 +1386,6 @@ date_field_tag "dob"
 
 Provides functionality for working with JavaScript in your views.
 
-#### button_to_function
-
-Returns a button that'll trigger a JavaScript function using the onclick handler. Examples:
-
-```ruby
-button_to_function "Greeting", "alert('Hello world!')"
-button_to_function "Delete", "if (confirm('Really?')) do_delete()"
-button_to_function "Details" do |page|
-  page[:details].visual_effect :toggle_slide
-end
-```
-
-#### define_javascript_functions
-
-Includes the Action Pack JavaScript libraries inside a single `script` tag.
-
 #### escape_javascript
 
 Escape carrier returns and single and double quotes for JavaScript segments.
@@ -1454,15 +1404,6 @@ javascript_tag "alert('All is good')"
 alert('All is good')
 //]]>
 </script>
-```
-
-#### link_to_function
-
-Returns a link that will trigger a JavaScript function using the onclick handler and return false after the fact.
-
-```ruby
-link_to_function "Greeting", "alert('Hello world!')"
-# => <a onclick="alert('Hello world!'); return false;" href="#">Greeting</a>
 ```
 
 ### NumberHelper

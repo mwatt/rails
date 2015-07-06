@@ -1,5 +1,6 @@
 require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/module/introspection'
+require 'active_support/core_ext/module/remove_method'
 
 module ActiveModel
   class Name
@@ -129,7 +130,7 @@ module ActiveModel
     #
     # Equivalent to +to_s+.
     delegate :==, :===, :<=>, :=~, :"!~", :eql?, :to_s,
-             :to_str, to: :name
+             :to_str, :as_json, to: :name
 
     # Returns a new ActiveModel::Name instance. By default, the +namespace+
     # and +name+ option will take the namespace and name of the given class

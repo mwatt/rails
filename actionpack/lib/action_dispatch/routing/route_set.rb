@@ -13,14 +13,17 @@ require 'action_dispatch/routing/endpoint'
 
 module ActionDispatch
   module Routing
-    class RouteSet #:nodoc:
+    # :stopdoc:
+    class RouteSet
       # Since the router holds references to many parts of the system
       # like engines, controllers and the application itself, inspecting
       # the route set can actually be really slow, therefore we default
       # alias inspect to to_s.
       alias inspect to_s
 
-      class Dispatcher < Routing::Endpoint #:nodoc:
+      mattr_accessor :relative_url_root
+
+      class Dispatcher < Routing::Endpoint
         def initialize(defaults)
           @defaults = defaults
           @controller_class_names = ThreadSafe::Cache.new
@@ -85,7 +88,7 @@ module ActionDispatch
       # A NamedRouteCollection instance is a collection of named routes, and also
       # maintains an anonymous module that can be used to install helpers for the
       # named routes.
-      class NamedRouteCollection #:nodoc:
+      class NamedRouteCollection
         include Enumerable
         attr_reader :routes, :url_helpers_module
 
@@ -189,7 +192,7 @@ module ActionDispatch
           end
         end
 
-        class UrlHelper # :nodoc:
+        class UrlHelper
           def self.create(route, options, route_name, url_strategy)
             if optimize_helper?(route)
               OptimizedUrlHelper.new(route, options, route_name, url_strategy)
@@ -204,7 +207,7 @@ module ActionDispatch
 
           attr_reader :url_strategy, :route_name
 
-          class OptimizedUrlHelper < UrlHelper # :nodoc:
+          class OptimizedUrlHelper < UrlHelper
             attr_reader :arg_size
 
             def initialize(route, options, route_name, url_strategy)
@@ -251,7 +254,7 @@ module ActionDispatch
             end
 
             def raise_generation_error(args, missing_keys)
-              constraints = Hash[@route.requirements.merge(args).sort]
+              constraints = Hash[@route.requirements.merge(args).sort_by{|k,v| k.to_s}]
               message = "No route matches #{constraints.inspect}"
               message << " missing required keys: #{missing_keys.sort.inspect}"
 
@@ -293,7 +296,11 @@ module ActionDispatch
                 path_params -= result.keys
               end
               path_params.each { |param|
-                result[param] = inner_options.fetch(param) { args.shift }
+                value = inner_options.fetch(param) { args.shift }
+
+                unless param == :format && value.nil?
+                  result[param] = value
+                end
               }
             end
 
@@ -343,7 +350,6 @@ module ActionDispatch
         end
       end
 
-      # :stopdoc:
       # strategy for building urls to send to the client
       PATH    = ->(options) { ActionDispatch::Http::URL.path_for(options) }
       FULL    = ->(options) { ActionDispatch::Http::URL.full_url_for(options) }
@@ -374,7 +380,6 @@ module ActionDispatch
           PATH.call(options)
         end
       }
-      # :startdoc:
 
       attr_accessor :formatter, :set, :named_routes, :default_scope, :router
       attr_accessor :disable_clear_and_finalize, :resources_path_names
@@ -449,7 +454,7 @@ module ActionDispatch
         Routing::RouteSet::Dispatcher.new(defaults)
       end
 
-      module MountedHelpers #:nodoc:
+      module MountedHelpers
         extend ActiveSupport::Concern
         include UrlFor
       end
@@ -480,6 +485,14 @@ module ActionDispatch
       end
 
       def url_helpers(supports_path = true)
+        if supports_path
+          @url_helpers_with_paths ||= generate_url_helpers(supports_path)
+        else
+          @url_helpers_without_paths ||= generate_url_helpers(supports_path)
+        end
+      end
+
+      def generate_url_helpers(supports_path)
         routes = self
 
         Module.new do
@@ -608,7 +621,7 @@ module ActionDispatch
       end
       private :build_conditions
 
-      class Generator #:nodoc:
+      class Generator
         PARAMETERIZE = lambda do |name, value|
           if name == :controller
             value
@@ -757,10 +770,10 @@ module ActionDispatch
       end
 
       def find_script_name(options)
-        options.delete(:script_name) || ''
+        options.delete(:script_name) || relative_url_root || ''
       end
 
-      def path_for(options, route_name = nil) # :nodoc:
+      def path_for(options, route_name = nil)
         url_for(options, route_name, PATH)
       end
 
@@ -846,5 +859,6 @@ module ActionDispatch
         raise ActionController::RoutingError, "No route matches #{path.inspect}"
       end
     end
+    # :startdoc:
   end
 end

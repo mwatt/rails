@@ -64,7 +64,7 @@ module ActiveRecord
     #   <tt>SET client_min_messages TO <min_messages></tt> call on the connection.
     # * <tt>:variables</tt> - An optional hash of additional parameters that
     #   will be used in <tt>SET SESSION key = val</tt> calls on the connection.
-    # * <tt>:insert_returning</tt> - An optional boolean to control the use or <tt>RETURNING</tt> for <tt>INSERT</tt> statements
+    # * <tt>:insert_returning</tt> - An optional boolean to control the use of <tt>RETURNING</tt> for <tt>INSERT</tt> statements
     #   defaults to true.
     #
     # Any further options are used as connection parameters to libpq. See
@@ -556,6 +556,8 @@ module ActiveRecord
         end
 
         def load_additional_types(type_map, oids = nil) # :nodoc:
+          initializer = OID::TypeMapInitializer.new(type_map)
+
           if supports_ranges?
             query = <<-SQL
               SELECT t.oid, t.typname, t.typelem, t.typdelim, t.typinput, r.rngsubtype, t.typtype, t.typbasetype
@@ -571,11 +573,13 @@ module ActiveRecord
 
           if oids
             query += "WHERE t.oid::integer IN (%s)" % oids.join(", ")
+          else
+            query += initializer.query_conditions_for_initial_load(type_map)
           end
 
-          initializer = OID::TypeMapInitializer.new(type_map)
-          records = execute(query, 'SCHEMA')
-          initializer.run(records)
+          execute_and_clear(query, 'SCHEMA', []) do |records|
+            initializer.run(records)
+          end
         end
 
         FEATURE_NOT_SUPPORTED = "0A000" #:nodoc:

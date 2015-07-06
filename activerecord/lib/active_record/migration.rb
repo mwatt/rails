@@ -39,7 +39,7 @@ module ActiveRecord
 
   class PendingMigrationError < MigrationError#:nodoc:
     def initialize
-      if defined?(Rails)
+      if defined?(Rails.env)
         super("Migrations are pending. To resolve this issue, run:\n\n\tbin/rake db:migrate RAILS_ENV=#{::Rails.env}")
       else
         super("Migrations are pending. To resolve this issue, run:\n\n\tbin/rake db:migrate")
@@ -307,9 +307,8 @@ module ActiveRecord
   #
   # == Reversible Migrations
   #
-  # Starting with Rails 3.1, you will be able to define reversible migrations.
   # Reversible migrations are migrations that know how to go +down+ for you.
-  # You simply supply the +up+ logic, and the Migration system will figure out
+  # You simply supply the +up+ logic, and the Migration system figures out
   # how to execute the down commands for you.
   #
   # To define a reversible migration, define the +change+ method in your
@@ -653,7 +652,8 @@ module ActiveRecord
         unless @connection.respond_to? :revert
           unless arguments.empty? || [:execute, :enable_extension, :disable_extension].include?(method)
             arguments[0] = proper_table_name(arguments.first, table_name_options)
-            if [:rename_table, :add_foreign_key].include?(method)
+            if [:rename_table, :add_foreign_key].include?(method) ||
+              (method == :remove_foreign_key && !arguments.second.is_a?(Hash))
               arguments[1] = proper_table_name(arguments.second, table_name_options)
             end
           end

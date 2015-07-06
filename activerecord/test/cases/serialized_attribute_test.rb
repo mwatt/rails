@@ -256,4 +256,22 @@ class SerializedAttributeTest < ActiveRecord::TestCase
     assert_equal("second", t.content)
     assert_equal("second", t.reload.content)
   end
+
+  def test_nil_is_not_changed_when_serialized_with_a_class
+    Topic.serialize(:content, Array)
+
+    topic = Topic.new(content: nil)
+
+    assert_not topic.content_changed?
+  end
+
+  def test_newly_emptied_serialized_hash_is_changed
+    Topic.serialize(:content, Hash)
+    topic = Topic.create(content: { "things" => "stuff" })
+    topic.content.delete("things")
+    topic.save!
+    topic.reload
+
+    assert_equal({}, topic.content)
+  end
 end

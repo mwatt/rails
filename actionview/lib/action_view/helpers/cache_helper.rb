@@ -111,7 +111,7 @@ module ActionView
       #
       # Now all you'll have to do is change that timestamp when the helper method changes.
       def cache(name = {}, options = nil, &block)
-        if controller.perform_caching
+        if controller.respond_to?(:perform_caching) && controller.perform_caching
           safe_concat(fragment_for(cache_fragment_name(name, options), options, &block))
         else
           yield
@@ -122,7 +122,7 @@ module ActionView
 
       # Cache fragments of a view if +condition+ is true
       #
-      #   <%= cache_if admin?, project do %>
+      #   <% cache_if admin?, project do %>
       #     <b>All the topics on this project</b>
       #     <%= render project.topics %>
       #   <% end %>
@@ -138,7 +138,7 @@ module ActionView
 
       # Cache fragments of a view unless +condition+ is true
       #
-      #   <%= cache_unless admin?, project do %>
+      #   <% cache_unless admin?, project do %>
       #     <b>All the topics on this project</b>
       #     <%= render project.topics %>
       #   <% end %>

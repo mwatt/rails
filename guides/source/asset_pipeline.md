@@ -207,7 +207,7 @@ precompiling works.
 
 NOTE: You must have an ExecJS supported runtime in order to use CoffeeScript.
 If you are using Mac OS X or Windows, you have a JavaScript runtime installed in
-your operating system. Check [ExecJS](https://github.com/sstephenson/execjs#readme) documentation to know all supported JavaScript runtimes.
+your operating system. Check [ExecJS](https://github.com/rails/execjs#readme) documentation to know all supported JavaScript runtimes.
 
 You can also disable generation of controller specific asset files by adding the
 following to your `config/application.rb` configuration:
@@ -727,27 +727,6 @@ include, you can add them to the `precompile` array in `config/initializers/asse
 Rails.application.config.assets.precompile += ['admin.js', 'admin.css', 'swfObject.js']
 ```
 
-Or, you can opt to precompile all assets with something like this:
-
-```ruby
-# config/initializers/assets.rb
-Rails.application.config.assets.precompile << Proc.new do |path|
-  if path =~ /\.(css|js)\z/
-    full_path = Rails.application.assets.resolve(path).to_path
-    app_assets_path = Rails.root.join('app', 'assets').to_path
-    if full_path.starts_with? app_assets_path
-      logger.info "including asset: " + full_path
-      true
-    else
-      logger.info "excluding asset: " + full_path
-      false
-    end
-  else
-    false
-  end
-end
-```
-
 NOTE. Always specify an expected compiled filename that ends with .js or .css,
 even if you want to add Sass or CoffeeScript files to the precompile array.
 
@@ -809,41 +788,6 @@ location ~ ^/assets/ {
   break;
 }
 ```
-
-#### GZip Compression
-
-When files are precompiled, Sprockets also creates a
-[gzipped](http://en.wikipedia.org/wiki/Gzip) (.gz) version of your assets. Web
-servers are typically configured to use a moderate compression ratio as a
-compromise, but since precompilation happens once, Sprockets uses the maximum
-compression ratio, thus reducing the size of the data transfer to the minimum.
-On the other hand, web servers can be configured to serve compressed content
-directly from disk, rather than deflating non-compressed files themselves.
-
-NGINX is able to do this automatically enabling `gzip_static`:
-
-```nginx
-location ~ ^/(assets)/  {
-  root /path/to/public;
-  gzip_static on; # to serve pre-gzipped version
-  expires max;
-  add_header Cache-Control public;
-}
-```
-
-This directive is available if the core module that provides this feature was
-compiled with the web server. Ubuntu/Debian packages, even `nginx-light`, have
-the module compiled. Otherwise, you may need to perform a manual compilation:
-
-```bash
-./configure --with-http_gzip_static_module
-```
-
-If you're compiling NGINX with Phusion Passenger you'll need to pass that option
-when prompted.
-
-A robust configuration for Apache is possible but tricky; please Google around.
-(Or help update this Guide if you have a good configuration example for Apache.)
 
 ### Local Precompilation
 
@@ -1156,7 +1100,7 @@ The following line invokes `uglifier` for JavaScript compression.
 config.assets.js_compressor = :uglifier
 ```
 
-NOTE: You will need an [ExecJS](https://github.com/sstephenson/execjs#readme)
+NOTE: You will need an [ExecJS](https://github.com/rails/execjs#readme)
 supported runtime in order to use `uglifier`. If you are using Mac OS X or
 Windows you have a JavaScript runtime installed in your operating system.
 

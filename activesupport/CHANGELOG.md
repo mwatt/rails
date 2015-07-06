@@ -1,3 +1,69 @@
+## Rails 4.2.3 (June 25, 2015) ##
+
+*   Fix a range of values for parameters of the Time#change
+
+    *Nikolay Kondratyev*
+
+*   Add some missing `require 'active_support/deprecation'`
+
+    *Akira Matsuda*
+
+
+## Rails 4.2.2 (June 16, 2015) ##
+
+*   Fix XSS vulnerability in `ActiveSupport::JSON.encode` method.
+
+    CVE-2015-3226.
+
+    *Rafael Mendonça França*
+
+*   Fix denial of service vulnerability in the XML processing.
+
+    CVE-2015-3227.
+
+    *Aaron Patterson*
+
+
+## Rails 4.2.1 (March 19, 2015) ##
+
+*   Fixed a problem where String#truncate_words would get stuck with a complex
+    string.
+
+    *Henrik Nygren*
+
+*   Fixed a roundtrip problem with AS::SafeBuffer where primitive-like strings
+    will be dumped as primitives:
+
+    Before:
+
+        YAML.load ActiveSupport::SafeBuffer.new("Hello").to_yaml  # => "Hello"
+        YAML.load ActiveSupport::SafeBuffer.new("true").to_yaml   # => true
+        YAML.load ActiveSupport::SafeBuffer.new("false").to_yaml  # => false
+        YAML.load ActiveSupport::SafeBuffer.new("1").to_yaml      # => 1
+        YAML.load ActiveSupport::SafeBuffer.new("1.1").to_yaml    # => 1.1
+
+     After:
+
+        YAML.load ActiveSupport::SafeBuffer.new("Hello").to_yaml  # => "Hello"
+        YAML.load ActiveSupport::SafeBuffer.new("true").to_yaml   # => "true"
+        YAML.load ActiveSupport::SafeBuffer.new("false").to_yaml  # => "false"
+        YAML.load ActiveSupport::SafeBuffer.new("1").to_yaml      # => "1"
+        YAML.load ActiveSupport::SafeBuffer.new("1.1").to_yaml    # => "1.1"
+
+    *Godfrey Chan*
+
+*   Replace fixed `:en` with `I18n.default_locale` in `Duration#inspect`.
+
+    *Dominik Masur*
+
+*   Add missing time zone definitions for Russian Federation and sync them
+    with `zone.tab` file from tzdata version 2014j (latest).
+
+    *Andrey Novikov*
+
+
+## Rails 4.2.0 (December 20, 2014) ##
+
 *   The decorated `load` and `require` methods are now kept private.
 
     Fixes #17553.

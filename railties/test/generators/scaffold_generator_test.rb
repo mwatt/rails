@@ -235,6 +235,29 @@ class ScaffoldGeneratorTest < Rails::Generators::TestCase
     assert_file "config/routes.rb", /\.routes\.draw do\s*\|map\|\s*$/
   end
 
+  def test_scaffold_generator_on_revoke_does_not_mutilate_routes
+    run_generator
+
+    route_path = File.expand_path("config/routes.rb", destination_root)
+    content = File.read(route_path)
+
+    # Remove all of the comments and blank lines from the routes file
+    content.gsub!(/^  \#.*\n/, '')
+    content.gsub!(/^\n/, '')
+
+    File.open(route_path, "wb") { |file| file.write(content) }
+    assert_file "config/routes.rb", /\.routes\.draw do\n  resources :product_lines\nend\n\z/
+
+    run_generator ["product_line"], :behavior => :revoke
+
+    assert_file "config/routes.rb", /\.routes\.draw do\nend\n\z/
+  end
+
+  def test_scaffold_generator_ignores_commented_routes
+    run_generator ["product"]
+    assert_file "config/routes.rb", /\.routes\.draw do\n  resources :products\n/
+  end
+
   def test_scaffold_generator_no_assets_with_switch_no_assets
     run_generator [ "posts", "--no-assets" ]
     assert_no_file "app/assets/stylesheets/scaffold.css"
@@ -254,6 +277,20 @@ class ScaffoldGeneratorTest < Rails::Generators::TestCase
     assert_file "config/routes.rb" do |route|
       assert_no_match(/resources :posts$/, route)
     end
+  end
+
+  def test_scaffold_generator_no_helper_with_switch_no_helper
+    output = run_generator [ "posts", "--no-helper" ]
+
+    assert_no_match /error/, output
+    assert_no_file "app/helpers/posts_helper.rb"
+  end
+
+  def test_scaffold_generator_no_helper_with_switch_helper_false
+    output = run_generator [ "posts", "--helper=false" ]
+
+    assert_no_match /error/, output
+    assert_no_file "app/helpers/post_helper.rb"
   end
 
   def test_scaffold_generator_no_stylesheets
@@ -344,6 +381,34 @@ class ScaffoldGeneratorTest < Rails::Generators::TestCase
 
     assert_file "test/fixtures/users.yml" do |content|
       assert_match(/password_digest: <%= BCrypt::Password.create\('secret'\) %>/, content)
+    end
+  end
+
+  def test_scaffold_tests_pass_by_default_inside_mountable_engine
+    Dir.chdir(destination_root) { `bundle exec rails plugin new bukkits --mountable` }
+
+    engine_path = File.join(destination_root, "bukkits")
+
+    Dir.chdir(engine_path) do
+      quietly do
+        `bin/rails g scaffold User name:string age:integer;
+        bundle exec rake db:migrate`
+      end
+      assert_match(/8 runs, 14 assertions, 0 failures, 0 errors/, `bundle exec rake test 2>&1`)
+    end
+  end
+
+  def test_scaffold_tests_pass_by_default_inside_full_engine
+    Dir.chdir(destination_root) { `bundle exec rails plugin new bukkits --full` }
+
+    engine_path = File.join(destination_root, "bukkits")
+
+    Dir.chdir(engine_path) do
+      quietly do
+        `bin/rails g scaffold User name:string age:integer;
+        bundle exec rake db:migrate`
+      end
+      assert_match(/8 runs, 14 assertions, 0 failures, 0 errors/, `bundle exec rake test 2>&1`)
     end
   end
 end

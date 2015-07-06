@@ -55,11 +55,7 @@ module ActiveRecord
       end
 
       def add_record(record)
-        if record.has_transactional_callbacks?
-          records << record
-        else
-          record.set_transaction_state(@state)
-        end
+        records << record
       end
 
       def rollback
@@ -192,7 +188,7 @@ module ActiveRecord
       ensure
         unless error
           if Thread.current.status == 'aborting'
-            rollback_transaction
+            rollback_transaction if transaction
           else
             begin
               commit_transaction

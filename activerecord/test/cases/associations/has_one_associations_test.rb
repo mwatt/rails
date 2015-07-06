@@ -273,6 +273,14 @@ class HasOneAssociationsTest < ActiveRecord::TestCase
     assert_equal account, firm.reload.account
   end
 
+  def test_create_with_inexistent_foreign_key_failing
+    firm = Firm.create(name: 'GlobalMegaCorp')
+
+    assert_raises(ActiveRecord::UnknownAttributeError) do
+      firm.create_account_with_inexistent_foreign_key
+    end
+  end
+
   def test_build
     firm = Firm.new("name" => "GlobalMegaCorp")
     firm.save
@@ -564,6 +572,12 @@ class HasOneAssociationsTest < ActiveRecord::TestCase
 
     assert_not_nil author.post
     assert_equal author.post, post
+  end
+
+  def test_has_one_loading_for_new_record
+    Post.create!(author_id: 42, title: 'foo', body: 'bar')
+    author = Author.new(id: 42)
+    assert author.post
   end
 
   def test_has_one_relationship_cannot_have_a_counter_cache

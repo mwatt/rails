@@ -291,7 +291,7 @@ module ActionDispatch
             when String
               ActiveSupport::Deprecation.warn(<<-MSG.squish)
                 Defining a route where `to` is a controller without an action is deprecated.
-                Please change `to: :#{to}` to `controller: :#{to}`.
+                Please change `to: '#{to}'` to `controller: '#{to}'`.
               MSG
 
               [to, nil]
@@ -1520,7 +1520,7 @@ module ActionDispatch
         end
 
         def using_match_shorthand?(path, options)
-          path && (options[:to] || options[:action]).nil? && path =~ %r{/[\w/]+$}
+          path && (options[:to] || options[:action]).nil? && path =~ %r{^/?[-\w]+/[-\w/]+$}
         end
 
         def decomposed_match(path, options) # :nodoc:

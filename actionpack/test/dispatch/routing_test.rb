@@ -1430,6 +1430,15 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
     assert_equal 'api/v3/products#list', @response.body
   end
 
+  def test_not_matching_shorthand_with_dynamic_parameters
+    draw do
+      get ':controller/:action/admin'
+    end
+
+    get '/finances/overview/admin'
+    assert_equal 'finances#overview', @response.body
+  end
+
   def test_controller_option_with_nesting_and_leading_slash
     draw do
       scope '/job', controller: 'job' do
@@ -3463,6 +3472,24 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
     assert_equal '/bar/comments/1', comment_path('1')
   end
 
+  def test_head_fetch_with_mount_on_root
+    draw do
+      get '/home' => 'test#index'
+      mount lambda { |env| [200, {}, [env['REQUEST_METHOD']]] }, at: '/'
+    end
+
+    # HEAD request should match `get /home` rather than the
+    # lower-precedence Rack app mounted at `/`.
+    head '/home'
+    assert_response :ok
+    assert_equal 'test#index', @response.body
+
+    # But the Rack app can still respond to its own HEAD requests.
+    head '/foobar'
+    assert_response :ok
+    assert_equal 'HEAD', @response.body
+  end
+
 private
 
   def draw(&block)
@@ -4430,6 +4457,19 @@ class TestUrlGenerationErrors < ActionDispatch::IntegrationTest
 
     # Non-optimized url helper
     error = assert_raises(ActionController::UrlGenerationError, message){ product_path(id: nil) }
+    assert_equal message, error.message
+  end
+
+  test "url helpers raise message with mixed parameters when generation fails " do
+    url, missing = { action: 'show', controller: 'products', id: nil, "id"=>"url-tested"}, [:id]
+    message = "No route matches #{url.inspect} missing required keys: #{missing.inspect}"
+
+    # Optimized url helper
+    error = assert_raises(ActionController::UrlGenerationError){ product_path(nil, 'id'=>'url-tested') }
+    assert_equal message, error.message
+
+    # Non-optimized url helper
+    error = assert_raises(ActionController::UrlGenerationError, message){ product_path(id: nil, 'id'=>'url-tested') }
     assert_equal message, error.message
   end
 end

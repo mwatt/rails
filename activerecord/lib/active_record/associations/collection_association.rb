@@ -129,6 +129,16 @@ module ActiveRecord
         first_nth_or_last(:last, *args)
       end
 
+      def take(n = nil)
+        if loaded?
+          n ? target.take(n) : target.first
+        else
+          scope.take(n).tap do |record|
+            set_inverse_instance record if record.is_a? ActiveRecord::Base
+          end
+        end
+      end
+
       def build(attributes = {}, &block)
         if attributes.is_a?(Array)
           attributes.collect { |attr| build(attr, &block) }
@@ -597,8 +607,13 @@ module ActiveRecord
           if reflection.is_a?(ActiveRecord::Reflection::ThroughReflection)
             assoc = owner.association(reflection.through_reflection.name)
             assoc.reader.any? { |source|
-              target = source.send(reflection.source_reflection.name)
-              target.respond_to?(:include?) ? target.include?(record) : target == record
+              target_association = source.send(reflection.source_reflection.name)
+
+              if target_association.respond_to?(:include?)
+                target_association.include?(record)
+              else
+                target_association == record
+              end
             } || target.include?(record)
           else
             target.include?(record)

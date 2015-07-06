@@ -25,12 +25,13 @@ require 'models/categorization'
 require 'models/member'
 require 'models/membership'
 require 'models/club'
+require 'models/organization'
 
 class HasManyThroughAssociationsTest < ActiveRecord::TestCase
   fixtures :posts, :readers, :people, :comments, :authors, :categories, :taggings, :tags,
            :owners, :pets, :toys, :jobs, :references, :companies, :members, :author_addresses,
            :subscribers, :books, :subscriptions, :developers, :categorizations, :essays,
-           :categories_posts, :clubs, :memberships
+           :categories_posts, :clubs, :memberships, :organizations
 
   # Dummies to force column loads so query counts are clean.
   def setup
@@ -83,11 +84,11 @@ class HasManyThroughAssociationsTest < ActiveRecord::TestCase
     subscriber   = make_model "Subscriber"
 
     subscriber.primary_key = 'nick'
-    subscription.belongs_to :book,       class: book
-    subscription.belongs_to :subscriber, class: subscriber
+    subscription.belongs_to :book,       anonymous_class: book
+    subscription.belongs_to :subscriber, anonymous_class: subscriber
 
-    book.has_many :subscriptions, class: subscription
-    book.has_many :subscribers, through: :subscriptions, class: subscriber
+    book.has_many :subscriptions, anonymous_class: subscription
+    book.has_many :subscribers, through: :subscriptions, anonymous_class: subscriber
 
     anonbook = book.first
     namebook = Book.find anonbook.id
@@ -153,10 +154,10 @@ class HasManyThroughAssociationsTest < ActiveRecord::TestCase
     lesson_student = make_model 'LessonStudent'
     lesson_student.table_name = 'lessons_students'
 
-    lesson_student.belongs_to :lesson, :class => lesson
-    lesson_student.belongs_to :student, :class => student
-    lesson.has_many :lesson_students, :class => lesson_student
-    lesson.has_many :students, :through => :lesson_students, :class => student
+    lesson_student.belongs_to :lesson, :anonymous_class => lesson
+    lesson_student.belongs_to :student, :anonymous_class => student
+    lesson.has_many :lesson_students, :anonymous_class => lesson_student
+    lesson.has_many :students, :through => :lesson_students, :anonymous_class => student
     [lesson, lesson_student, student]
   end
 
@@ -1150,5 +1151,20 @@ class HasManyThroughAssociationsTest < ActiveRecord::TestCase
 
     club.members << member
     assert_equal 1, SuperMembership.where(member_id: member.id, club_id: club.id).count
+  end
+
+  def test_build_for_has_many_through_association
+    organization = organizations(:nsa)
+    author = organization.author
+    post_direct = author.posts.build
+    post_through = organization.posts.build
+    assert_equal post_direct.author_id, post_through.author_id
+  end
+
+  def test_has_many_through_with_scope_that_should_not_be_fully_merged
+    Club.has_many :distinct_memberships, -> { distinct }, class_name: "Membership"
+    Club.has_many :special_favourites, through: :distinct_memberships, source: :member
+
+    assert_nil Club.new.special_favourites.distinct_value
   end
 end

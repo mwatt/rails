@@ -507,6 +507,16 @@ class DependenciesTest < ActiveSupport::TestCase
       assert_equal nil, ActiveSupport::Dependencies.search_for_file('service_three.rb')
       assert_equal root + '/service_one.rb', ActiveSupport::Dependencies.search_for_file('service_one')
       assert_equal root + '/service_one.rb', ActiveSupport::Dependencies.search_for_file('service_one.rb')
+      ActiveSupport::Dependencies.autoload_paths << "#{root}_lib/foo"
+      assert_equal root + '_lib/foo/bar.rb', ActiveSupport::Dependencies.search_for_file('foo/bar')
+    end
+  end
+
+  def test_autoloadable_module
+    with_loading 'dependencies' do
+      root = ActiveSupport::Dependencies.autoload_paths.first
+      ActiveSupport::Dependencies.autoload_paths << "#{root}_lib/foo"
+      assert_equal  "#{root}_lib/foo", ActiveSupport::Dependencies.autoloadable_module?('foo')
     end
   end
 

@@ -79,7 +79,7 @@ module ActiveRecord
               constraint = constraint.and table[reflection.type].eq substitute
             end
 
-            if reflection.type && reflection.options[:poly_classes]
+            if @reflection.polymorphic? && @reflection.options[:poly_classes]
               constraint = constraint.
                 and(foreign_table[reflection.foreign_type].
                 eq(reflection.klass.name))

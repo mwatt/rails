@@ -26,7 +26,7 @@ require 'active_support/core_ext/module/aliasing'
 # bypassed completely. This means that as_json won't be invoked and the JSON gem will simply
 # ignore any options it does not natively understand. This also means that ::JSON.{generate,dump}
 # should give exactly the same results with or without active support.
-[Object, Array, FalseClass, Float, Hash, Integer, NilClass, String, TrueClass, Enumerable].each do |klass|
+[Object, Array, FalseClass, Float, Hash, Integer, NilClass, String, TrueClass].each do |klass|
   klass.class_eval do
     def to_json_with_active_support_encoder(options = nil) # :nodoc:
       if options.is_a?(::JSON::State)
@@ -40,6 +40,14 @@ require 'active_support/core_ext/module/aliasing'
 
     alias_method_chain :to_json, :active_support_encoder
   end
+end
+
+Enumerable.class_eval do
+  def to_json_with_active_support_encoder(options = nil) # :nodoc:
+    # to_json is being invoked directly, use ActiveSupport's encoder
+    ActiveSupport::JSON.encode(self, options)
+  end
+  alias_method_chain :to_json, :active_support_encoder
 end
 
 class Object

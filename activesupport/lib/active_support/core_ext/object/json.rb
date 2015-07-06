@@ -26,24 +26,18 @@ require 'active_support/core_ext/date/conversions'
 # ignore any options it does not natively understand. This also means that ::JSON.{generate,dump}
 # should give exactly the same results with or without active support.
 
-module ActiveSupport
-  module CoreExt
-    module ToJsonWithActiveSupportEncoder
-      def to_json(options = nil)
-        if options.is_a?(::JSON::State)
-          # Called from JSON.{generate,dump}, forward it to JSON gem's to_json
-          super(options)
-        else
-          # to_json is being invoked directly, use ActiveSupport's encoder
-          ActiveSupport::JSON.encode(self, options)
-        end
+[Object, Array, FalseClass, Float, Hash, Integer, NilClass, String, TrueClass, Enumerable].each do |klass|
+  klass.class_eval do
+    def to_json_with_active_support_encoder(options = nil) # :nodoc:
+      if options.is_a?(::JSON::State)
+        # Called from JSON.{generate,dump}, forward it to JSON gem's to_json
+        self.to_json_without_active_support_encoder(options)
+      else
+        # to_json is being invoked directly, use ActiveSupport's encoder
+        ActiveSupport::JSON.encode(self, options)
       end
     end
   end
-end
-
-[Object, Array, FalseClass, Float, Hash, Integer, NilClass, String, TrueClass, Enumerable].reverse_each do |klass|
-  klass.prepend(ActiveSupport::CoreExt::ToJsonWithActiveSupportEncoder)
 end
 
 class Object

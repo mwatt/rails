@@ -570,7 +570,7 @@ module ActionDispatch
         # Here we munge values before they get sent on to rack-mount.
         verbs = conditions[:request_method] || []
         unless verbs.empty?
-          conditions[:request_method] = %r[^#{verbs.join('|')}$]
+          conditions[:request_method] = %r[\A#{verbs.join('|')}\Z]
         end
 
         conditions.keep_if do |k, _|

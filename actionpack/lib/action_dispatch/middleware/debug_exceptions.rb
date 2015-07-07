@@ -17,6 +17,7 @@ module ActionDispatch
         clean_params = params.clone
         clean_params.delete("action")
         clean_params.delete("controller")
+        clean_params.delete("format")
 
         if clean_params.empty?
           'None'
@@ -38,9 +39,10 @@ module ActionDispatch
       end
     end
 
-    def initialize(app, routes_app = nil)
+    def initialize(app, routes_app = nil, api_only = false)
       @app        = app
       @routes_app = routes_app
+      @api_only   = api_only
     end
 
     def call(env)
@@ -89,7 +91,19 @@ module ActionDispatch
         )
         file = "rescues/#{wrapper.rescue_template}"
 
-        if request.xhr?
+        if @api_only
+          body = {
+            :status => wrapper.status_code,
+            :error => Rack::Utils::HTTP_STATUS_CODES.fetch(wrapper.status_code, Rack::Utils::HTTP_STATUS_CODES[500]),
+            :exception => wrapper.exception.inspect,
+            :traces => traces
+          }
+          if content_type = request.formats.first
+            to_format = "to_#{content_type.to_sym}"
+            body = body.public_send(to_format)
+          end
+          format = "application/json"
+        elsif request.xhr?
           body = template.render(template: file, layout: false, formats: [:text])
           format = "text/plain"
         else

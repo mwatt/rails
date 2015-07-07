@@ -272,7 +272,7 @@ class RedirectTest < ActionController::TestCase
   end
 
   def test_redirect_to_params
-    assert_raise(ActionController::ActionControllerError) do
+    assert_raise(ArgumentError) do
       get :redirect_to_params
     end
   end

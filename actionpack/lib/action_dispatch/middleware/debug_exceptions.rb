@@ -70,15 +70,15 @@ module ActionDispatch
         if @api_only
           render_for_api_application(request, wrapper)
         else
-          render_for_non_api_application(env, request, wrapper)
+          render_for_non_api_application(request, wrapper)
         end
       else
         raise exception
       end
     end
 
-    def render_for_non_api_application(env, request, wrapper)
-      template = create_template(env, request, wrapper)
+    def render_for_non_api_application(request, wrapper)
+      template = create_template(request, wrapper)
       file = "rescues/#{wrapper.rescue_template}"
 
       if request.xhr?
@@ -114,7 +114,7 @@ module ActionDispatch
       render(wrapper.status_code, body, format)
     end
 
-    def create_template(env, request, wrapper)
+    def create_template(request, wrapper)
       traces = wrapper.traces
 
       trace_to_show = 'Application Trace'

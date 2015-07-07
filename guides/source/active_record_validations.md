@@ -149,9 +149,13 @@ false` as an argument. This technique should be used with caution.
 
 ### `valid?` and `invalid?`
 
-To verify whether or not an object is valid, Rails uses the `valid?` method.
-You can also use this method on your own. `valid?` triggers your validations
-and returns true if no errors were found in the object, and false otherwise.
+Before saving an ActiveRecord object, Rails calls the `valid?` method 
+to verify whether or not it is valid. 
+
+`valid?` triggers your validations and returns true if no errors were
+found in the object, and false otherwise. You can also use this method
+on your own.
+
 As you saw above:
 
 ```ruby
@@ -168,8 +172,9 @@ through the `errors.messages` instance method, which returns a collection of err
 By definition, an object is valid if this collection is empty after running
 validations.
 
-Note that an object instantiated with `new` will not report errors even if it's
-technically invalid, because validations are not run when using `new`.
+Note that an object instantiated with `new` will not report errors
+even if it's technically invalid, because validations are only run
+when the object is saved, such as with the `create` or `save` methods.
 
 ```ruby
 class Person < ActiveRecord::Base
@@ -972,6 +977,10 @@ class method, passing in the symbols for the validation methods' names.
 You can pass more than one symbol for each class method and the respective
 validations will be run in the same order as they were registered.
 
+The `valid?` method will verify that the errors collection is empty,
+so your custom validation methods should add errors to it when you
+wish validation to fail:
+
 ```ruby
 class Invoice < ActiveRecord::Base
   validate :expiration_date_cannot_be_in_the_past,
@@ -991,7 +1000,8 @@ class Invoice < ActiveRecord::Base
 end
 ```
 
-By default such validations will run every time you call `valid?`. It is also
+By default such validations will run every time `valid?` is called, whether
+it is called by your code or by Rails before the object is saved. It is also
 possible to control when to run these custom validations by giving an `:on`
 option to the `validate` method, with either: `:create` or `:update`.
 

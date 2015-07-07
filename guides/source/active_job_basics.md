@@ -280,6 +280,18 @@ UserMailer.welcome(@user).deliver_later
 ```
 
 
+Internationalization
+--------------------
+
+Each job will use the same I18n.locale that was set while it the job was created.
+This behavior is especially useful if you send emails asynchronously.
+
+```ruby
+I18n.locale = :eo
+UserMailer.welcome(@user).deliver_later # @user receives his email in esparanto
+```
+
+
 GlobalID
 --------
 

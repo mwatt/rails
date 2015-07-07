@@ -167,6 +167,8 @@ module ActionDispatch
         case options
         when nil
           _routes.url_for(url_options.symbolize_keys)
+        when ActionController::Parameters
+          raise ArgumentError.new("Cannot generate an URL from a parameter hash!")
         when Hash
           route_name = options.delete :use_route
           _routes.url_for(options.symbolize_keys.reverse_merge!(url_options),

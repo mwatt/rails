@@ -14,7 +14,7 @@ class TestJob < ActiveJob::Base
 
   def perform(x)
     File.open(Rails.root.join("tmp/\#{x}"), "w+") do |f|
-      f.write x
+      f.write I18n.locale
     end
   end
 end

@@ -142,7 +142,7 @@ module ActiveSupport #:nodoc:
     alias_method :original_concat, :concat
     private :original_concat
 
-    class SafeConcatError < StandardError
+    class SafeConcatError < StandardError # :nodoc:
       def initialize
         super 'Could not concatenate to the buffer because it is not html safe.'
       end

@@ -1,7 +1,7 @@
 require "active_support/notifications"
 
 module ActiveSupport
-  class DeprecationException < StandardError
+  class DeprecationException < StandardError # :nodoc:
   end
 
   class Deprecation

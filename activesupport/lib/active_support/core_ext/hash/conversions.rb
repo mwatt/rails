@@ -138,7 +138,7 @@ end
 
 module ActiveSupport
   class XMLConverter # :nodoc:
-    class DisallowedType < StandardError
+    class DisallowedType < StandardError # :nodoc:
       def initialize(type)
         super "Disallowed type attribute: #{type.inspect}"
       end

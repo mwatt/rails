@@ -4,7 +4,7 @@ require 'active_support/core_ext/hash/indifferent_access'
 
 module ActionDispatch
   class ParamsParser
-    class ParseError < StandardError
+    class ParseError < StandardError # :nodoc:
       attr_reader :original_exception
 
       def initialize(message, original_exception)

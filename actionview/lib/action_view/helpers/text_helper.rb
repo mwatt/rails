@@ -206,7 +206,7 @@ module ActionView
       # +plural+ is supplied, it will use that when count is > 1, otherwise
       # it will use the Inflector to determine the plural form.
       #
-      # If passed an optional +locale+ parameter, the word will be pluralized
+      # If passed an optional +locale:+ parameter, the word will be pluralized
       # using rules defined for that language (you must define your own
       # inflection rules for languages other than English).  See
       # ActiveSupport::Inflector.pluralize

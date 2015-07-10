@@ -278,7 +278,7 @@ module ActiveSupport
         end
       end
 
-      def set_defaults(target, source = self)
+      def set_defaults(target)
         if source.default_proc
           target.default_proc = source.default_proc.dup
         else

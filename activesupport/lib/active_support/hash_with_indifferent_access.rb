@@ -188,7 +188,11 @@ module ActiveSupport
     #   dup[:a][:c]  # => "c"
     def dup
       self.class.new(self).tap do |new_hash|
-        new_hash.default = default
+        if default_proc
+          new_hash.default_proc = default_proc.dup
+        else
+          new_hash.default = default
+        end
       end
     end
 

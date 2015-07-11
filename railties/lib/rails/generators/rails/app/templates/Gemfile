@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # Uncomment this, to increase the performance
-# gem 'listen', '~>1.0'
+# gem 'listen', '~>3.0.2'
 
 <% gemfile_entries.each do |gem| -%>
 <% if gem.comment -%>

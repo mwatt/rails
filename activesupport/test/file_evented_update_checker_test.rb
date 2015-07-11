@@ -114,13 +114,6 @@ class FileEventedUpdateCheckerWithEnumerableTest < ActiveSupport::TestCase
     assert !test.alive?
   end
 
-  def test_base_directories
-  	i = 0
-  	watcher = ActiveSupport::FileEventedUpdateChecker.new(FILES){ i += 1 }
-  	assert_equal watcher.base_directories, watcher.listener.directories
-  	assert true
-  end
-
   def test_modified_should_become_true_when_watched_file_is_updated
   	watcher = ActiveSupport::FileEventedUpdateChecker.new(FILES){ i += 1 }
   	assert_equal watcher.updated?, false

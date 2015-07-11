@@ -42,7 +42,7 @@ end
 # ActiveSupport
 gem 'dalli', '>= 2.2.1'
 group :test do
-  gem 'listen', '~>1.0'
+  gem 'listen', '~>3.0.2'
 end
 # ActiveJob
 group :job do

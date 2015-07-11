@@ -6,13 +6,13 @@ module ActiveSupport
     def initialize(files, dirs={}, &block)
       @files = Set.new
       @files = files.map { |f| File.expand_path(f)}
-      @dirs = Hash.new
-      dirs.map do |key,value|
-        @dirs[File.expand_path(key)] = Array(value) if !Array(value).empty?
+      @directories = Hash.new
+      dirs.each do |key,value|
+        @directories[File.expand_path(key)] = Array(value) if !Array(value).empty?
       end
       @block = block
       @modified = false
-      @listener = Listen.to(*base_directories, :latency => 0.1)
+      @listener = Listen.to(*base_directories)
       @listener.change(&method(:changed))
       @listener.start
     end
@@ -42,7 +42,7 @@ module ActiveSupport
       cfile = file
       while !cfile.eql? "/"
         cfile = File.expand_path("#{cfile}/..")
-        if !@dirs[cfile].nil? and file.end_with?(*(@dirs[cfile].map {|ext| ".#{ext.to_s}"}))
+        if !@directories[cfile].nil? and file.end_with?(*(@directories[cfile].map {|ext| ".#{ext.to_s}"}))
           return true
         end
       end
@@ -63,7 +63,7 @@ module ActiveSupport
 
     def base_directories
       # TODO :- To add nearest parent directory which exists for watching when watching directory does not exist.
-      values = (@files.map { |f| File.expand_path("#{f}/..") if File.exist?(f) } + @dirs.keys.map {|dir| dir if File.directory?(dir)} if @dirs).uniq
+      values = (@files.map { |f| File.expand_path("#{f}/..") if File.exist?(f) } + @directories.keys.map {|dir| dir if File.directory?(dir)} if @directories).uniq
       #(@files.map { |f| File.expand_path("#{f}/..") if File.exists?(f) } + @dirs.keys.map {|dir| dir if File.directory?(dir)} if @dirs).uniq
       values = values.map {|v| v if !v.nil?}
       values

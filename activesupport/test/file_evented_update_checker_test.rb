@@ -36,7 +36,7 @@ class FileEventedUpdateCheckerWithEnumerableTest < ActiveSupport::TestCase
     checker = ActiveSupport::FileEventedUpdateChecker.new(FILES){ i += 1 }
     sleep(1)
     FileUtils.touch(FILES)
-    sleep(0.2) #extra
+    sleep(1) #extra
     assert checker.execute_if_updated
     assert_equal 1, i
   end
@@ -45,7 +45,7 @@ class FileEventedUpdateCheckerWithEnumerableTest < ActiveSupport::TestCase
     i = 0
     checker = ActiveSupport::FileEventedUpdateChecker.new(FILES){ i += 1 }
     FileUtils.rm(FILES)
-    sleep(0.2) #extra
+    sleep(1) #extra
     assert checker.execute_if_updated
     assert_equal 1, i
   end
@@ -60,7 +60,7 @@ class FileEventedUpdateCheckerWithEnumerableTest < ActiveSupport::TestCase
 
     sleep(1)
     FileUtils.touch(FILES[0..1])
-    sleep(0.2) #extra
+    sleep(1) #extra
     assert checker.execute_if_updated
     assert_equal 1, i
   end
@@ -72,7 +72,7 @@ class FileEventedUpdateCheckerWithEnumerableTest < ActiveSupport::TestCase
 
     sleep(1)
     FileUtils.touch(FILES)
-    sleep(0.2) #extra
+    sleep(1) #extra
     assert checker.updated?
     checker.execute
     assert !checker.updated?
@@ -84,7 +84,7 @@ class FileEventedUpdateCheckerWithEnumerableTest < ActiveSupport::TestCase
     FileUtils.cd "tmp_watcher" do
       FileUtils.touch(FILES)
     end
-    sleep(0.2) #extra
+    sleep(1) #extra
     assert checker.execute_if_updated
     assert_equal 1, i
   end
@@ -95,7 +95,7 @@ class FileEventedUpdateCheckerWithEnumerableTest < ActiveSupport::TestCase
     FileUtils.cd "tmp_watcher" do
       FileUtils.touch(FILES)
     end
-    sleep(0.2) #extra
+    sleep(1) #extra
     assert !checker.execute_if_updated
     assert_equal 0, i
   end
@@ -125,7 +125,7 @@ class FileEventedUpdateCheckerWithEnumerableTest < ActiveSupport::TestCase
   	watcher = ActiveSupport::FileEventedUpdateChecker.new(FILES){ i += 1 }
   	assert_equal watcher.updated?, false
   	FileUtils.rm(FILES)
-  	sleep 0.2
+  	sleep 1
   	assert_equal watcher.updated?, true
   end
   

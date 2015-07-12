@@ -344,4 +344,11 @@ class HasOneThroughAssociationsTest < ActiveRecord::TestCase
       end
     end
   end
+
+  def test_has_one_through_associations_are_mutable_unless_through_belongs_to
+    member_detail = MemberDetail.new(member: @member)
+    assert_raise(ActiveRecord::HasOneThroughCantAssociateThroughHasOneOrManyReflection) do
+      member_detail.membership = Membership.new
+    end
+  end
 end

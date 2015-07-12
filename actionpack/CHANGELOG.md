@@ -1,3 +1,15 @@
+*   Add ability to access session with indifferent access for deep hashes
+    across multiple requests.
+
+        # First session
+        session[:deep][:hash] = "Magic"
+
+        # Second session
+        session[:deep][:hash] == "Magic"
+        session[:deep]["hash"] == "Magic"
+
+    *Tom Prats*
+
 *   Add ability to filter parameters based on parent keys.
 
         # matches {credit_card: {code: "xxxx"}}

@@ -1,3 +1,17 @@
+*   `ActionController::Parameters` no longer inherits from
+    `HashWithIndifferentAccess`
+
+    Inheriting from `HashWithIndifferentAccess` allowed users to call any
+    enumerable methods on `Parameters` object, resulting in a risk of losing the
+    `permitted?` status or even getting back a pure `Hash` object instead of
+    a `Parameters` object with proper sanitization.
+
+    By stop inheriting from `HashWithIndifferentAccess`, we are able to make
+    sure that all methods that are defined in `Parameters` object will return
+    a proper `Parameters` object with a correct `permitted?` flag.
+
+    *Prem Sichanugrist*
+
 *   Add ability to filter parameters based on parent keys.
 
         # matches {credit_card: {code: "xxxx"}}

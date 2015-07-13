@@ -23,6 +23,8 @@ gem 'mail', github: 'mikel/mail'
 gem 'sprockets', '~> 3.0.0.rc.1'
 gem 'sprockets-rails', github: 'rails/sprockets-rails', branch: 'master'
 
+gem 'concurrent-ruby', '~> 0.9.0'
+
 # require: false so bcrypt is loaded only when has_secure_password is used.
 # This is to avoid ActiveModel (and by extension the entire framework)
 # being dependent on a binary library.

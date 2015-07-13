@@ -135,6 +135,7 @@ GEM
       execjs
     coffee-script-source (1.9.0)
     columnize (0.9.0)
+    concurrent-ruby (0.9.0)
     connection_pool (2.1.1)
     dalli (2.7.2)
     dante (0.1.5)
@@ -274,6 +275,7 @@ DEPENDENCIES
   benchmark-ips
   byebug
   coffee-rails (~> 4.1.0)
+  concurrent-ruby (~> 0.9.0)
   dalli (>= 2.2.1)
   delayed_job
   delayed_job_active_record

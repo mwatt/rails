@@ -132,14 +132,7 @@ module ActionController
     end.new
   end
 
-  class TestResponse < ActionDispatch::TestResponse
-  end
-
   class LiveTestResponse < Live::Response
-    def body
-      @body ||= super
-    end
-
     # Was the response successful?
     alias_method :success?, :successful?
 
@@ -237,7 +230,7 @@ module ActionController
   #      request. You can modify this object before sending the HTTP request. For example,
   #      you might want to set some session properties before sending a GET request.
   # <b>@response</b>::
-  #      An ActionController::TestResponse object, representing the response
+  #      An ActionDispatch::TestResponse object, representing the response
   #      of the last HTTP response. In the above example, <tt>@response</tt> becomes valid
   #      after calling +post+. If the various assert methods are not sufficient, then you
   #      may use this object to inspect the HTTP response in detail.
@@ -539,7 +532,7 @@ module ActionController
       def setup_controller_request_and_response
         @controller = nil unless defined? @controller
 
-        @response_klass = TestResponse
+        @response_klass = ActionDispatch::TestResponse
 
         if klass = self.class.controller_class
           if klass < ActionController::Live

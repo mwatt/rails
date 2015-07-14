@@ -3,9 +3,12 @@ require "active_support/deprecation"
 module ActiveRecord
   module Associations
     class SingularAssociation < Association #:nodoc:
+
+      NO_FORCE_RELOAD_ARGUMENT = Object.new # :nodoc:
+
       # Implements the reader method, e.g. foo.bar for Foo.has_one :bar
-      def reader(force_reload = nil, reload: false)
-        unless force_reload.nil?
+      def reader(force_reload = NO_FORCE_RELOAD_ARGUMENT, reload: false)
+        if force_reload != NO_FORCE_RELOAD_ARGUMENT
           ActiveSupport::Deprecation.warn(<<-MSG.squish)
             Passing only `true` to force a collection to reload is now
             deprecated and will be removed in Rails 5.1. Please pass

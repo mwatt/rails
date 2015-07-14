@@ -14,7 +14,7 @@ module ActiveSupport
       @modified = false
       watch_dirs = base_directories
       @listener = Listen.to(*watch_dirs,&method(:changed)) if !watch_dirs.empty?
-      @listener.start if !@listener.nil?
+      @listener.start if @listener
     end
 
     def updated?
@@ -55,7 +55,7 @@ module ActiveSupport
     end
 
     def changed(modified, added, removed)
-      return if @modified
+      return if updated?
       if (modified + added + removed).any? { |f| watching? f }
         @modified = true
       end

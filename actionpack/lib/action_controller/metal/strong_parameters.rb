@@ -504,6 +504,12 @@ module ActionController
       )
     end
 
+    # This is required by ActiveModel attribute assignment, so that user can
+    # pass +Parameters+ to a mass assignment methods in a model.
+    def stringify_keys
+      dup
+    end
+
     protected
       def permitted=(new_permitted)
         @permitted = new_permitted

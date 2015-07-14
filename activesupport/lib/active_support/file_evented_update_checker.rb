@@ -5,7 +5,7 @@ module ActiveSupport
     attr_reader :listener
     def initialize(files, directories={}, &block)
       @files = Set.new
-      @files = files.map { |f| File.expand_path(f)}
+      @files = files.map { |f| File.expand_path(f)}.to_set
       @dirs = Hash.new
       directories.each do |key,value|
         @dirs[File.expand_path(key)] = Array(value) if !Array(value).empty?
@@ -37,6 +37,8 @@ module ActiveSupport
       end
     end
 
+    private
+
     def watching?(file)
       return true if @files.include?(file)
       cfile = file
@@ -62,11 +64,11 @@ module ActiveSupport
     end
 
     def base_directories
-      # TODO :- To add nearest parent directory which exists for watching when watching directory does not exist.
-      values = (@files.map { |f| File.expand_path("#{f}/..") if File.exist?(f) } + @dirs.keys.map {|dir| dir if File.directory?(dir)} if @dirs).uniq
-      #(@files.map { |f| File.expand_path("#{f}/..") if File.exists?(f) } + @dirs.keys.map {|dir| dir if File.directory?(dir)} if @dirs).uniq
-      values = values.map {|v| v if !v.nil?}
-      values
+      (@files.map { |f| existing_parent(File.expand_path("#{f}/..")) } + @dirs.keys.map {|dir| existing_parent(dir)}).uniq
+    end
+
+    def existing_parent(path)
+      File.exist?(path) ? path : existing_parent(File.expand_path("#{path}/.."))
     end
   end
 end

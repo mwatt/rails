@@ -1,3 +1,8 @@
+*   Fix `number_to_human` rounding 999999999 to "1000 Million" instead of
+    "1 Billion".
+
+    *Max Jacobson*
+
 *   Fix not calling `#default` on `HashWithIndifferentAccess#to_hash` when only
     `default_proc` is set, which could raise.
 

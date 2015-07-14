@@ -10,7 +10,7 @@ module ActiveRecord
       def reader(force_reload = NO_FORCE_RELOAD_ARGUMENT, reload: false)
         if force_reload != NO_FORCE_RELOAD_ARGUMENT
           ActiveSupport::Deprecation.warn(<<-MSG.squish)
-            Passing only `true` to force a collection to reload is now
+            Passing only `true` to force an association to reload is now
             deprecated and will be removed in Rails 5.1. Please pass
             `reload: true` instead.
           MSG

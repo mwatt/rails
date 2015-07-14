@@ -1,5 +1,7 @@
-*   Fix `number_to_human` rounding 999999999 to "1000 Million" instead of
-    "1 Billion".
+*   Fix `number_to_human` so it produces "1 Billion" from 999999999 instead of
+    "1000 Million".
+
+    Fixes #20869
 
     *Max Jacobson*
 

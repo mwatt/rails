@@ -1,3 +1,8 @@
+*   Fix `number_to_human` rounding 999999999 to "1000 Million" instead of
+    "1 Billion".
+
+    *Max Jacobson*
+
 *   Removed `ActiveSupport::Concurrency::Latch`, superseded by `Concurrent::CountDownLatch`
     from the concurrent-ruby gem.
 

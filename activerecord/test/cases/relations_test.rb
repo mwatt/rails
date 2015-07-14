@@ -1176,6 +1176,22 @@ class RelationTest < ActiveRecord::TestCase
     assert posts.loaded?
   end
 
+  def test_cache_key
+    developers = Developer.where(name: "David")
+    assert_match(/\Adevelopers\/query-(\h+)-(\d+)-(\d+)\Z/, developers.cache_key)
+  end
+
+  def test_cache_key_for_empty_relation
+    developers = Developer.where(name: "Non Existent Developer")
+    assert_match(/\Adevelopers\/query-(\h+)-0\Z/, developers.cache_key)
+  end
+
+  def test_cache_key_with_custom_timestamp_column
+    topics = Topic.where("title like ?", "%Topic%")
+    last_topic_timestamp = topics(:fifth).written_on.utc.to_s(:nsec)
+    assert_match(last_topic_timestamp, topics.cache_key(:written_on))
+  end
+
   def test_one
     posts = Post.all
     assert_queries(1) do

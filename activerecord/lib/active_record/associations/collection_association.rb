@@ -1,3 +1,5 @@
+require "active_support/deprecation"
+
 module ActiveRecord
   module Associations
     # = Active Record Association Collection
@@ -26,11 +28,21 @@ module ActiveRecord
     class CollectionAssociation < Association #:nodoc:
 
       # Implements the reader method, e.g. foo.items for Foo.has_many :items
-      def reader(force_reload = false)
-        if force_reload
-          klass.uncached { reload }
+      def reader(force_reload = nil, reload: false)
+        unless force_reload.nil?
+          ActiveSupport::Deprecation.warn(<<-MSG.squish)
+            Passing only `true` to force a collection to reload is now
+            deprecated and will be removed in Rails 5.1. Please pass
+            `reload: true` instead.
+          MSG
+
+          reload = force_reload
+        end
+
+        if reload
+          klass.uncached { self.reload }
         elsif stale_target?
-          reload
+          self.reload
         end
 
         if null_scope?

@@ -1,12 +1,24 @@
+require "active_support/deprecation"
+
 module ActiveRecord
   module Associations
     class SingularAssociation < Association #:nodoc:
       # Implements the reader method, e.g. foo.bar for Foo.has_one :bar
-      def reader(force_reload = false)
-        if force_reload && klass
-          klass.uncached { reload }
+      def reader(force_reload = nil, reload: false)
+        unless force_reload.nil?
+          ActiveSupport::Deprecation.warn(<<-MSG.squish)
+            Passing only `true` to force a collection to reload is now
+            deprecated and will be removed in Rails 5.1. Please pass
+            `reload: true` instead.
+          MSG
+
+          reload = force_reload
+        end
+
+        if reload && klass
+          klass.uncached { self.reload }
         elsif !loaded? || stale_target?
-          reload
+          self.reload
         end
 
         target

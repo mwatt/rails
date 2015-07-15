@@ -1,3 +1,8 @@
+*   Fix displaying mailer previews on non local requests when config
+    `action_mailer.show_previews` is set
+
+    *Wojciech Wnętrzak*
+
 *   Add a `--api` option in order to generate plugins that can be added
     inside an API application.
 

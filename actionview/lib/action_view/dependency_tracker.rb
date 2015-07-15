@@ -1,22 +1,24 @@
 require 'thread_safe'
+require 'action_view/path_set'
 
 module ActionView
   class DependencyTracker # :nodoc:
     @trackers = ThreadSafe::Cache.new
 
-    def self.find_dependencies(name, template)
-      tracker = @trackers[template.handler]
+    def self.find_dependencies(name, template, view_paths = nil)
+      tracker, supports_view_paths = @trackers[template.handler]
+      return [] unless tracker.present?
 
-      if tracker.present?
-        tracker.call(name, template)
+      if supports_view_paths
+        tracker.call(name, template, view_paths)
       else
-        []
+        tracker.call(name, template)
       end
     end
 
-    def self.register_tracker(extension, tracker)
+    def self.register_tracker(extension, tracker, supports_view_paths: false)
       handler = Template.handler_for_extension(extension)
-      @trackers[handler] = tracker
+      @trackers[handler] = [tracker, supports_view_paths]
     end
 
     def self.remove_tracker(handler)
@@ -82,12 +84,12 @@ module ActionView
         (?:#{STRING}|#{VARIABLE_OR_METHOD_CHAIN})      # finally, the dependency name of interest
       /xm
 
-      def self.call(name, template)
-        new(name, template).dependencies
+      def self.call(name, template, view_paths = nil)
+        new(name, template, view_paths).dependencies
       end
 
-      def initialize(name, template)
-        @name, @template = name, template
+      def initialize(name, template, view_paths = nil)
+        @name, @template, @view_paths = name, template, view_paths
       end
 
       def dependencies
@@ -142,11 +144,23 @@ module ActionView
           end
         end
 
+        def resolve_directories(wildcard_dependencies)
+          wildcard_dependencies.each_with_object([]) do |query, templates|
+            @view_paths.find_all_with_query(query).each do |template|
+              templates << "#{File.dirname(query)}/#{File.basename(template).split('.').first}"
+            end
+          end
+        end
+
         def explicit_dependencies
-          source.scan(EXPLICIT_DEPENDENCY).flatten.uniq
+          dependencies = source.scan(EXPLICIT_DEPENDENCY).flatten.uniq
+
+          wildcards, explicits = dependencies.partition { |dependency| dependency[-1] == '*' }
+
+          (explicits + resolve_directories(wildcards)).uniq
         end
     end
 
-    register_tracker :erb, ERBTracker
+    register_tracker :erb, ERBTracker, supports_view_paths: true
   end
 end

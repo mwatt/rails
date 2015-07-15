@@ -50,6 +50,12 @@ module ActionView
       end
     end
 
+    initializer "action_view.dependency_tracker_view_paths" do |app|
+      ActiveSupport.on_load(:action_controller) do
+        ActionView::DependencyTracker.view_paths = ActionController::Base.view_paths
+      end
+    end
+
     initializer "action_view.setup_action_pack" do |app|
       ActiveSupport.on_load(:action_controller) do
         ActionView::RoutingUrlFor.include(ActionDispatch::Routing::UrlFor)

@@ -116,6 +116,10 @@ module ActionView
       end
     end
 
+    def find_all_with_query(query) # :nodoc:
+      find_template_paths(File.join(@path, query))
+    end
+
   private
 
     delegate :caching?, to: :class

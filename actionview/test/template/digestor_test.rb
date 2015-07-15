@@ -30,7 +30,7 @@ class FixtureFinder
   end
 
   def find(name, prefixes = [], partial = false, keys = [], options = {})
-    partial_name = partial ? name.gsub(%r|/([^/]+)$|, '/_\1') : name
+    partial_name = partial ? name.gsub(%r|/([^/]+)$|, '/_\1') : name # '
     format = @formats.first.to_s
     format += "+#{@variants.first}" if @variants.any?
 
@@ -72,6 +72,28 @@ class TemplateDigestorTest < ActionView::TestCase
   def test_explicit_dependency_in_multiline_erb_tag
     assert_digest_difference("messages/show") do
       change_template("messages/_form")
+    end
+  end
+
+  def test_explicit_dependency_wildcard
+    assert_digest_difference("events/index") do
+      change_template("events/_completed")
+    end
+  end
+
+  def test_explicit_dependency_wildcard_picks_up_added_file
+    assert_digest_difference("events/index") do
+      add_template("events/_uncompleted")
+    end
+  ensure
+    remove_template("events/_uncompleted")
+  end
+
+  def test_explicit_dependency_wildcard_picks_up_removed_file
+    add_template("events/_subscribers_changed")
+
+    assert_digest_difference("events/index") do
+      remove_template("events/_subscribers_changed")
     end
   end
 
@@ -328,5 +350,10 @@ class TemplateDigestorTest < ActionView::TestCase
       File.open("digestor/#{template_name}.html#{variant}.erb", "w") do |f|
         f.write "\nTHIS WAS CHANGED!"
       end
+    end
+    alias_method :add_template, :change_template
+
+    def remove_template(template_name)
+      File.delete("digestor/#{template_name}.html.erb")
     end
 end

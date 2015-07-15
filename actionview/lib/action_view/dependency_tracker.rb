@@ -142,8 +142,20 @@ module ActionView
           end
         end
 
+        def resolve_directories(wildcard_dependencies)
+          wildcard_dependencies.map do |dependency|
+            Dir[ "digestor/#{dependency}" ].map do |file|
+              "#{File.dirname(dependency)}/#{File.basename(file).split('.').first}"
+            end
+          end
+        end
+
         def explicit_dependencies
-          source.scan(EXPLICIT_DEPENDENCY).flatten.uniq
+          dependencies = source.scan(EXPLICIT_DEPENDENCY).flatten.uniq
+
+          wildcards, explicits = dependencies.partition { |dependency| dependency[-1] == '*' }
+
+          explicits + resolve_directories(wildcards).flatten.uniq
         end
     end
 

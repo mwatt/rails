@@ -1,8 +1,11 @@
 require 'thread_safe'
+require 'action_view/path_set'
 
 module ActionView
   class DependencyTracker # :nodoc:
     @trackers = ThreadSafe::Cache.new
+
+    mattr_accessor(:view_paths) { ActionView::PathSet.new }
 
     def self.find_dependencies(name, template)
       tracker = @trackers[template.handler]
@@ -142,8 +145,20 @@ module ActionView
           end
         end
 
+        def resolve_directories(wildcard_dependencies)
+          wildcard_dependencies.map do |query|
+            DependencyTracker.view_paths.find_all_with_query(query).map do |template|
+              "#{File.dirname(query)}/#{File.basename(template).split('.').first}"
+            end
+          end
+        end
+
         def explicit_dependencies
-          source.scan(EXPLICIT_DEPENDENCY).flatten.uniq
+          dependencies = source.scan(EXPLICIT_DEPENDENCY).flatten.uniq
+
+          wildcards, explicits = dependencies.partition { |dependency| dependency[-1] == '*' }
+
+          explicits + resolve_directories(wildcards).flatten.uniq
         end
     end
 

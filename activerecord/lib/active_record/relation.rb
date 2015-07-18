@@ -317,14 +317,7 @@ module ActiveRecord
     #
     #   Product.where("name like ?", "%Game%").cache_key(:last_reviewed_at)
     def cache_key(timestamp_column = :updated_at)
-      query_signature = Digest::MD5.hexdigest(to_sql)
-      key = "#{klass.model_name.cache_key}/query-#{query_signature}-#{size}"
-
-      if timestamp = maximum(timestamp_column)
-        key = "#{key}-#{timestamp.utc.to_s(cache_timestamp_format)}"
-      end
-
-      key
+      @klass.collection_cache_key(self, timestamp_column)
     end
 
     # Scope all queries to the current scope.

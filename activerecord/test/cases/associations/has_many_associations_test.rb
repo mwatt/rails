@@ -2074,11 +2074,6 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
     assert !author.first_posts.exists?
   end
 
-  test "collection proxy provides a cache_key" do
-    developers = projects(:active_record).developers
-    assert_match(/\Adevelopers\/query-(\h+)-(\d+)-(\d+)\Z/, developers.cache_key)
-  end
-
   test "association with extend option" do
     post = posts(:welcome)
     assert_equal "lifo",  post.comments_with_extend.author

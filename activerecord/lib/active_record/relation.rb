@@ -307,17 +307,18 @@ module ActiveRecord
     #   Product.where("name like ?", "%Cosmic Encounter%").cache_key
     #   => "products/query-1850ab3d302391b85b8693e941286659-1-20150714212553907087000"
     #
-    # Under the hood this triggers two SQL queries:
+    # If the collection is loaded, the method will iterate through the records
+    # to generate the timestamp, otherwise it will trigger one SQL query like:
     #
-    #    SELECT COUNT(*) FROM "products" WHERE (name like '%Cosmic Encounter%')
-    #    SELECT MAX("products"."updated_at") FROM "products" WHERE (name like '%Cosmic Encounter%')
+    #    SELECT COUNT("products"."updated_at"), MAX("products"."updated_at") FROM "products" WHERE (name like '%Cosmic Encounter%')
     #
     # You can also pass a custom timestamp column to fetch the timestamp of the
     # last updated record.
     #
     #   Product.where("name like ?", "%Game%").cache_key(:last_reviewed_at)
     def cache_key(timestamp_column = :updated_at)
-      @klass.collection_cache_key(self, timestamp_column)
+      @cache_keys ||= {}
+      @cache_keys[timestamp_column] ||= @klass.collection_cache_key(self, timestamp_column)
     end
 
     # Scope all queries to the current scope.

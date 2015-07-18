@@ -641,6 +641,13 @@ module ActiveRecord
       "#<#{self.class.name} [#{entries.join(', ')}]>"
     end
 
+    protected
+
+      def load_records(records)
+        @records = records
+        @loaded = true
+      end
+
     private
 
     def exec_queries

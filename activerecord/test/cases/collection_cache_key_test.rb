@@ -3,14 +3,32 @@ require "models/computer"
 require "models/developer"
 require "models/project"
 require "models/topic"
+require "models/post"
+require "models/comment"
 
 module ActiveRecord
   class CollectionCacheKeyTest < ActiveRecord::TestCase
-    fixtures :developers,  :projects, :developers_projects, :topics
+    fixtures :developers,  :projects, :developers_projects, :topics, :comments, :posts
 
-    test "relation cache_key" do
+    test "collection_cache_key on model" do
+      assert_match(/\Adevelopers\/query-(\h+)-(\d+)-(\d+)\Z/, Developer.collection_cache_key)
+    end
+
+    test "collection_cache_key with custom collection" do
+      collection = Topic.where(author_name: "Carl")
+      assert_match(/\Atopics\/query-(\h+)-(\d+)-(\d+)\Z/, ActiveRecord::Base.collection_cache_key(collection))
+    end
+
+    test "cache_key for relation" do
       developers = Developer.where(name: "David")
       assert_match(/\Adevelopers\/query-(\h+)-(\d+)-(\d+)\Z/, developers.cache_key)
+    end
+
+    test "relation cache_key changes when the sql query changes" do
+      developers = Developer.where(name: "David")
+      other_relation =  Developer.where(name: "David").where("1 = 1")
+
+      assert_not_equal developers.cache_key, other_relation.cache_key
     end
 
     test "cache_key for empty relation" do

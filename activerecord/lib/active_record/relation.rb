@@ -310,7 +310,7 @@ module ActiveRecord
     # If the collection is loaded, the method will iterate through the records
     # to generate the timestamp, otherwise it will trigger one SQL query like:
     #
-    #    SELECT COUNT("products"."updated_at"), MAX("products"."updated_at") FROM "products" WHERE (name like '%Cosmic Encounter%')
+    #    SELECT COUNT(*), MAX("products"."updated_at") FROM "products" WHERE (name like '%Cosmic Encounter%')
     #
     # You can also pass a custom timestamp column to fetch the timestamp of the
     # last updated record.

@@ -13,7 +13,7 @@ module ActiveRecord
         column_type = collection.klass.type_for_attribute(timestamp_column.to_s)
         column = "#{connection.quote_table_name(collection.table_name)}.#{connection.quote_column_name(timestamp_column)}"
 
-        result = collection.select("COUNT(#{column}) AS size", "MAX(#{column}) AS timestamp").to_a.first
+        result = collection.select("COUNT(*) AS size", "MAX(#{column}) AS timestamp").to_a.first
         [result.size, column_type.deserialize(result.timestamp)]
       end
 

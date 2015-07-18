@@ -1,3 +1,22 @@
+*   Add `ActiveRecord::Relation#in_batches` to work with records and relations
+    in batches.
+
+    Available options are `of` (batch size), `load`, `begin_at`, and `end_at`.
+
+    Examples:
+
+        Person.in_batches.each_record(&:party_all_night!)
+        Person.in_batches.update_all(awesome: true)
+        Person.in_batches(of: 100).delete_all
+        Person.in_batches.each do |relation|
+          relation.delete_all
+          sleep 10 # Throttles the delete queries
+        end
+
+    Many thanks to everyone who helped and reviewed the implementation.
+
+    *Sina Siadat*
+
 *   Don't raise an error if an association failed to destroy when `destroy` was
     called on the parent (as opposed to `destroy!`).
 

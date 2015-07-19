@@ -968,10 +968,12 @@ module ActiveRecord
 
         # When connections are established in the future, begin a transaction too
         @connection_subscriber = ActiveSupport::Notifications.subscribe('connection.active_record') do |_, _, _, _, payload|
-          connection = ActiveRecord::Base.connection_handler.retrieve_connection(payload[:class_name].constantize)
-          unless @fixture_connections.include? connection
-            connection.begin_transaction joinable: false
-            @fixture_connections << connection
+          if payload[:class_name] && klass = payload[:class_name].constantize rescue nil
+            connection = ActiveRecord::Base.connection_handler.retrieve_connection(klass)
+            unless @fixture_connections.include? connection
+              connection.begin_transaction joinable: false
+              @fixture_connections << connection
+            end
           end
         end
 

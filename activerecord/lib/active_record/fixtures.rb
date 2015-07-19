@@ -949,6 +949,7 @@ module ActiveRecord
       @fixture_cache = {}
       @fixture_connections = []
       @@already_loaded_fixtures ||= {}
+      @connection_subscriber = nil
 
       # Load fixtures once and begin transaction.
       if run_in_transaction?
@@ -966,10 +967,12 @@ module ActiveRecord
         end
 
         # When connections are established in the future, begin a transaction too
-        ActiveSupport::Notifications.subscribe('connection.active_record') do |_, _, _, _, payload|
+        @connection_subscriber = ActiveSupport::Notifications.subscribe('connection.active_record') do |_, _, _, _, payload|
           connection = ActiveRecord::Base.connection_handler.retrieve_connection(payload[:class_name].constantize)
-          connection.begin_transaction joinable: false
-          @fixture_connections << connection
+          unless @fixture_connections.include? connection
+            connection.begin_transaction joinable: false
+            @fixture_connections << connection
+          end
         end
 
       # Load fixtures for every test.
@@ -986,6 +989,7 @@ module ActiveRecord
     def teardown_fixtures
       # Rollback changes if a transaction is active.
       if run_in_transaction?
+        ActiveSupport::Notifications.unsubscribe(@connection_subscriber) if @connection_subscriber
         @fixture_connections.each do |connection|
           connection.rollback_transaction if connection.transaction_open?
         end

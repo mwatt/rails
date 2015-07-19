@@ -581,32 +581,40 @@ class TransactionalFixturesOnConnectionNotification < ActiveRecord::TestCase
   self.use_transactional_tests = true
   self.use_instantiated_fixtures = false
 
-  def test_transaction_on_connection_notification
+  def test_transaction_created_on_connection_notification
     connection = stub(:transaction_open? => false)
     connection.expects(:begin_transaction).with(joinable: false)
     fire_connection_notification(connection)
   end
 
-  def test_notification_established_connections_rolled_back
-    connection = stub(:transaction_open? => true)
-    connection.stubs(:begin_transaction)
-    # This should be #expects but that causes a SystemStackError under mocha 0.14.0
-    connection.stubs(:rollback_transaction)
+  def test_notification_established_transactions_are_rolled_back
+    # Mocha is not thread-safe so define our own stub to test
+    connection = Class.new do
+      attr_accessor :rollback_transaction_called
+      def transaction_open?; true; end
+      def begin_transaction(*args); end
+      def rollback_transaction(*args)
+        @rollback_transaction_called = true
+      end
+    end.new
     fire_connection_notification(connection)
-    # teardown_fixtures is called when the tests complete
+    teardown_fixtures
+    assert(connection.rollback_transaction_called, "Expected <mock connection>#rollback_transaction to be called but was not")
   end
 
-  def fire_connection_notification(connection)
-    ActiveRecord::Base.connection_handler.stubs(:retrieve_connection).with(Book).returns(connection)
-    message_bus = ActiveSupport::Notifications.instrumenter
-    payload = {
-      class_name: 'Book',
-      config: nil,
-      connection_id: connection.object_id
-    }
+  private
 
-    message_bus.instrument('connection.active_record', payload) {}
-  end
+    def fire_connection_notification(connection)
+      ActiveRecord::Base.connection_handler.stubs(:retrieve_connection).with(Book).returns(connection)
+      message_bus = ActiveSupport::Notifications.instrumenter
+      payload = {
+        class_name: 'Book',
+        config: nil,
+        connection_id: connection.object_id
+      }
+
+      message_bus.instrument('connection.active_record', payload) {}
+    end
 end
 
 class InvalidTableNameFixturesTest < ActiveRecord::TestCase

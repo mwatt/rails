@@ -9,6 +9,34 @@ module ActiveSupport
   #
   #   Rails.env.production?
   class StringInquirer < String
+
+    def initialize(value, valid_values = [])
+      super(value)
+
+      if valid_values.any?
+        extend StaticStringInquirier
+        define_inquiry_methods(valid_values)
+      else
+        extend DynamicStringInquirer
+      end
+    end
+  end
+
+  module StaticStringInquirier
+    private
+
+      def define_inquiry_methods(valid_values)
+        class_eval do
+          define_method(:valid_values) { valid_values }
+
+          valid_values.each do |value|
+            define_method("#{value}?") { self == value }
+          end
+        end
+      end
+  end
+
+  module DynamicStringInquirer
     private
 
       def respond_to_missing?(method_name, include_private = false)

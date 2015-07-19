@@ -7,7 +7,7 @@ class String
   #   env = 'production'.inquiry
   #   env.production?  # => true
   #   env.development? # => false
-  def inquiry
-    ActiveSupport::StringInquirer.new(self)
+  def inquiry(*valid_values)
+    ActiveSupport::StringInquirer.new(self, valid_values.flatten)
   end
 end

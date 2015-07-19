@@ -21,7 +21,15 @@ module ActiveRecord
 
     test "cache_key for relation" do
       developers = Developer.where(name: "David")
-      assert_match(/\Adevelopers\/query-(\h+)-(\d+)-(\d+)\Z/, developers.cache_key)
+      last_developer_timestamp = developers.order(updated_at: :desc).first.updated_at
+
+      assert_match /\Adevelopers\/query-(\h+)-(\d+)-(\d+)\Z/, developers.cache_key
+
+      /\Adevelopers\/query-(\h+)-(\d+)-(\d+)\Z/ =~ developers.cache_key
+
+      assert_equal Digest::MD5.hexdigest(developers.to_sql), $1
+      assert_equal developers.count.to_s, $2
+      assert_equal last_developer_timestamp.to_s(ActiveRecord::Base::cache_timestamp_format), $3
     end
 
     test "it triggers at most one query" do
@@ -52,6 +60,11 @@ module ActiveRecord
       topics = Topic.where("title like ?", "%Topic%")
       last_topic_timestamp = topics(:fifth).written_on.utc.to_s(:nsec)
       assert_match(last_topic_timestamp, topics.cache_key(:written_on))
+    end
+
+    test "cache_key with unknown timestamp column" do
+      topics = Topic.where("title like ?", "%Topic%")
+      assert_raises(ActiveRecord::StatementInvalid) { topics.cache_key(:published_at) }
     end
 
     test "collection proxy provides a cache_key" do

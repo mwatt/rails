@@ -1,3 +1,11 @@
+*   ActiveSupport::StringInquirer now allows specifying valid values so that only these
+    get inquiry methods generated. Example:
+
+        'pending'.inquiry('pending', 'active').pending? => returns true
+        'pending'.inquiry('pending', 'active').expired? => raises NoMethodsError
+
+    *Rafael Sales*
+
 *   Fix `TimeWithZone#eql?` to properly handle `TimeWithZone` created from `DateTime`:
         twz = DateTime.now.in_time_zone
         twz.eql?(twz.dup) => true

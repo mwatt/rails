@@ -205,9 +205,15 @@ class StringInflectionsTest < ActiveSupport::TestCase
     assert_equal expected, original
   end
 
-  def test_string_inquiry
+  def test_dynamic_string_inquiry
     assert "production".inquiry.production?
     assert !"production".inquiry.development?
+  end
+
+  def test_restrict_string_inquiry
+    assert "staging".inquiry('staging', 'qa').staging?
+    assert !"staging".inquiry('staging', 'qa').qa?
+    assert_raises(NoMethodError) { "qa".inquiry('staging', 'qa').production? }
   end
 
   def test_truncate

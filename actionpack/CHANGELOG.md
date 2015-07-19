@@ -1,3 +1,11 @@
+*   Allow multiple `root` routes in same scope level. Example:
+
+    ```ruby
+    root 'blog#show', constraints: ->(req) { Hostname.blog_site?(req.host) }
+    root 'landing#show'
+    ```
+    *Rafael Sales*
+
 *   Fix `ActionController::Parameters#fetch` overwriting `KeyError` returned by
     default block.
 

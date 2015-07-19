@@ -1,3 +1,9 @@
+*   ActiveSupport::StringInquirer now allows specifying valid values so that only these
+    get inquiry methods generated. Example:
+
+        'pending'.inquiry('pending', 'active').pending? => returns true
+        'pending'.inquiry('pending', 'active').expired? => raises NoMethodsError
+
 *   ActiveSupport::HashWithIndifferentAccess `select` and `reject` will now return
     enumerator if called without block.
 

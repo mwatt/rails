@@ -16,41 +16,42 @@ module Rails
                     :beginning_of_week, :filter_redirect, :x
 
       attr_writer :log_level
-      attr_reader :encoding, :api_only
+      attr_reader :encoding, :api_only, :debug_exception_response_format
 
       def initialize(*)
         super
         self.encoding = "utf-8"
-        @allow_concurrency             = nil
-        @consider_all_requests_local   = false
-        @filter_parameters             = []
-        @filter_redirect               = []
-        @helpers_paths                 = []
-        @serve_static_files            = true
-        @static_cache_control          = nil
-        @static_index                  = "index"
-        @force_ssl                     = false
-        @ssl_options                   = {}
-        @session_store                 = :cookie_store
-        @session_options               = {}
-        @time_zone                     = "UTC"
-        @beginning_of_week             = :monday
-        @log_level                     = nil
-        @middleware                    = app_middleware
-        @generators                    = app_generators
-        @cache_store                   = [ :file_store, "#{root}/tmp/cache/" ]
-        @railties_order                = [:all]
-        @relative_url_root             = ENV["RAILS_RELATIVE_URL_ROOT"]
-        @reload_classes_only_on_change = true
-        @file_watcher                  = ActiveSupport::FileUpdateChecker
-        @exceptions_app                = nil
-        @autoflush_log                 = true
-        @log_formatter                 = ActiveSupport::Logger::SimpleFormatter.new
-        @eager_load                    = nil
-        @secret_token                  = nil
-        @secret_key_base               = nil
-        @api_only                      = false
-        @x                             = Custom.new
+        @allow_concurrency               = nil
+        @consider_all_requests_local     = false
+        @filter_parameters               = []
+        @filter_redirect                 = []
+        @helpers_paths                   = []
+        @serve_static_files              = true
+        @static_cache_control            = nil
+        @static_index                    = "index"
+        @force_ssl                       = false
+        @ssl_options                     = {}
+        @session_store                   = :cookie_store
+        @session_options                 = {}
+        @time_zone                       = "UTC"
+        @beginning_of_week               = :monday
+        @log_level                       = nil
+        @middleware                      = app_middleware
+        @generators                      = app_generators
+        @cache_store                     = [ :file_store, "#{root}/tmp/cache/" ]
+        @railties_order                  = [:all]
+        @relative_url_root               = ENV["RAILS_RELATIVE_URL_ROOT"]
+        @reload_classes_only_on_change   = true
+        @file_watcher                    = ActiveSupport::FileUpdateChecker
+        @exceptions_app                  = nil
+        @autoflush_log                   = true
+        @log_formatter                   = ActiveSupport::Logger::SimpleFormatter.new
+        @eager_load                      = nil
+        @secret_token                    = nil
+        @secret_key_base                 = nil
+        @api_only                        = false
+        @debug_exception_response_format = :default
+        @x                               = Custom.new
       end
 
       def encoding=(value)

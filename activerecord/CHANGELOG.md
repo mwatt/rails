@@ -1,3 +1,31 @@
+*   Fix state being carried over from previous transaction.
+
+    Considering the following example where `name` is a required attribute.
+    Before we had `new_record?` returning `true` for a persisted record:
+
+        author = Author.create! name: 'foo'
+        author.name = nil
+        author.save        # => false
+        author.new_record? # => true
+
+    Fixes #20824.
+
+    *Roque Pinel*
+
+*   Correctly ignore `mark_for_destruction` when `autosave` isn't set to `true`
+    when validating associations.
+
+    Fixes #20882.
+
+    *Sean Griffin*
+
+*   Fix a bug where counter_cache doesn't always work with  polymorphic
+    relations.
+
+    Fixes #16407.
+
+    *Stefan Kanev & Sean Griffin*
+
 *   Ensure that cyclic associations with autosave don't cause duplicate errors
     to be added to the parent record.
 

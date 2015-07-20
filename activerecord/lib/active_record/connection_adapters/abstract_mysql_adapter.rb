@@ -12,6 +12,18 @@ module ActiveRecord
         end
       end
 
+      class Version
+        include Comparable
+
+        def initialize(version_string)
+          @version = version_string.split('.').map(&:to_i)
+        end
+
+        def <=>(version_string)
+          @version <=> version_string.split('.').map(&:to_i)
+        end
+      end
+
       class ColumnDefinition < ActiveRecord::ConnectionAdapters::ColumnDefinition
         attr_accessor :charset
       end
@@ -307,7 +319,7 @@ module ActiveRecord
       #
       # http://bugs.mysql.com/bug.php?id=39170
       def supports_transaction_isolation?
-        version[0] >= 5
+        version >= '5.0.0'
       end
 
       def supports_indexes_in_create?
@@ -319,13 +331,11 @@ module ActiveRecord
       end
 
       def supports_views?
-        version[0] >= 5
+        version >= '5.0.0'
       end
 
       def supports_datetime_with_precision?
-        version[0] == 5 && version[1] == 6 && version[2] >= 4 ||
-          version[0] == 5 && version[1] >= 7 ||
-          version[0] >= 6
+        version >= '5.6.4'
       end
 
       def native_database_types
@@ -947,7 +957,7 @@ module ActiveRecord
       end
 
       def version
-        @version ||= full_version.scan(/^(\d+)\.(\d+)\.(\d+)/).flatten.map(&:to_i)
+        @version ||= Version.new(full_version.match(/^\d+\.\d+\.\d+/)[0])
       end
 
       def mariadb?
@@ -955,7 +965,7 @@ module ActiveRecord
       end
 
       def supports_rename_index?
-        mariadb? ? false : (version[0] == 5 && version[1] >= 7) || version[0] >= 6
+        mariadb? ? false : version >= '5.7.6'
       end
 
       def configure_connection

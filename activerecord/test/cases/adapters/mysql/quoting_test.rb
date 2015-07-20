@@ -14,13 +14,15 @@ class MysqlQuotingTest < ActiveRecord::MysqlTestCase
   end
 
   def test_quoted_date_precision_for_gte_564
-    @conn.stubs(:version).returns([5, 6, 4])
+    @conn.stubs(:full_version).returns('5.6.4')
+    @conn.remove_instance_variable(:@version)
     t = Time.now.change(usec: 1)
     assert_match(/\.000001\z/, @conn.quoted_date(t))
   end
 
   def test_quoted_date_precision_for_lt_564
-    @conn.stubs(:version).returns([5, 6, 3])
+    @conn.stubs(:full_version).returns('5.6.3')
+    @conn.remove_instance_variable(:@version)
     t = Time.now.change(usec: 1)
     refute_match(/\.000001\z/, @conn.quoted_date(t))
   end

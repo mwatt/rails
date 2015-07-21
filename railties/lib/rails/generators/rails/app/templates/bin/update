@@ -1,0 +1,23 @@
+require 'pathname'
+require 'fileutils'
+include FileUtils
+
+# path to your application root.
+APP_ROOT = Pathname.new File.expand_path('../../', __FILE__)
+
+chdir APP_ROOT do
+  # This script is a way to update your application automatically
+  # Add necessary update steps to this file.
+
+  puts '== Installing dependencies =='
+  system 'bundle install'
+
+  puts "\n== Updating database =="
+  system 'ruby bin/rake db:migrate'
+
+  puts "\n== Removing old logs and tempfiles =="
+  system 'ruby bin/rake log:clear tmp:clear'
+
+  puts "\n== Restarting application server =="
+  system 'ruby bin/rake restart'
+end

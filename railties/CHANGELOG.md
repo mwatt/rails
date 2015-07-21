@@ -1,3 +1,7 @@
+*   Add `bin/update` script to update application automatically
+
+    *Mehmet Emin İNAÇ*
+
 *   Fix `NoMethodError` when generating a scaffold inside a full engine.
 
     *Yuji Yaginuma*

@@ -1,3 +1,7 @@
+*   Add `bin/update` script to update development environment automatically.
+
+    *Mehmet Emin İNAÇ*
+
 *   Add a `--api` option in order to generate plugins that can be added
     inside an API application.
 

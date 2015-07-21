@@ -34,6 +34,8 @@ module Rails
           opts.on("-P", "--pid=pid", String,
                   "Specifies the PID file.",
                   "Default: tmp/pids/server.pid") { |v| options[:pid] = v }
+          opts.on("-C", "--perform-caching", String,
+                  "Specifies whether to perform caching in development.") { |v| options[:caching] = true }
 
           opts.separator ""
 
@@ -67,6 +69,11 @@ module Rails
       print_boot_information
       trap(:INT) { exit }
       create_tmp_directories
+
+      if options[:cache]
+        create_cache_file
+      end
+
       log_to_stdout if options[:log_stdout]
 
       super
@@ -86,6 +93,7 @@ module Rails
         DoNotReverseLookup: true,
         environment:        (ENV['RAILS_ENV'] || ENV['RACK_ENV'] || "development").dup,
         daemonize:          false,
+        caching:            false,
         pid:                File.expand_path("tmp/pids/server.pid")
       })
     end
@@ -99,6 +107,14 @@ module Rails
         puts "=> Run `rails server -h` for more startup options"
 
         puts "=> Ctrl-C to shutdown server" unless options[:daemonize]
+      end
+
+      def create_cache_file
+        FileUtils.touch("tmp/caching-dev.txt")
+      end
+
+      def delete_cache_file
+        FileUtils.rm("tmp/caching-dev.txt") if File.exists?("tmp/caching-dev.txt")
       end
 
       def create_tmp_directories

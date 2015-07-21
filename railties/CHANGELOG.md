@@ -1,3 +1,15 @@
+*   Make enabling or disabling caching in development mode possible with 
+    rake dev:cache
+
+    Running rake dev:cache will create or remove tmp/caching-dev.txt. When this
+    file exists config.action_controller.perform_caching will be set to true in
+    config/environments/development.rb.
+
+    Additionally, a server can be started with the -C or --perform-caching flag
+    included to enable caching on startup.
+
+    *Jussi Mertanen*, *Chuck Callebs*
+
 *   Fix `NoMethodError` when generating a scaffold inside a full engine.
 
     *Yuji Yaginuma*

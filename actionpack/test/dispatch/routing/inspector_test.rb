@@ -94,6 +94,23 @@ module ActionDispatch
         ], output
       end
 
+      def test_inspect_routes_shows_resource_route
+        output = draw do
+          resource :profile
+        end
+
+        assert_equal [
+          "      Prefix Verb   URI Pattern             Controller#Action",
+          " new_profile GET    /profile/new(.:format)  profiles#new",
+          "edit_profile GET    /profile/edit(.:format) profiles#edit",
+          "     profile GET    /profile(.:format)      profiles#show",
+          "             PATCH  /profile(.:format)      profiles#update",
+          "             PUT    /profile(.:format)      profiles#update",
+          "             DELETE /profile(.:format)      profiles#destroy",
+          "             POST   /profile(.:format)      profiles#create"
+        ], output
+      end
+
       def test_inspect_routes_shows_resources_route
         output = draw do
           resources :articles
@@ -102,8 +119,8 @@ module ActionDispatch
         assert_equal [
           "      Prefix Verb   URI Pattern                  Controller#Action",
           "    articles GET    /articles(.:format)          articles#index",
-          "             POST   /articles(.:format)          articles#create",
           " new_article GET    /articles/new(.:format)      articles#new",
+          "             POST   /articles(.:format)          articles#create",
           "edit_article GET    /articles/:id/edit(.:format) articles#edit",
           "     article GET    /articles/:id(.:format)      articles#show",
           "             PATCH  /articles/:id(.:format)      articles#update",
@@ -296,8 +313,8 @@ module ActionDispatch
 
         assert_equal ["   Prefix Verb   URI Pattern               Controller#Action",
                       "    posts GET    /posts(.:format)          posts#index",
-                      "          POST   /posts(.:format)          posts#create",
                       " new_post GET    /posts/new(.:format)      posts#new",
+                      "          POST   /posts(.:format)          posts#create",
                       "edit_post GET    /posts/:id/edit(.:format) posts#edit",
                       "     post GET    /posts/:id(.:format)      posts#show",
                       "          PATCH  /posts/:id(.:format)      posts#update",

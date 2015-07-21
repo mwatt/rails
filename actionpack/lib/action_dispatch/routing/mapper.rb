@@ -1192,15 +1192,11 @@ module ActionDispatch
 
             concerns(options[:concerns]) if options[:concerns]
 
-            collection do
-              post :create
-            end if parent_resource.actions.include?(:create)
-
-            new do
-              get :new
-            end if parent_resource.actions.include?(:new)
+            get :new, on: :new if parent_resource.actions.include?(:new)
 
             set_member_mappings_for_resource
+
+            post :create, on: :collection if parent_resource.actions.include?(:create)
           end
 
           self
@@ -1350,14 +1346,11 @@ module ActionDispatch
 
             concerns(options[:concerns]) if options[:concerns]
 
-            collection do
-              get  :index if parent_resource.actions.include?(:index)
-              post :create if parent_resource.actions.include?(:create)
-            end
+            get :index, on: :collection if parent_resource.actions.include?(:index)
 
-            new do
-              get :new
-            end if parent_resource.actions.include?(:new)
+            get :new, on: :new if parent_resource.actions.include?(:new)
+
+            post :create, on: :collection if parent_resource.actions.include?(:create)
 
             set_member_mappings_for_resource
           end

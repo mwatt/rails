@@ -114,7 +114,6 @@
 
     *James Kerr*
 
-
 *   Fix `NoMethodError` when generating a scaffold inside a full engine.
 
     *Yuji Yaginuma*

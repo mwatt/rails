@@ -108,6 +108,12 @@
 
     *Robin Dupret*
 
+*   Added javascript to update the URL on mailer previews with the currently
+    selected email format. Reloading the page now keeps you on your selected
+    format rather than going back to the default html version.
+
+    *James Kerr*
+
 *   Fix `NoMethodError` when generating a scaffold inside a full engine.
 
     *Yuji Yaginuma*

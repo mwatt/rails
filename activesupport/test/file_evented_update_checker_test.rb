@@ -19,3 +19,4 @@ class FileEventedUpdateCheckerWithEnumerableTest < ActiveSupport::TestCase
   	assert_equal watcher.updated?, true
   end 
 end
+

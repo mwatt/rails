@@ -17,6 +17,5 @@ class FileEventedUpdateCheckerWithEnumerableTest < ActiveSupport::TestCase
   	FileUtils.rm(FILES)
   	sleep 1
   	assert_equal watcher.updated?, true
-  end
-  
+  end 
 end

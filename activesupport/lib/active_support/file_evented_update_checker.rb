@@ -4,7 +4,6 @@ module ActiveSupport
   class FileEventedUpdateChecker
     attr_reader :listener
     def initialize(files, directories={}, &block)
-      @files = Set.new
       @files = files.map { |f| File.expand_path(f)}.to_set
       @dirs = Hash.new
       directories.each do |key,value|
@@ -27,7 +26,6 @@ module ActiveSupport
       @modified = false
     end
 
-    # Execute the block given if updated.
     def execute_if_updated
       if updated?
         execute
@@ -48,11 +46,6 @@ module ActiveSupport
           return true
         end
       end
-      # @dirs.map do |key,value|
-      # 	if file.start_with?(key) and file.end_with?(*(value.map {|ext| ".#{ext.to_s}"}))
-      # 		return true
-      # 	end
-      # end
       false
     end
 

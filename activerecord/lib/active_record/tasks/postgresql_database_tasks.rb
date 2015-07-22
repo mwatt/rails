@@ -67,7 +67,10 @@ module ActiveRecord
 
       def structure_load(filename)
         set_psql_env
-        Kernel.system("psql -X -q -f #{Shellwords.escape(filename)} #{configuration['database']}")
+        command = "psql -X -q -f #{Shellwords.escape(filename)} #{configuration['database']}"
+        unless Kernel.system(command)
+          raise "Could not load structure. Exit status: #{$?}"
+        end
       end
 
       private

@@ -186,6 +186,9 @@ module ActiveRecord
         configuration = arguments.first
         filename = arguments.delete_at 1
         class_for_adapter(configuration['adapter']).new(*arguments).structure_load(filename)
+      rescue Exception => error
+        $stderr.puts error, *(error.backtrace)
+        $stderr.puts "Couldn't load structure for #{configuration.inspect}"
       end
 
       def load_schema(configuration, format = ActiveRecord::Base.schema_format, file = nil) # :nodoc:

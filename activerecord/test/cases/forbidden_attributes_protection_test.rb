@@ -3,18 +3,32 @@ require 'active_support/core_ext/hash/indifferent_access'
 require 'models/person'
 require 'models/company'
 
-class ProtectedParams < ActiveSupport::HashWithIndifferentAccess
+class ProtectedParams
   attr_accessor :permitted
   alias :permitted? :permitted
 
+  delegate :keys, :key?, :has_key?, :empty?, to: :@parameters
+
   def initialize(attributes)
-    super(attributes)
+    @parameters = attributes.with_indifferent_access
     @permitted = false
   end
 
   def permit!
     @permitted = true
     self
+  end
+
+  def [](key)
+    @parameters[key]
+  end
+
+  def to_h
+    @parameters
+  end
+
+  def stringify_keys
+    dup
   end
 
   def dup

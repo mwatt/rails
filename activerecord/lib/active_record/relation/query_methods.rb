@@ -558,7 +558,7 @@ module ActiveRecord
     end
 
     def where!(opts, *rest) # :nodoc:
-      if Hash === opts
+      if Hash === opts || opts.respond_to?(:permitted?)
         opts = sanitize_forbidden_attributes(opts)
         references!(PredicateBuilder.references(opts))
       end

@@ -386,16 +386,6 @@ class EachTest < ActiveRecord::TestCase
     assert_equal 2, person.reload.author_id # incremented only once
   end
 
-  def test_in_batches_should_return_a_relation_with_ids_in_range
-    Post.in_batches(of: 2, load: true) do |relation|
-      assert_equal relation.pluck(:id), Array(relation.where_values_hash['id'])
-    end
-
-    Post.in_batches(of: 2, load: false) do |relation|
-      assert_equal relation.pluck(:id), Array(relation.where_values_hash['id'])
-    end
-  end
-
   def test_find_in_batches_start_deprecated
     assert_deprecated do
       assert_queries(@total) do

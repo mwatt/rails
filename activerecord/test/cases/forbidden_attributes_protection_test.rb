@@ -3,18 +3,32 @@ require 'active_support/core_ext/hash/indifferent_access'
 require 'models/person'
 require 'models/company'
 
-class ProtectedParams < ActiveSupport::HashWithIndifferentAccess
+class ProtectedParams
   attr_accessor :permitted
   alias :permitted? :permitted
 
+  delegate :keys, :key?, :has_key?, :empty?, to: :@parameters
+
   def initialize(attributes)
-    super(attributes)
+    @parameters = attributes.with_indifferent_access
     @permitted = false
   end
 
   def permit!
     @permitted = true
     self
+  end
+
+  def [](key)
+    @parameters[key]
+  end
+
+  def to_h
+    @parameters
+  end
+
+  def stringify_keys
+    dup
   end
 
   def dup
@@ -96,4 +110,24 @@ class ForbiddenAttributesProtectionTest < ActiveRecord::TestCase
     person = Person.where(first_name: params[:first_name]).create!
     assert_equal 'Guille', person.first_name
   end
+
+  def test_strong_params_style_objects_work_with_singular_associations
+    params = ProtectedParams.new( name: "Stern", ship_attributes: ProtectedParams.new(name: "The Black Rock").permit!).permit!
+    part = ShipPart.new(params)
+
+    assert_equal "Stern", part.name
+    assert_equal "The Black Rock", part.ship.name
+  end
+
+  def test_strong_params_style_objects_work_with_collection_associations
+    params = ProtectedParams.new(
+      trinkets_attributes: ProtectedParams.new(
+        "0" => ProtectedParams.new(name: "Necklace").permit!,
+        "1" => ProtectedParams.new(name: "Spoon").permit! ) ).permit!
+    part = ShipPart.new(params)
+
+    assert_equal "Necklace", part.trinkets[0].name
+    assert_equal "Spoon", part.trinkets[1].name
+  end
+
 end

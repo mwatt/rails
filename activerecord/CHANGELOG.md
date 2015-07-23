@@ -1,3 +1,11 @@
+*   Added run_cmd class method to ActiveRecord::Tasks::DatabaseTasks for
+    drying up Kernel.system() calls within this namespace and to avoid
+    shell expansion by using a paramter list instead of string as arguments
+    for Kernel.system(). Thanks to Nate Berkopec for supply patch to get 
+    test units passing.
+ 
+    *Bryan Paxton*
+
 *   ActiveRecord::RecordNotFound modified to store model name, primary_key and
     id of the caller model. It allows the catcher of this exception to make
     a better decision to what to do with it. For example consider this simple

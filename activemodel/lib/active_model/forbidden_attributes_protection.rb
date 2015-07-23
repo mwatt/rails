@@ -20,7 +20,7 @@ module ActiveModel
         if attributes.respond_to?(:permitted?) && !attributes.permitted?
           raise ActiveModel::ForbiddenAttributesError
         else
-          attributes
+          attributes.to_h
         end
       end
       alias :sanitize_forbidden_attributes :sanitize_for_mass_assignment

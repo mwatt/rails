@@ -295,7 +295,7 @@ class EachTest < ActiveRecord::TestCase
     end
   end
 
-  def test_in_batches_should_return_relationes
+  def test_in_batches_should_return_relations
     assert_queries(@total + 1) do
       Post.in_batches(of: 1) do |relation|
         assert_kind_of ActiveRecord::Relation, relation
@@ -365,7 +365,7 @@ class EachTest < ActiveRecord::TestCase
     assert_equal posts(:welcome), posts.first
   end
 
-  def test_in_batches_should_not_ignore_the_default_scope_if_it_is_other_then_order
+  def test_in_batches_should_not_ignore_default_scope_without_order_statements
     special_posts_ids = SpecialPostWithDefaultScope.all.map(&:id).sort
     posts = []
     SpecialPostWithDefaultScope.in_batches do |relation|

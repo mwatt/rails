@@ -180,7 +180,7 @@ module ActiveRecord
     #   Person.in_batches.each_record(&:party_all_night!)
     #
     # NOTE: It's not possible to set the order. That is automatically set to
-    # ascending on the primary key ("id ASC") to make the batch ordering is
+    # ascending on the primary key ("id ASC") to make the batch ordering
     # consistent. Therefore the primary key must be orderable, e.g an integer
     # or a string.
     #

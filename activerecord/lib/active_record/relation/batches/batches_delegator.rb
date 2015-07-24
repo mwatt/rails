@@ -31,9 +31,9 @@ module ActiveRecord
       #   Person.in_batches.each_record.with_index do |person, index|
       #     person.award_trophy(index + 1)
       #   end
-      #
       def each_record
         return to_enum(:each_record) unless block_given?
+
         @relation.to_enum(:in_batches, of: @of, begin_at: @begin_at, end_at: @end_at, load: true).map do |relation|
           relation.to_a.each { |record| yield record }
         end
@@ -44,7 +44,6 @@ module ActiveRecord
       #   People.in_batches.delete_all
       #   People.in_batches.destroy_all('age < 10')
       #   People.in_batches.update_all('age = age + 1')
-      #
       [:delete_all, :update_all, :destroy_all].each do |method|
         define_method(method) do |*args, &block|
           @relation.to_enum(:in_batches, of: @of, begin_at: @begin_at, end_at: @end_at, load: false).map do |relation|

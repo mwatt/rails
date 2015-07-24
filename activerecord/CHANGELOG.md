@@ -1,3 +1,18 @@
+*   Restore the record state (e.g. id, new_record, destroyed) after rollback.
+
+    Example:
+
+        user = User.new(name: 'foo')
+        User.transaction do
+          user.save
+          raise ActiveRecord::Rollback
+        end
+        user.id # => nil
+
+    Fixes #7807 and #12922.
+
+    *Roque Pinel*, *Ivan Antropov*
+
 *   Don't raise an error if an association failed to destroy when `destroy` was
     called on the parent (as opposed to `destroy!`).
 

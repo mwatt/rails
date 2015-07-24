@@ -129,8 +129,6 @@ module ActiveRecord
       end
     end
 
-    # Returns a BatchesDelegator object to work with batches of records.
-    #
     # Yields ActiveRecord::Relation objects to work with a batch of records.
     #
     #   Person.where("age > 21").in_batches do |relation|

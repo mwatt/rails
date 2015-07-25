@@ -95,4 +95,50 @@ class MethodCallAssertionsTest < ActiveSupport::TestCase
 
     assert_equal "Expected increment to be called 0 times, but was called 1 times.\nExpected: 0\n  Actual: 1", error.message
   end
+
+  def test_assert_any_instance_called_with_defaults_to_expect_once
+    assert_any_instance_called(@object.class, :<<) do
+      @object << 2
+    end
+  end
+
+  def test_assert_any_instance_called_more_than_once
+    assert_any_instance_called(@object.class, :increment, times: 2) do
+      @object.increment
+      @object.increment
+    end
+  end
+
+  def test_assert_any_instance_called_failure
+    error = assert_raises(Minitest::Assertion) do
+      assert_any_instance_called(@object.class, :increment) do
+        # Call nothing...
+      end
+    end
+
+    assert_equal "Expected increment to be called 1 times, but was called 0 times.\nExpected: 1\n  Actual: 0", error.message
+  end
+
+  def test_assert_any_instance_called_with_returns
+    assert_any_instance_called(@object.class, :increment, returns: 10) do
+      assert_equal 10, @object.increment
+    end
+  end
+
+  def test_assert_any_instance_not_called
+    assert_any_instance_not_called(@object.class, :decrement) do
+      @object.increment
+    end
+  end
+
+  def test_assert_any_instance_not_called_failure
+    error = assert_raises(Minitest::Assertion) do
+      assert_any_instance_not_called(@object.class, :increment) do
+        @object.increment
+      end
+    end
+
+    assert_equal "Expected increment to be called 0 times, but was called 1 times.\nExpected: 0\n  Actual: 1", error.message
+  end
+
 end

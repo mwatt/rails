@@ -33,6 +33,7 @@ module ActionDispatch
           defaults       = route.defaults
           required_parts = route.required_parts
           parameterized_parts.delete_if do |key, value|
+            next if defaults[key].nil?
             value.to_s == defaults[key].to_s && !required_parts.include?(key)
           end
 

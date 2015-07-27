@@ -66,6 +66,10 @@ module ActiveRecord
         def normalize_table_name(_table_name)
           pluralize_table_names? ? _table_name.pluralize : _table_name.singularize
         end
+
+        def strategy_version
+          Rails.version.to_f
+        end
     end
   end
 end

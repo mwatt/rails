@@ -1,4 +1,4 @@
-class <%= migration_class_name %> < ActiveRecord::Migration
+class <%= migration_class_name %> < ActiveRecord::Migration[<%= strategy_version %>]
 <%- if migration_action == 'add' -%>
   def change
 <% attributes.each do |attribute| -%>

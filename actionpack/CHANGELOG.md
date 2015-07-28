@@ -1,3 +1,16 @@
+*   Add parameter filter capability for redirect locations.
+
+    It uses the `config.filter_parameters` to match what needs to be filtered.
+    The result would be like this:
+
+        Redirected to http://secret.foo.bar?username=roque&password=[FILTERED]
+
+    By security default, if no filter is provided, it does not filter any parameter.
+
+    Fixes #14055.
+
+    *Roque Pinel*, *Trevor Turk*
+
 *   ActionDispatch::Response#new no longer applies default headers.  If you want
     default headers applied to the response object, then call
     `ActionDispatch::Response.create`.  This change only impacts people who are

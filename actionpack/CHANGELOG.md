@@ -1,3 +1,16 @@
+*   Add parameter filter capability for redirect locations.
+
+    It uses the `config.filter_parameters` to match what needs to be filtered.
+    The result would be like this:
+
+        Redirected to http://secret.foo.bar?username=roque&password=[FILTERED]
+
+    By security default, if no filter is provided, it filters all parameters.
+
+    Fixes #14055.
+
+    *Roque Pinel*, *Trevor Turk*
+
 *   Fix `ActionController::Parameters#fetch` overwriting `KeyError` returned by
     default block.
 

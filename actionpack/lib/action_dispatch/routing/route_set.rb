@@ -583,8 +583,6 @@ module ActionDispatch
         PARAMETERIZE = lambda do |name, value|
           if name == :controller
             value
-          elsif value.is_a?(Array)
-            value.map(&:to_param).join('/')
           elsif param = value.to_param
             param
           end

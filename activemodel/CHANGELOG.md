@@ -1,3 +1,21 @@
+*   Validate multiple contexts on `valid?` and `invalid?` at once.
+
+    Example:
+    
+        class Person
+          include ActiveModel::Validations
+    
+          attr_reader :name, :title
+          validates_presence_of :name, on: :create
+          validates_presence_of :title, on: :update
+        end
+    
+        person = Person.new
+        person.valid?                           # => true
+        person.errors.full_messages_for(:name)  # => ["Name can't be blank"]
+
+    *Dmitry Polushkin*
+
 *   Ensure `method_missing` is called for methods passed to
     `ActiveModel::Serialization#serializable_hash` that don't exist.
 

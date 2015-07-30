@@ -1,3 +1,9 @@
+*   Autosave association should respect to value of validate option
+
+    Fixes #21058.
+
+    *Mehmet Emin İNAÇ*
+
 *   Add `cache_key` to ActiveRecord::Relation.
 
     Example:

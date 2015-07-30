@@ -1,3 +1,9 @@
+*   Autosave association should respect to value of validate option
+
+    Fixes #21058.
+
+    *Mehmet Emin İNAÇ*
+
 *   Properly allow uniqueness validations on primary keys.
 
     Fixes #20966.

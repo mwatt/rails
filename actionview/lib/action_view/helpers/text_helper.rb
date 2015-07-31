@@ -239,6 +239,8 @@ module ActionView
       # breaks on the first whitespace character that does not exceed +line_width+
       # (which is 80 by default).
       #
+      # You can also specify a custom +break_sequence+ ("\n" by default)
+      #
       #   word_wrap('Once upon a time')
       #   # => Once upon a time
       #
@@ -250,6 +252,9 @@ module ActionView
       #
       #   word_wrap('Once upon a time', line_width: 1)
       #   # => Once\nupon\na\ntime
+      #
+      #   word_wrap('Once upon a time', line_width: 1, break_sequence: "\r\n")
+      #   # => Once\r\nupon\r\na\r\ntime
       def word_wrap(text, options = {})
         line_width = options.fetch(:line_width, 80)
         break_sequence = options.fetch(:break_sequence, "\n")

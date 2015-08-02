@@ -334,10 +334,9 @@ class LegacyRouteSetTests < ActiveSupport::TestCase
   end
 
   def test_route_with_colon_first
-    rs.draw do
-      get '/:controller/:action/:id', :action => 'index', :id => nil
-      get ':url', :controller => 'tiny_url', :action => 'translate'
-    end
+    rs.draw { get ':url', :controller => 'content', :action => 'translate' }
+
+    assert_equal({controller: 'content', action: 'translate', url: 'example'}, rs.recognize_path('/example'))
   end
 
   def test_route_with_regexp_for_controller

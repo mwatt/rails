@@ -367,7 +367,7 @@ class TextHelperTest < ActionView::TestCase
   end
 
   def test_word_wrap_with_custom_break_sequence
-    assert_equal("1234567890\r\n1234567890\r\n1234567890", word_wrap("1234567890 "*3, :line_width => 2, :break_sequence => "\r\n"))
+    assert_equal("1234567890\r\n1234567890\r\n1234567890", word_wrap("1234567890 " * 3, line_width: 2, break_sequence: "\r\n"))
   end
 
   def test_pluralization

@@ -257,11 +257,17 @@ module ActionView
       #
       #   word_wrap('Once upon a time', line_width: 1, break_sequence: "\r\n")
       #   # => Once\r\nupon\r\na\r\ntime
+      #
+      #   You can also specify a custom +line_splitter+ if you want to have a special character sequence that defines a new line ("\n" by default)
+      #
+      #   word_wrap('Once upon a time,| in a kingdom called Far Far Away,| a king fell ill...', line_width: 10, line_splitter: "|")
+      #   # => "Once upon\na time,\nin a\nkingdom\ncalled Far\nFar Away,\na king\nfell\nill..."
       def word_wrap(text, options = {})
         line_width = options.fetch(:line_width, 80)
+        line_splitter = options.fetch(:line_splitter, "\n")
         break_sequence = options.fetch(:break_sequence, "\n")
 
-        text.split("\n").collect! do |line|
+        text.split(line_splitter).collect! do |line|
           line.length > line_width ? line.gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1#{break_sequence}").strip : line
         end * break_sequence
       end

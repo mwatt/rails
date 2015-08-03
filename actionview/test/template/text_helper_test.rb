@@ -370,6 +370,10 @@ class TextHelperTest < ActionView::TestCase
     assert_equal("1234567890\r\n1234567890\r\n1234567890", word_wrap("1234567890 " * 3, line_width: 2, break_sequence: "\r\n"))
   end
 
+  def test_word_wrap_with_custom_line_splitter
+    assert_equal("12345\n67890\n12345\n67890\n12345\n67890", word_wrap("12345|67890 " * 3, line_width: 2, line_splitter: "|"))
+  end
+
   def test_pluralization
     assert_equal("1 count", pluralize(1, "count"))
     assert_equal("2 counts", pluralize(2, "count"))

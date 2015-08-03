@@ -1,3 +1,13 @@
+*   Add a native JSON data type support in MySQL.
+
+    Example:
+
+        create_table :json_data_type do |t|
+          t.json :settings
+        end
+
+    *Ryuta Kamizono*
+
 *   Add `cache_key` to ActiveRecord::Relation.
 
     Example:

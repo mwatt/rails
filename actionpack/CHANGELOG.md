@@ -1,3 +1,13 @@
+*   Add a `response_format` option to `ActionDispatch::DebugExceptions`
+    to configure the format of the response when errors occur in
+    development mode.
+
+    If `response_format` is `:default` the debug info will be rendered
+    in an HTML page. In the other hand, if the provided value is `:api`
+    the debug info will be rendered in the original response format.
+
+    *Jorge Bejar*
+
 *   Add ability to filter parameters based on parent keys.
 
         # matches {credit_card: {code: "xxxx"}}

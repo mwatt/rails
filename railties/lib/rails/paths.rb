@@ -175,6 +175,12 @@ module Rails
         @paths
       end
 
+      def expanded_paths
+        map do |p|
+          File.expand_path(p, @root.path)
+        end
+      end
+
       # Expands all paths against the root and return all unique values.
       def expanded
         raise "You need to set a path root" unless @root.path

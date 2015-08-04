@@ -10,6 +10,7 @@ After reading this guide, you will know:
 
 * How to create jobs.
 * How to enqueue jobs.
+* How to pass arguments to a jobs.
 * How to run jobs in the background.
 * How to send emails from your application asynchronously.
 
@@ -98,6 +99,29 @@ MyJob.set(wait: 1.week).perform_later(record)
 
 That's it!
 
+### Pass arguments to a Job
+
+To pass arguments to a job, you need first to define them in the `perform` method. Then, when calling `perform_later` or `perform_now`, pass as much args as defined in your `perform`. 
+
+For example, you create the job like this:
+
+```ruby
+class UpdateUserParamsJob < ActiveJob::Base
+  queue_as :default
+  
+  # Define accepted args here
+  def perform(user, **params)
+    user.update(params)
+    user.save
+  end
+end
+```
+
+And then call it like this:
+
+```ruby
+UpdateUserParamsJob.perform_later(User.first, name: "Dhia", email: "dhia@example.com")
+```
 
 Job Execution
 -------------

@@ -4,6 +4,22 @@ require "active_support/core_ext/array/wrap"
 
 module I18n
   class Railtie < Rails::Railtie
+    module Helpers
+      def self.extensions_for(glob)
+        $1.split(',') if glob =~ /\{([\S]+)\}/
+      end
+
+      def self.compile_watched_dirs(paths)
+        watched_dirs = {}
+        paths.each do |path|
+          path.expanded_paths.each do |expanded|
+            watched_dirs[expanded] = extensions_for(path.glob)
+          end
+        end
+        watched_dirs
+      end
+    end
+
     config.i18n = ActiveSupport::OrderedOptions.new
     config.i18n.railties_load_path = []
     config.i18n.load_path = []
@@ -37,10 +53,12 @@ module I18n
       enforce_available_locales = I18n.enforce_available_locales if enforce_available_locales.nil?
       I18n.enforce_available_locales = false
 
+      reloadable_paths = nil
       app.config.i18n.each do |setting, value|
         case setting
         when :railties_load_path
-          app.config.i18n.load_path.unshift(*value)
+          reloadable_paths = value
+          app.config.i18n.load_path.unshift(*value.map(&:existent).flatten)
         when :load_path
           I18n.load_path += value
         else
@@ -53,7 +71,14 @@ module I18n
       # Restore available locales check so it will take place from now on.
       I18n.enforce_available_locales = enforce_available_locales
 
-      reloader = ActiveSupport::FileUpdateChecker.new(I18n.load_path.dup){ I18n.reload! }
+      directories = Helpers.compile_watched_dirs(reloadable_paths)
+      reloader = ActiveSupport::FileUpdateChecker.new(I18n.load_path.dup, directories) do
+        I18n.load_path.keep_if { |p| File.exist?(p) }
+        I18n.load_path |= reloadable_paths.map(&:existent).flatten
+
+        I18n.reload!
+      end
+
       app.reloaders << reloader
       ActionDispatch::Reloader.to_prepare do
         reloader.execute_if_updated

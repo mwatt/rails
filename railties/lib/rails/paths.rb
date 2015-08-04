@@ -175,14 +175,21 @@ module Rails
         @paths
       end
 
+      def extensions
+        $1.split(',') if @glob =~ /\{([\S]+)\}/
+      end
+
+      def expand_paths_without_uniq # :nodoc:
+        raise "You need to set a path root" unless @root.path
+
+        map { |path| File.expand_path(path, @root.path) }
+      end
+
       # Expands all paths against the root and return all unique values.
       def expanded
-        raise "You need to set a path root" unless @root.path
         result = []
 
-        each do |p|
-          path = File.expand_path(p, @root.path)
-
+        expand_paths_without_uniq.each do |path|
           if @glob && File.directory?(path)
             Dir.chdir(path) do
               result.concat(Dir.glob(@glob).map { |file| File.join path, file }.sort)

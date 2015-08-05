@@ -412,36 +412,36 @@ module ActionView
       # * <tt>confirm: 'question?'</tt> - If present the unobtrusive JavaScript
       #   drivers will provide a prompt with the question specified. If the user accepts,
       #   the form is processed normally, otherwise no action is taken.
-      # * <tt>:disable_with</tt> - Value of this parameter will be used as the value for a
+      # * <tt>:disable_with</tt> - Defaults to "Please Wait...". Value of this parameter will be used as the value for a
       #   disabled version of the submit button when the form is submitted. This feature is
       #   provided by the unobtrusive JavaScript driver.
       #
       # ==== Examples
       #   submit_tag
-      #   # => <input name="commit" type="submit" value="Save changes" />
+      #   # => <input name="commit" data-disabled-with="Please wait..." type="submit" value="Save changes" />
       #
       #   submit_tag "Edit this article"
-      #   # => <input name="commit" type="submit" value="Edit this article" />
+      #   # => <input name="commit" data-disabled-with="Please wait..." type="submit" value="Edit this article" />
       #
       #   submit_tag "Save edits", disabled: true
-      #   # => <input disabled="disabled" name="commit" type="submit" value="Save edits" />
+      #   # => <input disabled="disabled" name="commit" data-disabled-with="Please wait..." type="submit" value="Save edits" />
       #
-      #   submit_tag "Complete sale", data: { disable_with: "Please wait..." }
-      #   # => <input name="commit" data-disable-with="Please wait..." type="submit" value="Complete sale" />
+      #   submit_tag "Complete sale", data: { disable_with: "Submitting..." }
+      #   # => <input name="commit" data-disable-with="Submitting..." type="submit" value="Complete sale" />
       #
       #   submit_tag nil, class: "form_submit"
-      #   # => <input class="form_submit" name="commit" type="submit" />
+      #   # => <input class="form_submit" data-disabled-with="Please wait..." name="commit" type="submit" />
       #
       #   submit_tag "Edit", class: "edit_button"
-      #   # => <input class="edit_button" name="commit" type="submit" value="Edit" />
+      #   # => <input class="edit_button" data-disabled-with="Please wait..." name="commit" type="submit" value="Edit" />
       #
       #   submit_tag "Save", data: { confirm: "Are you sure?" }
-      #   # => <input name='commit' type='submit' value='Save' data-confirm="Are you sure?" />
+      #   # => <input name='commit' type='submit' value='Save' data-disabled-with="Please wait..." data-confirm="Are you sure?" />
       #
       def submit_tag(value = "Save changes", options = {})
         options = options.stringify_keys
 
-        tag :input, { "type" => "submit", "name" => "commit", "value" => value }.update(options)
+        tag :input, { "data" => {"disable_with": "Please wait..."}, "type" => "submit", "name" => "commit", "value" => value }.deep_merge!(options)
       end
 
       # Creates a button element that defines a <tt>submit</tt> button,

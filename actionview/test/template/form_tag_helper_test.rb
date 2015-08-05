@@ -426,6 +426,13 @@ class FormTagHelperTest < ActionView::TestCase
     assert_dom_equal expected, actual
   end
 
+  def test_empty_submit_tag
+    assert_dom_equal(
+      %(<input data-disable-with="Please wait..." name='commit' type="submit" value="Save" />),
+      submit_tag("Save")
+    )
+  end
+
   def test_submit_tag
     assert_dom_equal(
       %(<input name='commit' data-disable-with="Saving..." onclick="alert(&#39;hello!&#39;)" type="submit" value="Save" />),
@@ -442,7 +449,7 @@ class FormTagHelperTest < ActionView::TestCase
 
   def test_submit_tag_with_confirmation
     assert_dom_equal(
-      %(<input name='commit' type='submit' value='Save' data-confirm="Are you sure?" />),
+      %(<input name='commit' type='submit' value='Save' data-confirm="Are you sure?" data-disable-with="Please wait..." type="submit" />),
       submit_tag("Save", :data => { :confirm => "Are you sure?" })
     )
   end

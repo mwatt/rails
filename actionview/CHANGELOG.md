@@ -1,3 +1,8 @@
+*   Make `disable_with` the default behavior for submit tags. Disables the
+    button on submit to prevent double submits.
+
+    *Justin Schiff*
+
 *   Add wildcard matching to explicit dependencies.
 
     Turns:

@@ -1,0 +1,6 @@
+
+//= link_tree ./images
+<% unless options[:skip_javascript] -%>
+//= link javascripts/application.js
+<% end -%>
+//= link stylesheets/application.css

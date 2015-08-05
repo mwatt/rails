@@ -20,7 +20,7 @@ gem 'turbolinks'
 gem 'arel', github: 'rails/arel', branch: 'master'
 gem 'mail', github: 'mikel/mail'
 
-gem 'sprockets', '~> 3.0.0.rc.1'
+gem 'sprockets', github: 'rails/sprockets', branch: 'master'
 gem 'sprockets-rails', github: 'rails/sprockets-rails', branch: 'master'
 
 # require: false so bcrypt is loaded only when has_secure_password is used.
@@ -31,6 +31,7 @@ gem 'bcrypt', '~> 3.1.10', require: false
 # This needs to be with require false to avoid
 # it being automatically loaded by sprockets
 gem 'uglifier', '>= 1.3.0', require: false
+gem 'sass', '>= 3.3', require: false
 
 group :doc do
   gem 'sdoc', '~> 0.4.0'

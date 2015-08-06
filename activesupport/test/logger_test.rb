@@ -114,6 +114,7 @@ class LoggerTest < ActiveSupport::TestCase
   end
 
   def test_buffer_multibyte
+    @logger.level = Logger::INFO
     @logger.info(UNICODE_STRING)
     @logger.info(BYTE_STRING)
     assert @output.string.include?(UNICODE_STRING)

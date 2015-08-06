@@ -7,14 +7,8 @@
 
     *Matthew Gerrior*
 
-*   Add `config.action_controller.always_permitted_parameters` to configure which
-    parameters are permitted globally. The default value of this configuration is
-    `['controller', 'action']`.
-
 *   Fix `ActionController::Parameters#fetch` overwriting `KeyError` returned by
     default block.
-
-*   Fix env['PATH_INFO'] missing leading slash when a rack app mounted at '/'.
 
     *Jonas Schuber Erlandsson*, *Roque Pinel*
 

@@ -117,7 +117,7 @@ module ActiveRecord
 
           rows.each do |row|
             # unescape string passed BYTEA field (OID == 17)
-            binaries.each do |index, _|
+            binaries.each_key do |index|
               row[index] = unescape_bytea(row[index])
             end
 

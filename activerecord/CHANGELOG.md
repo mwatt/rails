@@ -1,3 +1,7 @@
+*   Exit with non-zero status for failed database rake tasks.
+
+    *Jay Hayes*
+
 *   `ActiveRecord::Tasks::PostgreSQLDatabaseTasks` fail if shellout to
     postgresql commands (like `pg_dump`) is not successful.
 

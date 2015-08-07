@@ -266,7 +266,7 @@ module ActiveRecord
             end
 
             if part.nil? && allow_nil
-              mapping.each { |key, _| self[key] = nil }
+              mapping.each_key { |key| self[key] = nil }
               @aggregation_cache[name] = nil
             else
               mapping.each { |key, value| self[key] = part.send(value) }

@@ -26,6 +26,8 @@ module ActiveRecord
 
       def purge
         drop
+      rescue NoDatabaseError
+      ensure
         create
       end
 

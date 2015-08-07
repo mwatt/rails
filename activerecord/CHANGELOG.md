@@ -1,3 +1,7 @@
+*   Exit with non-zero status for failed database rake tasks.
+
+    *Jay Hayes*
+
 *   Add `ActiveRecord::Relation#in_batches` to work with records and relations
     in batches.
 

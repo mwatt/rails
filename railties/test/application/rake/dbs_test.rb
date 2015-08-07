@@ -52,15 +52,15 @@ module ApplicationTests
       def with_database_existing
         Dir.chdir(app_path) do
           set_database_url
-          `bundle exec rake db:create`
+          `bin/rake db:create`
           yield
-          `bundle exec rake db:drop`
+          `bin/rake db:drop`
         end
       end
 
       test 'db:create failure because database exists' do
         with_database_existing do
-          output = `bundle exec rake db:create 2>&1`
+          output = `bin/rake db:create 2>&1`
           assert_match /already exists/, output
           assert_equal 0, $?.exitstatus
         end
@@ -77,7 +77,7 @@ module ApplicationTests
 
       test 'db:create failure because bad permissions' do
         with_bad_permissions do
-          output = `bundle exec rake db:create 2>&1`
+          output = `bin/rake db:create 2>&1`
           assert_match /Couldn't create database/, output
           assert_equal 1, $?.exitstatus
         end
@@ -97,7 +97,7 @@ module ApplicationTests
       test 'db:drop failure because bad permissions' do
         with_database_existing do
           with_bad_permissions do
-            output = `bundle exec rake db:drop 2>&1`
+            output = `bin/rake db:drop 2>&1`
             assert_match /Couldn't drop/, output
             assert_equal 1, $?.exitstatus
           end

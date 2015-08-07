@@ -117,7 +117,7 @@ module ActiveRecord
 
           rows.each do |row|
             # unescape string passed BYTEA field (OID == 17)
-            binaries.each do |index, _|
+            binaries.each_key do |index|
               row[index] = unescape_bytea(row[index])
             end
 
@@ -125,7 +125,7 @@ module ActiveRecord
             # then strip them off. Indeed it would be prettier to do this in
             # PostgreSQLColumn.string_to_decimal but would break form input
             # fields that call value_before_type_cast.
-            monies.each do |index, _|
+            monies.each_key do |index|
               data = row[index]
               # Because money output is formatted according to the locale, there are two
               # cases to consider (note the decimal separators):

@@ -83,16 +83,13 @@ module ApplicationTests
         end
       end
 
-      # This test should work, but it does not. It seems (at least for sqlite)
-      # the NoDatabaseError is never raised.
-      # https://github.com/rails/rails/blob/f00554a8226b9529c38be1f3e61b6b1888682fb4/activerecord/lib/active_record/connection_adapters/sqlite3_adapter.rb#L34-L37
-      # test 'db:drop failure because database does not exist' do
-      #   Dir.chdir(app_path) do
-      #     output = `bundle exec rake db:drop 2>&1`
-      #     assert_match /does not exist/, output
-      #     assert_equal 0, $?.exitstatus
-      #   end
-      # end
+      test 'db:drop failure because database does not exist' do
+        Dir.chdir(app_path) do
+          output = `bin/rake db:drop 2>&1`
+          assert_match /does not exist/, output
+          assert_equal 0, $?.exitstatus
+        end
+      end
 
       test 'db:drop failure because bad permissions' do
         with_database_existing do

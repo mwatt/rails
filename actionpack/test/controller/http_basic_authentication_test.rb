@@ -33,7 +33,7 @@ class HttpBasicAuthenticationTest < ActionController::TestCase
     end
 
     def authenticate_with_request
-      if authenticate_with_http_basic { |username, password| username == 'pretty' && password == 'please' }
+      if authenticate_with_http_basic { |username, password| username == 'pretty' && password == 'please:!@#$%^&*()_+{}[];"\',./<>?`~' }
         @logged_in = true
       else
         request_http_basic_authentication("SuperSecret", "Authentication Failed\n")
@@ -118,7 +118,7 @@ class HttpBasicAuthenticationTest < ActionController::TestCase
   end
 
   test "authentication request with valid credential" do
-    @request.env['HTTP_AUTHORIZATION'] = encode_credentials('pretty', 'please')
+    @request.env['HTTP_AUTHORIZATION'] = encode_credentials('pretty', 'please:!@#$%^&*()_+{}[];"\',./<>?`~')
     get :display
 
     assert_response :success

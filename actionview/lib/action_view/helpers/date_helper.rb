@@ -100,6 +100,7 @@ module ActionView
 
         from_time = from_time.to_time if from_time.respond_to?(:to_time)
         to_time = to_time.to_time if to_time.respond_to?(:to_time)
+        from_time, to_time = Time.at(from_time), Time.at(to_time)
         from_time, to_time = to_time, from_time if from_time > to_time
         distance_in_minutes = ((to_time - from_time)/60.0).round
         distance_in_seconds = (to_time - from_time).round

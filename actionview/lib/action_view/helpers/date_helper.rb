@@ -90,17 +90,19 @@ module ActionView
       #   distance_of_time_in_words(from_time, from_time + 50.minutes, scope: 'datetime.distance_in_words.short') # => "an hour"
       #   distance_of_time_in_words(from_time, from_time + 3.hours, scope: 'datetime.distance_in_words.short')    # => "3 hours"
       def distance_of_time_in_words(from_time, to_time = 0, options = {})
-        if from_time.nil? || to_time.nil?
-          raise ArgumentError, "given time must not be nil"
+        unless from_time.respond_to?(:to_time)
+          raise ArgumentError, "first argument must be convertible to_time"
+        end
+
+        unless to_time.respond_to?(:to_time)
+          raise ArgumentError, "second argument must be convertible to_time"
         end
 
         options = {
           scope: :'datetime.distance_in_words'
         }.merge!(options)
 
-        from_time = from_time.to_time if from_time.respond_to?(:to_time)
-        to_time = to_time.to_time if to_time.respond_to?(:to_time)
-        from_time, to_time = Time.at(from_time), Time.at(to_time)
+        from_time, to_time = from_time.to_time, to_time.to_time
         from_time, to_time = to_time, from_time if from_time > to_time
         distance_in_minutes = ((to_time - from_time)/60.0).round
         distance_in_seconds = (to_time - from_time).round

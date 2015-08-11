@@ -90,7 +90,7 @@ module ActionView
       #   distance_of_time_in_words(from_time, from_time + 50.minutes, scope: 'datetime.distance_in_words.short') # => "an hour"
       #   distance_of_time_in_words(from_time, from_time + 3.hours, scope: 'datetime.distance_in_words.short')    # => "3 hours"
       def distance_of_time_in_words(from_time, to_time = 0, options = {})
-        if [from_time, to_time].any?(&:nil?)
+        if from_time.nil? || to_time.nil?
           raise ArgumentError, "given time must not be nil"
         end
 

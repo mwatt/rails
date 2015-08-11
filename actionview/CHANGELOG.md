@@ -1,3 +1,8 @@
+*   Update distance_of_time_in_words helper to display better error messages
+    for bad input.
+
+    *Jay Hayes*
+
 *   Make `disable_with` the default behavior for submit tags. Disables the
     button on submit to prevent double submits.
 

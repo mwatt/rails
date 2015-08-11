@@ -102,7 +102,8 @@ module ActionView
           scope: :'datetime.distance_in_words'
         }.merge!(options)
 
-        from_time, to_time = from_time.to_time, to_time.to_time
+        from_time = from_time.to_time
+        to_time = to_time.to_time
         from_time, to_time = to_time, from_time if from_time > to_time
         distance_in_minutes = ((to_time - from_time)/60.0).round
         distance_in_seconds = (to_time - from_time).round

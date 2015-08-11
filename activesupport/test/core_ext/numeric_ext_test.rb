@@ -71,6 +71,10 @@ class NumericExtTimeAndDateTimeTest < ActiveSupport::TestCase
     assert_equal Time.utc(2005,2,28,15,15,10), Time.utc(2004,2,29,15,15,10) + 1.year
     assert_equal DateTime.civil(2005,2,28,15,15,10), DateTime.civil(2004,2,29,15,15,10) + 1.year
   end
+
+  def test_conversion_to_time
+    assert_equal Time.at(42), 42.to_time
+  end
 end
 
 class NumericExtDateTest < ActiveSupport::TestCase

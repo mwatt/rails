@@ -1,3 +1,7 @@
+*   Add `Numeric#to_time` conversion protocol.
+
+    *Jay Hayes*
+
 *   Deprecate `:prefix` option of `number_to_human_size` with no replacement.
 
     *Jean Boussier*

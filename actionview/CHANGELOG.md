@@ -1,3 +1,8 @@
+*   Update distance_of_time_in_words helper to display better error messages
+    for bad input.
+
+    *Jay Hayes*
+
 *   Add wildcard matching to explicit dependencies.
 
     Turns:

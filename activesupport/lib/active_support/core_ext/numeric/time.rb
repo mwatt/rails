@@ -5,6 +5,11 @@ require 'active_support/core_ext/date/calculations'
 require 'active_support/core_ext/date/acts_like'
 
 class Numeric
+  # Convert number to local Time.
+  def to_time
+    Time.at(self)
+  end
+
   # Enables the use of time calculations and declarations, like 45.minutes + 2.hours + 4.years.
   #
   # These methods use Time#advance for precise date calculations when using from_now, ago, etc.

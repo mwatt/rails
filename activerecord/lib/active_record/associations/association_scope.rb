@@ -104,7 +104,7 @@ module ActiveRecord
         scope    = scope.where(table[key].eq(bind_val))
 
         if reflection.type
-          value    = owner.class.base_class.name
+          value    = owner.class.base_class.sti_name
           bind_val = bind scope, table.table_name, reflection.type, value, tracker
           scope    = scope.where(table[reflection.type].eq(bind_val))
         else

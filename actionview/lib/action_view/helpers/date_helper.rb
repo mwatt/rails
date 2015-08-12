@@ -137,11 +137,11 @@ module ActionView
             # 60 days up to 365 days
             when 86400...525600   then locale.t :x_months,       :count => (distance_in_minutes.to_f / 43200.0).round
             else
-              fyear = from_time.year
-              fyear += 1 if from_time.month >= 3
-              tyear = to_time.year
-              tyear -= 1 if to_time.month < 3
-              leap_years = (fyear > tyear) ? 0 : (fyear..tyear).count{|x| Date.leap?(x)}
+              from_year = from_time.year
+              from_year += 1 if from_time.month >= 3
+              to_year = to_time.year
+              to_year -= 1 if to_time.month < 3
+              leap_years = (from_year > to_year) ? 0 : (from_year..to_year).count{|x| Date.leap?(x)}
               minute_offset_for_leap_year = leap_years * 1440
               # Discount the leap year days when calculating year distance.
               # e.g. if there are 20 leap year days between 2 dates having the same day

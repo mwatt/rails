@@ -1,4 +1,4 @@
 
 //= link_tree ./images
-//= link ./javascripts/application
-//= link ./stylesheets/application
+//= link ./javascripts/application.js
+//= link ./stylesheets/application.css

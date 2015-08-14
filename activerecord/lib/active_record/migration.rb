@@ -47,6 +47,26 @@ module ActiveRecord
     end
   end
 
+  class NoEnvironmentInSchemaError < MigrationError #:nodoc:
+    def initialize
+      msg = "Environment data not found in the schema. To resolve this issue, run: \n\n\tbin/rake db:migrate"
+      if defined?(Rails.env)
+        super("#{msg} RAILS_ENV=#{::Rails.env}")
+      else
+        super(msg)
+      end
+    end
+  end
+
+  class ProductionRestrictedError < ActiveRecordError#:nodoc:
+    def initialize
+      msg = "You are attempting to run a destructive action against your 'production' database\n"
+      msg << "if you are sure you want to continue, run the same command with the environment variable\n"
+      msg << "RUN_AGAINST_PRODUCTION_DATABASE=1"
+      super(msg)
+    end
+  end
+
   # = Active Record Migrations
   #
   # Migrations can manage the evolution of a schema used by several physical
@@ -1013,8 +1033,13 @@ module ActiveRecord
         ActiveRecord::SchemaMigration.where(:version => version.to_s).delete_all
       else
         migrated << version
-        ActiveRecord::SchemaMigration.create!(:version => version.to_s)
+        ActiveRecord::SchemaMigration.create!(version: version.to_s, environment: ActiveRecord::ConnectionHandling::DEFAULT_ENV.call)
       end
+    end
+
+    def self.production?
+      raise NoEnvironmentInSchemaError unless SchemaMigration.environment_is_stored?
+      ActiveRecord::SchemaMigration.order(:created_at).last.environment == "production"
     end
 
     def up?

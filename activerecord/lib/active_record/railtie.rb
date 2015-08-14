@@ -36,6 +36,13 @@ module ActiveRecord
     config.eager_load_namespaces << ActiveRecord
 
     rake_tasks do
+      task :test do
+        if !ENV['RUN_AGAINST_PRODUCTION_DATABASE'] && ActiveRecord::Migrator.production?
+          raise ActiveRecord::ProductionRestrictedError
+        end
+        Rake::Task[:test].invoke
+      end
+
       namespace :db do
         task :load_config do
           ActiveRecord::Tasks::DatabaseTasks.database_configuration = Rails.application.config.database_configuration

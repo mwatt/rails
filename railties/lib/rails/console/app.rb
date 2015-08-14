@@ -1,9 +1,10 @@
 require 'active_support/all'
-require 'active_support/test_case'
 require 'action_controller'
 
-# work around the at_exit hook in test/unit, which kills IRB
-Test::Unit.run = true if Test::Unit.respond_to?(:run=)
+if defined? Test::Unit
+  require 'active_support/test_case'
+  Test::Unit.run = true if Test::Unit.respond_to?(:run=)
+end
 
 module Rails
   module ConsoleMethods

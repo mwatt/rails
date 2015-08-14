@@ -15,8 +15,8 @@ module Rails
 
         OptionParser.new do |opt|
           opt.banner = "Usage: rails dbconsole [environment] [options]"
-          opt.on("-p", "--include-password", "Automatically provide the password from database.yml") do |v|
-            options['include_password'] = true
+          opt.on("-p", "--provide-password", "Provide the password instead of reading from database.yml") do |v|
+            options['provide_password'] = true
           end
 
           opt.on("--mode [MODE]", ['html', 'list', 'line', 'column'],
@@ -69,9 +69,9 @@ module Rails
           'sslkey'    => '--ssl-key'
         }.map { |opt, arg| "#{arg}=#{config[opt]}" if config[opt] }.compact
 
-        if config['password'] && options['include_password']
+        if config['password'] && !options['provide_password']
           args << "--password=#{config['password']}"
-        elsif config['password'] && !config['password'].to_s.empty?
+        else
           args << "-p"
         end
 
@@ -83,7 +83,7 @@ module Rails
         ENV['PGUSER']     = config["username"] if config["username"]
         ENV['PGHOST']     = config["host"] if config["host"]
         ENV['PGPORT']     = config["port"].to_s if config["port"]
-        ENV['PGPASSWORD'] = config["password"].to_s if config["password"] && options['include_password']
+        ENV['PGPASSWORD'] = config["password"].to_s unless !config["password"] || options['provide_password']
         find_cmd_and_exec('psql', config["database"])
 
       when "sqlite3"
@@ -100,7 +100,7 @@ module Rails
 
         if config['username']
           logon = config['username']
-          logon << "/#{config['password']}" if config['password'] && options['include_password']
+          logon << "/#{config['password']}" unless !config['password'] || options['provide_password']
           logon << "@#{config['database']}" if config['database']
         end
 

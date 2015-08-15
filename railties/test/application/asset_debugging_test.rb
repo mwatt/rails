@@ -58,7 +58,6 @@ module ApplicationTests
 
       get '/posts?debug_assets=true'
       assert_match(/<script src="\/assets\/application(\.debug)?-([0-z]+)\.js"><\/script>/, last_response.body)
-      assert_no_match(/<script src="\/assets\/xmlhr(\.self)?-([0-z]+)\.js\?body=1"><\/script>/, last_response.body)
     end
   end
 end

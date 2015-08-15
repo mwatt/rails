@@ -48,6 +48,7 @@ module ConstantizeTestCases
 
     assert_equal ConstantizeTestCases, yield("ConstantizeTestCases")
     assert_equal ConstantizeTestCases, yield("::ConstantizeTestCases")
+    assert_equal ConstantizeTestCases, yield("Object::ConstantizeTestCases")
 
     assert_raises(NameError) { yield("UnknownClass") }
     assert_raises(NameError) { yield("UnknownClass::Ace") }
@@ -61,6 +62,8 @@ module ConstantizeTestCases
     assert_raises(NameError) { yield("") }
     assert_raises(NameError) { yield("::") }
     assert_raises(NameError) { yield("Ace::gas") }
+    assert_raises(NameError) { yield("Object::Object::UnknownClass") }
+    assert_raises(NameError) { yield("Object::UnknownClass") }
 
     assert_raises(NameError) do
       with_autoloading_fixtures do
@@ -86,6 +89,7 @@ module ConstantizeTestCases
     assert_equal Case::Dice, yield("Object::Case::Dice")
     assert_equal ConstantizeTestCases, yield("ConstantizeTestCases")
     assert_equal ConstantizeTestCases, yield("::ConstantizeTestCases")
+    assert_equal ConstantizeTestCases, yield("Object::ConstantizeTestCases")
     assert_nil yield("")
     assert_nil yield("::")
     assert_nil yield("UnknownClass")
@@ -100,6 +104,9 @@ module ConstantizeTestCases
     assert_nil yield("Ace::Gas::ConstantizeTestCases")
     assert_nil yield("#<Class:0x7b8b718b>::Nested_1")
     assert_nil yield("Ace::gas")
+    assert_nil yield("Object::UnknownClass")
+    assert_nil yield("Object::Object::UnknownClass")
+    assert_nil yield("UnknownClass::Object")
 
     assert_raises(NameError) do
       with_autoloading_fixtures do

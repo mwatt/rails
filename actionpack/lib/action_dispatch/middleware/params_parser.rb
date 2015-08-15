@@ -1,9 +1,14 @@
-require 'active_support/core_ext/hash/conversions'
 require 'action_dispatch/http/request'
-require 'active_support/core_ext/hash/indifferent_access'
 
 module ActionDispatch
+  # ActionDispatch::ParamsParser works for all the requests having any Content-Length
+  # (like POST). It takes raw data from the request and puts it through the parser
+  # that is picked based on Content-Type header.
+  #
+  # In case of any error while parsing data ParamsParser::ParseError is raised.
   class ParamsParser
+    # Raised when raw data from the request cannot be parsed by the parser
+    # defined for request's content mime type
     class ParseError < StandardError
       attr_reader :original_exception
 
@@ -13,6 +18,7 @@ module ActionDispatch
       end
     end
 
+    # The default parsers list includes just JSON parser
     DEFAULT_PARSERS = {
       Mime::JSON => lambda { |raw_post|
         data = ActiveSupport::JSON.decode(raw_post)
@@ -21,6 +27,10 @@ module ActionDispatch
       }
     }
 
+    # Create a new +ParamsParser+ middleware instance.
+    #
+    # The +parsers+ argument can take Hash of parsers where key is identifying
+    # content mime type, and value is a lambda that is going to process data
     def initialize(app, parsers = {})
       @app, @parsers = app, DEFAULT_PARSERS.merge(parsers)
     end

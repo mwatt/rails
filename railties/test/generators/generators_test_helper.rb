@@ -1,8 +1,10 @@
 require 'abstract_unit'
 require 'active_support/core_ext/module/remove_method'
 require 'active_support/testing/stream'
+require 'active_support/testing/method_call_assertions'
 require 'rails/generators'
 require 'rails/generators/test_case'
+require 'minitest/mock'
 
 module Rails
   class << self
@@ -25,6 +27,7 @@ require 'action_view'
 
 module GeneratorsTestHelper
   include ActiveSupport::Testing::Stream
+  include ActiveSupport::Testing::MethodCallAssertions
 
   def self.included(base)
     base.class_eval do

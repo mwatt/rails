@@ -1,3 +1,8 @@
+require_relative 'task_builder/core'
+require_relative 'task_builder/test'
+require_relative 'task_builder/assets'
+require_relative 'task_builder/tmp'
+
 module Rails
   # This is a class which takes in a rails command and initiates the appropriate
   # initiation sequence.
@@ -28,84 +33,43 @@ In addition to those, there are:
 All commands can be run with -h (or --help) for more information.
 EOT
 
-    COMMAND_WHITELIST = %w(plugin generate destroy console server dbconsole runner new version help test)
-
     def initialize(argv)
       @argv = argv
     end
 
+    def core_commands
+      Rails::Commands::TaskBuilder::Core.new(argv)
+    end
+
+    def test_commands
+      Rails::Commands::TaskBuilder::Test.new(argv)
+    end
+
+    def asset_commands
+      Rails::Commands::TaskBuilder::Assets.new(argv)
+    end
+
+    def tmp_commands
+      Rails::Commands::TaskBuilder::Tmp.new(argv)
+    end
+
+    # TODO: Add a delegator class for this. Ideally, run_command! will just
+    # call that, and this file will just deal with either running the command
+    # or displaying a contextual error message
     def run_command!(command)
-      command = parse_command(command)
-      if COMMAND_WHITELIST.include?(command)
-        send(command)
+      command_to_run = command.gsub(/:/, "_")
+
+      if Rails::Commands::TaskBuilder::Core::COMMAND_WHITELIST.include?(command)
+        core_commands.send(command_to_run)
+      elsif Rails::Commands::TaskBuilder::Test::COMMAND_WHITELIST.include?(command)
+        test_commands.send(command_to_run)
+      elsif Rails::Commands::TaskBuilder::Assets::COMMAND_WHITELIST.include?(command)
+        asset_commands.send(command_to_run)     
+      elsif Rails::Commands::TaskBuilder::Tmp::COMMAND_WHITELIST.include?(command)
+        tmp_commands.send(command_to_run)
       else
         write_error_message(command)
       end
-    end
-
-    def plugin
-      require_command!("plugin")
-    end
-
-    def generate
-      generate_or_destroy(:generate)
-    end
-
-    def destroy
-      generate_or_destroy(:destroy)
-    end
-
-    def console
-      require_command!("console")
-      options = Rails::Console.parse_arguments(argv)
-
-      # RAILS_ENV needs to be set before config/application is required
-      ENV['RAILS_ENV'] = options[:environment] if options[:environment]
-
-      # shift ARGV so IRB doesn't freak
-      shift_argv!
-
-      require_application_and_environment!
-      Rails::Console.start(Rails.application, options)
-    end
-
-    def server
-      set_application_directory!
-      require_command!("server")
-
-      Rails::Server.new.tap do |server|
-        # We need to require application after the server sets environment,
-        # otherwise the --environment option given to the server won't propagate.
-        require APP_PATH
-        Dir.chdir(Rails.application.root)
-        server.start
-      end
-    end
-
-    def test
-      require_command!("test")
-    end
-
-    def dbconsole
-      require_command!("dbconsole")
-      Rails::DBConsole.start
-    end
-
-    def runner
-      require_command!("runner")
-    end
-
-    def new
-      if %w(-h --help).include?(argv.first)
-        require_command!("application")
-      else
-        exit_with_initialization_warning!
-      end
-    end
-
-    def version
-      argv.unshift '--version'
-      require_command!("application")
     end
 
     def help
@@ -118,33 +82,6 @@ EOT
         puts "Can't initialize a new Rails application within the directory of another, please change to a non-Rails directory first.\n"
         puts "Type 'rails' for help."
         exit(1)
-      end
-
-      def shift_argv!
-        argv.shift if argv.first && argv.first[0] != '-'
-      end
-
-      def require_command!(command)
-        require "rails/commands/#{command}"
-      end
-
-      def generate_or_destroy(command)
-        require 'rails/generators'
-        require_application_and_environment!
-        Rails.application.load_generators
-        require_command!(command)
-      end
-
-      # Change to the application's path if there is no config.ru file in current directory.
-      # This allows us to run `rails server` from other directories, but still get
-      # the main config.ru and properly set the tmp directory.
-      def set_application_directory!
-        Dir.chdir(File.expand_path('../../', APP_PATH)) unless File.exist?(File.expand_path("config.ru"))
-      end
-
-      def require_application_and_environment!
-        require APP_PATH
-        Rails.application.require_environment!
       end
 
       def write_help_message
@@ -169,17 +106,6 @@ EOT
         end
         write_help_message
         exit(1)
-      end
-
-      def parse_command(command)
-        case command
-        when '--version', '-v'
-          'version'
-        when '--help', '-h'
-          'help'
-        else
-          command
-        end
       end
   end
 end

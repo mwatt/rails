@@ -64,6 +64,12 @@ class FormTagHelperTest < ActionView::TestCase
     assert_dom_equal expected, actual
   end
 
+  def test_multiple_check_box_tag
+    actual = check_box_tag "languages[]", "ruby"
+    expected = %(<input type="checkbox" name="languages[]" id="languages_ruby" value="ruby" />)
+    assert_dom_equal expected, actual
+  end
+
   def test_check_box_tag_id_sanitized
     label_elem = root_elem(check_box_tag("project[2][admin]"))
     assert_match VALID_HTML_ID, label_elem['id']

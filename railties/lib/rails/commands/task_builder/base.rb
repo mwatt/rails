@@ -10,7 +10,8 @@ module Rails
 
         attr_reader :argv
 
-        COMMAND_WHITELIST = %w(plugin generate destroy console server dbconsole runner new version help test)
+        COMMAND_WHITELIST = %w(plugin generate destroy console server dbconsole
+          runner new version help)
 
         def initialize(argv)
           @argv = argv

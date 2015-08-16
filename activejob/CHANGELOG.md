@@ -1,3 +1,8 @@
+*   Implement a simple `AsyncAdapter` that queues jobs to a `concurrent-ruby`
+    thread pool.
+
+    *Jerry D'Antonio*
+
 *   Implement `provider_job_id` for `queue_classic` adapter. This requires the
     latest, currently unreleased, version of queue_classic.
 

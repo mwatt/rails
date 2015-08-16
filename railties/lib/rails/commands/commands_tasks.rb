@@ -1,4 +1,5 @@
 require_relative 'task_builder/base'
+require_relative 'task_builder/test'
 
 module Rails
   # This is a class which takes in a rails command and initiates the appropriate
@@ -38,9 +39,20 @@ EOT
       Rails::Commands::TaskBuilder::Base.new(argv)
     end
 
+    def test_commands
+      Rails::Commands::TaskBuilder::Test.new(argv)
+    end
+
+    # TODO: Add a delegator class for this. Ideally, run_command! will just
+    # call that, and this file will just deal with either running the command
+    # or displaying a contextual error message
     def run_command!(command)
+      command_to_run = command.gsub(/:/, "_")
+
       if Rails::Commands::TaskBuilder::Base::COMMAND_WHITELIST.include?(command)
-        base_commands.send(command)
+        base_commands.send(command_to_run)
+      elsif Rails::Commands::TaskBuilder::Test::COMMAND_WHITELIST.include?(command)
+        test_commands.send(command_to_run)
       else
         write_error_message(command)
       end

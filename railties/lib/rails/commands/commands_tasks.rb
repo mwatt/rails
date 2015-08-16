@@ -58,17 +58,6 @@ EOT
       end
     end
 
-    def parse_command(command)
-      case command
-      when '--version', '-v'
-        'version'
-      when '--help', '-h'
-        'help'
-      else
-        command
-      end
-    end
-
     def help
       write_help_message
     end

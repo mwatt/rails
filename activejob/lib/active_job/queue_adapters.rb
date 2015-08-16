@@ -26,6 +26,7 @@ module ActiveJob
   #   | Sidekiq           | Yes   | Yes    | Yes        | Queue      | No      | Job     |
   #   | Sneakers          | Yes   | Yes    | No         | Queue      | Queue   | No      |
   #   | Sucker Punch      | Yes   | Yes    | No         | No         | No      | No      |
+  #   | Active Job Async  | Yes   | Yes    | No         | No         | No      | No      |
   #   | Active Job Inline | No    | Yes    | N/A        | N/A        | N/A     | N/A     |
   #
   # ==== Async
@@ -99,6 +100,7 @@ module ActiveJob
   module QueueAdapters
     extend ActiveSupport::Autoload
 
+    autoload :AsyncAdapter
     autoload :InlineAdapter
     autoload :BackburnerAdapter
     autoload :DelayedJobAdapter

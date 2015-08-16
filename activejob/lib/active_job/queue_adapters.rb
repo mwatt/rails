@@ -12,6 +12,8 @@ module ActiveJob
   # * {Sidekiq}[http://sidekiq.org]
   # * {Sneakers}[https://github.com/jondot/sneakers]
   # * {Sucker Punch}[https://github.com/brandonhilkert/sucker_punch]
+  # * {Active Job Async Job}[http://api.rubyonrails.org/classes/ActiveJob/AsyncJob.html]
+  # * {Active Job Inline}[http://api.rubyonrails.org/classes/ActiveJob/QueueAdapters/InlineAdapter.html]
   #
   # === Backends Features
   #
@@ -26,6 +28,7 @@ module ActiveJob
   #   | Sidekiq           | Yes   | Yes    | Yes        | Queue      | No      | Job     |
   #   | Sneakers          | Yes   | Yes    | No         | Queue      | Queue   | No      |
   #   | Sucker Punch      | Yes   | Yes    | No         | No         | No      | No      |
+  #   | Active Job Async  | Yes   | Yes    | Yes        | No         | No      | No      |
   #   | Active Job Inline | No    | Yes    | N/A        | N/A        | N/A     | N/A     |
   #
   # ==== Async
@@ -96,9 +99,36 @@ module ActiveJob
   #
   # N/A: The adapter does not run in a separate process, and therefore doesn't
   # support retries.
+  #
+  # === Async and Inline Queue Adapters
+  #
+  # Active Job has two built-in queue adapters intended for development and
+  # testing: +:async+ and +:inline+.
+  #
+  # ==== Async Job Queue Adapter
+  #
+  # When enqueueing jobs with Async Job each job will be executed
+  # asynchronously on a +concurrent-ruby+ thread pool. All job data
+  # is retained in memory. Because job data is not saved to a persistent
+  # datastore there is no additional infrastructure needed and most jobs
+  # will process very quickly. The lack of persistence, however, means
+  # that all unprocessed jobs will be lost on application restart. This
+  # makes in-memory queue adapters unsuitable for most production
+  # environments but excellent for development and testing. See the
+  # {api documentation}[http://api.rubyonrails.org/classes/ActiveJob/QueueAdapters/AsyncAdapter.html]
+  # for more information.
+  #
+  # ==== Inline Queue Adapter
+  #
+  # When enqueueing jobs with the Inline adapter the job will be executed
+  # immediately on the calling thread. Job scheduling is not supported. This
+  # adapter is intended for use in tests. For more information see the
+  # {api documentation}[http://api.rubyonrails.org/classes/ActiveJob/QueueAdapters/AsyncAdapter.html]
+  # for more information.
   module QueueAdapters
     extend ActiveSupport::Autoload
 
+    autoload :AsyncAdapter
     autoload :InlineAdapter
     autoload :BackburnerAdapter
     autoload :DelayedJobAdapter

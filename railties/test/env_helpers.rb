@@ -21,6 +21,13 @@ module EnvHelpers
     end
   end
 
+  def with_port(port)
+    Rails.instance_variable_set :@_env, nil
+    switch_env 'PORT', env do
+      yield
+    end
+  end
+
   def switch_env(key, value)
     old, ENV[key] = ENV[key], value
     yield

@@ -12,6 +12,8 @@ module Ace
   class Gas
     include Base
   end
+  class Object
+  end
 end
 
 class Object
@@ -37,6 +39,7 @@ module ConstantizeTestCases
     assert_equal Ace::Gas::Case, yield("Ace::Gas::Case")
     assert_equal Ace::Gas::Case::Dice, yield("Ace::Gas::Case::Dice")
     assert_equal Ace::Base::Case::Dice, yield("Ace::Gas::Case::Dice")
+    assert_equal Ace::Object, yield("Ace::Object")
 
     assert_equal Case::Dice, yield("Case::Dice")
     assert_equal AddtlGlobalConstants::Case::Dice, yield("Case::Dice")
@@ -85,6 +88,7 @@ module ConstantizeTestCases
     assert_equal Ace::Base::Fase::Dice, yield("Ace::Base::Fase::Dice")
     assert_equal Ace::Gas::Case, yield("Ace::Gas::Case")
     assert_equal Ace::Gas::Case::Dice, yield("Ace::Gas::Case::Dice")
+    assert_equal Ace::Object, yield("Ace::Object")
     assert_equal Case::Dice, yield("Case::Dice")
     assert_equal Case::Dice, yield("Object::Case::Dice")
     assert_equal ConstantizeTestCases, yield("ConstantizeTestCases")

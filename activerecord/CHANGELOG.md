@@ -1,3 +1,7 @@
+*   Allow tokens generated with `ActiveRecord::SecureToken` to be validated.
+
+    *Kyle Marek-Spartz*
+
 *   Descriptive error message when fixtures contain a missing column.
 
     Closes #21201.

@@ -355,6 +355,10 @@ module ActiveRecord
         postgresql_version >= 90300
       end
 
+      def supports_pgcrypto?
+        postgresql_version >= 90400
+      end
+
       def enable_extension(name)
         exec_query("CREATE EXTENSION IF NOT EXISTS \"#{name}\"").tap {
           reload_type_map

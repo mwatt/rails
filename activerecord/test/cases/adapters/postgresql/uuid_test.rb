@@ -20,6 +20,7 @@ class PostgresqlUUIDTest < ActiveRecord::PostgreSQLTestCase
   end
 
   setup do
+    enable_extension!('uuid-ossp', connection)
     connection.create_table "uuid_data_type" do |t|
       t.uuid 'guid'
     end
@@ -27,6 +28,7 @@ class PostgresqlUUIDTest < ActiveRecord::PostgreSQLTestCase
 
   teardown do
     drop_table "uuid_data_type"
+    enable_extension!('uuid-ossp', connection)
   end
 
   def test_change_column_default
@@ -164,11 +166,17 @@ class PostgresqlUUIDGenerationTest < ActiveRecord::PostgreSQLTestCase
       t.string 'name'
       t.uuid 'other_uuid_2', default: 'my_uuid_generator()'
     end
+
+    # Create such a table with custom function as default value generator
+    connection.create_table('pg_uuids_3', id: :uuid) do |t|
+      t.string 'name'
+    end
   end
 
   teardown do
     drop_table "pg_uuids"
     drop_table 'pg_uuids_2'
+    drop_table 'pg_uuids_3'
     connection.execute 'DROP FUNCTION IF EXISTS my_uuid_generator();'
     disable_extension!('uuid-ossp', connection)
   end
@@ -206,6 +214,15 @@ class PostgresqlUUIDGenerationTest < ActiveRecord::PostgreSQLTestCase
       schema = dump_table_schema "pg_uuids_2"
       assert_match(/\bcreate_table "pg_uuids_2", id: :uuid, default: "my_uuid_generator\(\)"/, schema)
       assert_match(/t\.uuid   "other_uuid_2", default: "my_uuid_generator\(\)"/, schema)
+    end
+
+    def test_schema_dumper_for_uuid_primary_key_default
+      schema = dump_table_schema "pg_uuids_3"
+      if connection.supports_pgcrypto?
+        assert_match(/\bcreate_table "pg_uuids_3", id: :uuid, default: "gen_random_uuid\(\)"/, schema)
+      else
+        assert_match(/\bcreate_table "pg_uuids_3", id: :uuid, default: "uuid_generate_v4\(\)"/, schema)
+      end
     end
   end
 end

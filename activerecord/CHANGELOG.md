@@ -1,3 +1,8 @@
+*   Use gen_random_uuid() function from pgcrypto extension in default of uuid
+    primary key (only PostgreSQL >= 9.4).
+
+    *Yuji Yaginuma*
+
 *   Uniqueness validator raises descriptive error when running on a persisted
     record without primary key.
 

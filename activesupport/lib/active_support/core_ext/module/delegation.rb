@@ -171,7 +171,7 @@ class Module
     line = line.to_i
 
     to = to.to_s
-    to = "self.#{to}" if RUBY_RESERVED_WORDS.include?(to)
+    to = "self.#{to}" if RUBY_RESERVED_WORDS.include?(to) || %w(arg args block).freeze.include?(to)
 
     methods.each do |method|
       # Attribute writer methods only accept one argument. Makes sure []=

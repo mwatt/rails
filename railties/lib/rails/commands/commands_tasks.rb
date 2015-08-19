@@ -1,5 +1,7 @@
 require_relative 'task_builder/base'
 require_relative 'task_builder/test'
+require_relative 'task_builder/assets'
+require_relative 'task_builder/tmp'
 
 module Rails
   # This is a class which takes in a rails command and initiates the appropriate
@@ -43,6 +45,14 @@ EOT
       Rails::Commands::TaskBuilder::Test.new(argv)
     end
 
+    def asset_commands
+      Rails::Commands::TaskBuilder::Assets.new(argv)
+    end
+
+    def tmp_commands
+      Rails::Commands::TaskBuilder::Tmp.new(argv)
+    end
+
     # TODO: Add a delegator class for this. Ideally, run_command! will just
     # call that, and this file will just deal with either running the command
     # or displaying a contextual error message
@@ -53,6 +63,10 @@ EOT
         base_commands.send(command_to_run)
       elsif Rails::Commands::TaskBuilder::Test::COMMAND_WHITELIST.include?(command)
         test_commands.send(command_to_run)
+      elsif Rails::Commands::TaskBuilder::Assets::COMMAND_WHITELIST.include?(command)
+        asset_commands.send(command_to_run)     
+      elsif Rails::Commands::TaskBuilder::Tmp::COMMAND_WHITELIST.include?(command)
+        tmp_commands.send(command_to_run)
       else
         write_error_message(command)
       end

@@ -5,7 +5,7 @@ module Rails
     module TaskBuilder
       # This is a wrapper around all base Rails tasks, including but not
       # limited to: generate, console, server, test, dbconsole, new, etc.
-      class Base
+      class Core
         include Common
 
         attr_reader :argv

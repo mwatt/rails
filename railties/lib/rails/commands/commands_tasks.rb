@@ -1,4 +1,4 @@
-require_relative 'task_builder/base'
+require_relative 'task_builder/core'
 require_relative 'task_builder/test'
 require_relative 'task_builder/assets'
 require_relative 'task_builder/tmp'
@@ -37,8 +37,8 @@ EOT
       @argv = argv
     end
 
-    def base_commands
-      Rails::Commands::TaskBuilder::Base.new(argv)
+    def core_commands
+      Rails::Commands::TaskBuilder::Core.new(argv)
     end
 
     def test_commands
@@ -59,8 +59,8 @@ EOT
     def run_command!(command)
       command_to_run = command.gsub(/:/, "_")
 
-      if Rails::Commands::TaskBuilder::Base::COMMAND_WHITELIST.include?(command)
-        base_commands.send(command_to_run)
+      if Rails::Commands::TaskBuilder::Core::COMMAND_WHITELIST.include?(command)
+        core_commands.send(command_to_run)
       elsif Rails::Commands::TaskBuilder::Test::COMMAND_WHITELIST.include?(command)
         test_commands.send(command_to_run)
       elsif Rails::Commands::TaskBuilder::Assets::COMMAND_WHITELIST.include?(command)

@@ -3,6 +3,7 @@ require 'rails/commands/core'
 require 'rails/commands/dev_cache'
 require 'rails/commands/test'
 require 'rails/commands/tmp'
+require 'byebug'
 
 module Rails
   module Commands
@@ -10,25 +11,21 @@ module Rails
     class Warden
       attr_accessor :command, :argv
 
+      COMMAND_MAP = {
+        core: Rails::Commands::Core::COMMAND_WHITELIST,
+        test: Rails::Commands::Test::COMMAND_WHITELIST,
+        assets: Rails::Commands::Assets::COMMAND_WHITELIST,
+        tmp: Rails::Commands::Tmp::COMMAND_WHITELIST,
+        dev_cache: Rails::Commands::Tmp::COMMAND_WHITELIST
+      }
+
       def initialize(command, argv)
         @command = command
         @argv = argv
       end
 
       def run!
-        method_name = command.gsub(/:/, "_")
-
-        if Rails::Commands::Core::COMMAND_WHITELIST.include?(command)
-          core_commands.send(method_name)
-        elsif Rails::Commands::Test::COMMAND_WHITELIST.include?(command)
-          test_commands.send(method_name)
-        elsif Rails::Commands::Assets::COMMAND_WHITELIST.include?(command)
-          asset_commands.send(method_name)     
-        elsif Rails::Commands::Tmp::COMMAND_WHITELIST.include?(command)
-          tmp_commands.send(method_name)
-        elsif Rails::Commands::DevCache::COMMAND_WHITELIST.include?(command)
-          dev_cache_commands.send(method_name)
-        else
+        unless command_class.send(method_name)
           return false
         end
 
@@ -37,7 +34,18 @@ module Rails
 
       protected
 
-        def asset_commands
+        def method_name
+          command.gsub(/:/, "_")
+        end
+
+        def command_class
+          key = COMMAND_MAP.select { |key, hash| hash.include?(@command) }
+            .keys.first
+
+          send("#{key.to_s}_commands")
+        end
+
+        def assets_commands
           Rails::Commands::Assets.new(argv)
         end
 

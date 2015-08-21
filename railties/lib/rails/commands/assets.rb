@@ -1,4 +1,4 @@
-require 'rails/commands/task_helpers'
+require 'rails/commands/command'
 require 'rake'
 
 module Rails
@@ -8,18 +8,7 @@ module Rails
     #   rails assets:clobber
     #   rails assets:environment
     #   rails assets:precompile
-    class Assets
-      include TaskHelpers
-
-      attr_reader :argv
-
-      COMMAND_WHITELIST = %w(assets:clean assets:clobber assets:environment 
-        assets:precompile)
-
-      def initialize(argv)
-        @argv = argv
-      end
-
+    class Assets < Command
       def assets_clean
         system("bin/rake assets:clean")
       end

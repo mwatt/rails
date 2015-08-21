@@ -1,4 +1,9 @@
-require 'rails/commands/warden'
+require 'rails/commands/command'
+require 'rails/commands/assets'
+require 'rails/commands/core'
+require 'rails/commands/dev_cache'
+require 'rails/commands/test'
+require 'rails/commands/tmp'
 
 module Rails
   # This is a class which takes in a rails command and initiates the appropriate
@@ -32,11 +37,11 @@ EOT
 
     def initialize(argv)
       @argv = argv
+      @command = Rails::Commands::Command.new(argv)
     end
 
     def run_command!(command)
-      warden = Rails::Commands::Warden.new(command, argv)      
-      write_error_message(command) unless warden.run!
+      write_error_message(command) unless @command.run(command)
     end
 
     def help

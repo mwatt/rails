@@ -1,21 +1,10 @@
-require 'rails/commands/task_helpers'
+require 'rails/commands/command'
 
 module Rails
   module Commands
     # This is a wrapper around all base Rails tasks, including but not
     # limited to: generate, console, server, test, dbconsole, new, etc.
-    class Core
-      include TaskHelpers
-
-      attr_reader :argv
-
-      COMMAND_WHITELIST = %w(plugin generate destroy console server dbconsole
-        runner new version help)
-
-      def initialize(argv)
-        @argv = argv
-      end
-
+    class Core < Command
       def require_command!(command)
         require "rails/commands/#{command}"
       end
@@ -66,10 +55,6 @@ module Rails
         end
       end
 
-      def test
-        require_command!("test")
-      end
-
       def dbconsole
         require_command!("dbconsole")
         Rails::DBConsole.start
@@ -93,6 +78,10 @@ module Rails
       end
 
       private
+
+        def shift_argv!
+          argv.shift if argv.first && argv.first[0] != '-'
+        end
 
         # Change to the application's path if there is no config.ru file in current directory.
         # This allows us to run `rails server` from other directories, but still get

@@ -56,6 +56,13 @@ class AppGeneratorTest < Rails::Generators::TestCase
   # brings setup, teardown, and some tests
   include SharedGeneratorTests
 
+  def assert_generates_with_bundler(options = {})
+    generator([destination_root], options)
+    assert_called_with(generator, :bundle_command, [ ['install'], ["exec spring binstub --all"] ]) do
+      quietly { generator.invoke_all }
+    end
+  end
+
   def default_files
     ::DEFAULT_APP_FILES
   end

@@ -1,7 +1,6 @@
 require 'generators/generators_test_helper'
 require 'rails/generators/rails/plugin/plugin_generator'
 require 'generators/shared_generator_tests'
-require 'mocha/setup' # FIXME: stop using mocha
 
 DEFAULT_PLUGIN_FILES = %w(
   .gitignore
@@ -26,6 +25,13 @@ class PluginGeneratorTest < Rails::Generators::TestCase
 
   # brings setup, teardown, and some tests
   include SharedGeneratorTests
+
+  def assert_generates_with_bundler(options = {})
+    generator([destination_root], options)
+    assert_called_with(generator, :bundle_command, ['install']) do
+      quietly { generator.invoke_all }
+    end
+  end
 
   def test_invalid_plugin_name_raises_an_error
     content = capture(:stderr){ run_generator [File.join(destination_root, "my_plugin-31fr-extension")] }

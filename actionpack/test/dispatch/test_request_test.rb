@@ -54,9 +54,7 @@ class TestRequestTest < ActiveSupport::TestCase
   end
 
   test "does not complain when Rails.application is nil" do
-    Rails.stubs(:application).returns(nil)
     req = ActionDispatch::TestRequest.create({})
-
     assert_equal false, req.env.empty?
   end
 

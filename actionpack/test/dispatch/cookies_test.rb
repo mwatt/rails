@@ -3,6 +3,7 @@ require 'openssl'
 require 'active_support/key_generator'
 require 'active_support/message_verifier'
 
+
 class CookiesTest < ActionController::TestCase
   class CustomSerializer
     def self.load(value)
@@ -321,10 +322,11 @@ class CookiesTest < ActionController::TestCase
   end
 
   def test_setting_cookie_with_secure_when_always_write_cookie_is_true
-    ActionDispatch::Cookies::CookieJar.any_instance.stubs(:always_write_cookie).returns(true)
+    @request.cookie_jar.always_write_cookie = true
     get :authenticate_with_secure
     assert_cookie_header "user_name=david; path=/; secure"
     assert_equal({"user_name" => "david"}, @response.cookies)
+    @request.cookie_jar.always_write_cookie = false
   end
 
   def test_not_setting_cookie_with_secure

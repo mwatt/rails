@@ -1,3 +1,10 @@
+*   Support dropping indexes concurrently in Postgres.
+
+    See http://www.postgresql.org/docs/9.4/static/sql-dropindex.html for more
+    details.
+
+    *Grey Baker*
+
 *   Uniqueness validator raises descriptive error when running on a persisted
     record without primary key.
 

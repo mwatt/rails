@@ -68,17 +68,21 @@ module Rails
         reloader = routes_reloader
         reloader.execute_if_updated
         self.reloaders << reloader
-        ActionDispatch::Reloader.to_prepare do
-          # We configure #execute rather than #execute_if_updated because if
-          # autoloaded constants are cleared we need to reload routes also in
-          # case any was used there, as in
-          #
-          #   mount MailPreview => 'mail_view'
-          #
-          # This means routes are also reloaded if i18n is updated, which
-          # might not be necessary, but in order to be more precise we need
-          # some sort of reloaders dependency support, to be added.
-          reloader.execute
+
+        # Since the following is expensive with large route sets (which many
+        # applications have) we're hiding it behind a config flag.
+        if config.reload_routes_aggressively
+          ActionDispatch::Reloader.to_prepare do
+            # If autoloaded constants are cleared we need to reload routes also
+            # in case any was used there, as in
+            #
+            #   mount MailPreview => 'mail_view'
+            #
+            # This means routes are also reloaded if i18n is updated, which
+            # might not be necessary, but in order to be more precise we need
+            # some sort of reloaders dependency support to be added.
+            reloader.execute
+          end
         end
       end
 
@@ -96,15 +100,18 @@ module Rails
           reloader = config.file_watcher.new(*watchable_args, &callback)
           self.reloaders << reloader
 
-          # Prepend this callback to have autoloaded constants cleared before
-          # any other possible reloading, in case they need to autoload fresh
-          # constants.
-          ActionDispatch::Reloader.to_prepare(prepend: true) do
-            # In addition to changes detected by the file watcher, if routes
-            # or i18n have been updated we also need to clear constants,
-            # that's why we run #execute rather than #execute_if_updated, this
-            # callback has to clear autoloaded constants after any update.
-            reloader.execute
+          # See above about this being expensive.
+          if config.reload_routes_aggressively
+            # Prepend this callback to have autoloaded constants cleared before
+            # any other possible reloading, in case they need to autoload fresh
+            # constants.
+            ActionDispatch::Reloader.to_prepare(prepend: true) do
+              # In addition to changes detected by the file watcher, if routes
+              # or i18n have been updated we also need to clear constants,
+              # that's why we run #execute rather than #execute_if_updated, this
+              # callback has to clear autoloaded constants after any update.
+              reloader.execute
+            end
           end
         else
           ActionDispatch::Reloader.to_cleanup(&callback)

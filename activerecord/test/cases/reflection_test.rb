@@ -389,12 +389,12 @@ class ReflectionTest < ActiveRecord::TestCase
   end
 
   def test_join_table
-    category = Struct.new(:table_name, :pluralize_table_names).new('categories', true)
-    product = Struct.new(:table_name, :pluralize_table_names).new('products', true)
+    category = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('categories', true, 'categories')
+    product = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('products', true, 'products')
 
     reflection = ActiveRecord::Reflection.create(:has_many, :categories, nil, {}, product)
     reflection.stubs(:klass).returns(category)
-    assert_equal 'categories_products', reflection.join_table
+     assert_equal 'categories_products', reflection.join_table
 
     reflection = ActiveRecord::Reflection.create(:has_many, :products, nil, {}, category)
     reflection.stubs(:klass).returns(product)
@@ -402,8 +402,8 @@ class ReflectionTest < ActiveRecord::TestCase
   end
 
   def test_join_table_with_common_prefix
-    category = Struct.new(:table_name, :pluralize_table_names).new('catalog_categories', true)
-    product = Struct.new(:table_name, :pluralize_table_names).new('catalog_products', true)
+    category = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('catalog_categories', true, 'catalog_categories')
+    product = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('catalog_products', true, 'catalog_products')
 
     reflection = ActiveRecord::Reflection.create(:has_many, :categories, nil, {}, product)
     reflection.stubs(:klass).returns(category)
@@ -415,8 +415,8 @@ class ReflectionTest < ActiveRecord::TestCase
   end
 
   def test_join_table_with_different_prefix
-    category = Struct.new(:table_name, :pluralize_table_names).new('catalog_categories', true)
-    page = Struct.new(:table_name, :pluralize_table_names).new('content_pages', true)
+    category = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('catalog_categories', true, 'catalog_categories')
+    page = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('content_pages', true, 'content_pages')
 
     reflection = ActiveRecord::Reflection.create(:has_many, :categories, nil, {}, page)
     reflection.stubs(:klass).returns(category)
@@ -427,9 +427,60 @@ class ReflectionTest < ActiveRecord::TestCase
     assert_equal 'catalog_categories_content_pages', reflection.join_table
   end
 
+  def test_join_table_with_table_prefix
+    ActiveRecord::Base.table_name_prefix = 'mystore_'
+
+    category = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('categories', true, 'categories')
+    product = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('products', true, 'products')
+
+    reflection = ActiveRecord::Reflection.create(:has_many, :categories, nil, {}, product)
+    reflection.stubs(:klass).returns(category)
+    assert_equal 'mystore_categories_products', reflection.join_table
+
+    reflection = ActiveRecord::Reflection.create(:has_many, :products, nil, {}, category)
+    reflection.stubs(:klass).returns(product)
+    assert_equal 'mystore_categories_products', reflection.join_table
+  ensure
+    ActiveRecord::Base.table_name_prefix = ''
+  end
+
+  def test_join_table_with_table_suffix
+    ActiveRecord::Base.table_name_suffix = '_test'
+
+    category = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('categories', true, 'categories')
+    product = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('products', true, 'products')
+
+    reflection = ActiveRecord::Reflection.create(:has_many, :categories, nil, {}, product)
+    reflection.stubs(:klass).returns(category)
+    assert_equal 'categories_products_test', reflection.join_table
+
+    reflection = ActiveRecord::Reflection.create(:has_many, :products, nil, {}, category)
+    reflection.stubs(:klass).returns(product)
+    assert_equal 'categories_products_test', reflection.join_table
+  ensure
+    ActiveRecord::Base.table_name_suffix = ''
+  end
+
+  def test_join_table_with_common_prefix_and_table_prefix
+    ActiveRecord::Base.table_name_prefix = 'mystore_'
+
+    category = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('catalog_categories', true, 'catalog_categories')
+    product = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('catalog_products', true, 'catalog_products')
+
+    reflection = ActiveRecord::Reflection.create(:has_many, :categories, nil, {}, product)
+    reflection.stubs(:klass).returns(category)
+    assert_equal 'mystore_catalog_categories_products', reflection.join_table
+
+    reflection = ActiveRecord::Reflection.create(:has_many, :products, nil, {}, category)
+    reflection.stubs(:klass).returns(product)
+    assert_equal 'mystore_catalog_categories_products', reflection.join_table
+  ensure
+    ActiveRecord::Base.table_name_prefix = ''
+  end
+
   def test_join_table_can_be_overridden
-    category = Struct.new(:table_name, :pluralize_table_names).new('categories', true)
-    product = Struct.new(:table_name, :pluralize_table_names).new('products', true)
+    category = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('categories', true, 'categories')
+    product = Struct.new(:table_name, :pluralize_table_names, :undecorated_table_name).new('products', true, 'products')
 
     reflection = ActiveRecord::Reflection.create(:has_many, :categories, nil, { :join_table => 'product_categories' }, product)
     reflection.stubs(:klass).returns(category)

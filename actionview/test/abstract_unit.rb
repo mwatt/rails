@@ -31,6 +31,7 @@ module Rails
     def env
       @_env ||= ActiveSupport::StringInquirer.new(ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "test")
     end
+    def root; end;
   end
 end
 
@@ -281,7 +282,6 @@ def jruby_skip(message = '')
   skip message if defined?(JRUBY_VERSION)
 end
 
-require 'mocha/setup' # FIXME: stop using mocha
 class ActiveSupport::TestCase
   include ActiveSupport::Testing::MethodCallAssertions
 end

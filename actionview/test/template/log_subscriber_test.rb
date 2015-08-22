@@ -12,7 +12,6 @@ class AVLogSubscriberTest < ActiveSupport::TestCase
     lookup_context = ActionView::LookupContext.new(view_paths, {}, ["test"])
     renderer = ActionView::Renderer.new(lookup_context)
     @view = ActionView::Base.new(renderer, {})
-    Rails.stubs(:root).returns(File.expand_path(FIXTURE_LOAD_PATH))
     ActionView::LogSubscriber.attach_to :action_view
   end
 
@@ -26,66 +25,82 @@ class AVLogSubscriberTest < ActiveSupport::TestCase
   end
 
   def test_render_file_template
-    @view.render(:file => "test/hello_world")
-    wait
+    Rails.stub(:root, File.expand_path(FIXTURE_LOAD_PATH)) do
+      @view.render(:file => "test/hello_world")
+      wait
 
-    assert_equal 1, @logger.logged(:info).size
-    assert_match(/Rendered test\/hello_world\.erb/, @logger.logged(:info).last)
+      assert_equal 1, @logger.logged(:info).size
+      assert_match(/Rendered test\/hello_world\.erb/, @logger.logged(:info).last)
+    end
   end
 
   def test_render_text_template
-    @view.render(:text => "TEXT")
-    wait
+    Rails.stub(:root, File.expand_path(FIXTURE_LOAD_PATH)) do
+      @view.render(:text => "TEXT")
+      wait
 
-    assert_equal 1, @logger.logged(:info).size
-    assert_match(/Rendered text template/, @logger.logged(:info).last)
+      assert_equal 1, @logger.logged(:info).size
+      assert_match(/Rendered text template/, @logger.logged(:info).last)
+    end
   end
 
   def test_render_inline_template
-    @view.render(:inline => "<%= 'TEXT' %>")
-    wait
+    Rails.stub(:root, File.expand_path(FIXTURE_LOAD_PATH)) do
+      @view.render(:inline => "<%= 'TEXT' %>")
+      wait
 
-    assert_equal 1, @logger.logged(:info).size
-    assert_match(/Rendered inline template/, @logger.logged(:info).last)
+      assert_equal 1, @logger.logged(:info).size
+      assert_match(/Rendered inline template/, @logger.logged(:info).last)
+    end
   end
 
   def test_render_partial_template
-    @view.render(:partial => "test/customer")
-    wait
+    Rails.stub(:root, File.expand_path(FIXTURE_LOAD_PATH)) do
+      @view.render(:partial => "test/customer")
+      wait
 
-    assert_equal 1, @logger.logged(:info).size
-    assert_match(/Rendered test\/_customer.erb/, @logger.logged(:info).last)
+      assert_equal 1, @logger.logged(:info).size
+      assert_match(/Rendered test\/_customer.erb/, @logger.logged(:info).last)
+    end
   end
 
   def test_render_partial_with_implicit_path
-    @view.render(Customer.new("david"), :greeting => "hi")
-    wait
+    Rails.stub(:root, File.expand_path(FIXTURE_LOAD_PATH)) do
+      @view.render(Customer.new("david"), :greeting => "hi")
+      wait
 
-    assert_equal 1, @logger.logged(:info).size
-    assert_match(/Rendered customers\/_customer\.html\.erb/, @logger.logged(:info).last)
+      assert_equal 1, @logger.logged(:info).size
+      assert_match(/Rendered customers\/_customer\.html\.erb/, @logger.logged(:info).last)
+    end
   end
 
   def test_render_collection_template
-    @view.render(:partial => "test/customer", :collection => [ Customer.new("david"), Customer.new("mary") ])
-    wait
+    Rails.stub(:root, File.expand_path(FIXTURE_LOAD_PATH)) do
+      @view.render(:partial => "test/customer", :collection => [ Customer.new("david"), Customer.new("mary") ])
+      wait
 
-    assert_equal 1, @logger.logged(:info).size
-    assert_match(/Rendered test\/_customer.erb/, @logger.logged(:info).last)
+      assert_equal 1, @logger.logged(:info).size
+      assert_match(/Rendered test\/_customer.erb/, @logger.logged(:info).last)
+    end
   end
 
   def test_render_collection_with_implicit_path
-    @view.render([ Customer.new("david"), Customer.new("mary") ], :greeting => "hi")
-    wait
+    Rails.stub(:root, File.expand_path(FIXTURE_LOAD_PATH)) do
+      @view.render([ Customer.new("david"), Customer.new("mary") ], :greeting => "hi")
+      wait
 
-    assert_equal 1, @logger.logged(:info).size
-    assert_match(/Rendered customers\/_customer\.html\.erb/, @logger.logged(:info).last)
+      assert_equal 1, @logger.logged(:info).size
+      assert_match(/Rendered customers\/_customer\.html\.erb/, @logger.logged(:info).last)
+    end
   end
 
   def test_render_collection_template_without_path
-    @view.render([ GoodCustomer.new("david"), Customer.new("mary") ], :greeting => "hi")
-    wait
+    Rails.stub(:root, File.expand_path(FIXTURE_LOAD_PATH)) do
+      @view.render([ GoodCustomer.new("david"), Customer.new("mary") ], :greeting => "hi")
+      wait
 
-    assert_equal 1, @logger.logged(:info).size
-    assert_match(/Rendered collection/, @logger.logged(:info).last)
+      assert_equal 1, @logger.logged(:info).size
+      assert_match(/Rendered collection/, @logger.logged(:info).last)
+    end
   end
 end

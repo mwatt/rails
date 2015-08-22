@@ -8,6 +8,7 @@ end
 
 class FormOptionsHelperTest < ActionView::TestCase
   tests ActionView::Helpers::FormOptionsHelper
+  TimeZoneStruct = Struct.new(:name, :to_s)
 
   silence_warnings do
     Post        = Struct.new('Post', :title, :author_name, :body, :secret, :written_on, :category, :origin, :allow_comments)
@@ -18,12 +19,7 @@ class FormOptionsHelperTest < ActionView::TestCase
   end
 
   def setup
-    @fake_timezones = %w(A B C D E).map do |id|
-      tz = stub(:name => id, :to_s => id)
-      ActiveSupport::TimeZone.stubs(:[]).with(id).returns(tz)
-      tz
-    end
-    ActiveSupport::TimeZone.stubs(:all).returns(@fake_timezones)
+    @fake_timezones = %w(A B C D E).each_with_index.map{|id,index| TimeZoneStruct.new(id, id)}
   end
 
   def test_collection_options
@@ -369,74 +365,86 @@ class FormOptionsHelperTest < ActionView::TestCase
   end
 
   def test_time_zone_options_no_params
-    opts = time_zone_options_for_select
-    assert_dom_equal "<option value=\"A\">A</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\">D</option>\n" +
-                 "<option value=\"E\">E</option>",
-                 opts
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      opts = time_zone_options_for_select
+      assert_dom_equal "<option value=\"A\">A</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\">D</option>\n" +
+                   "<option value=\"E\">E</option>",
+                   opts
+    end
   end
 
   def test_time_zone_options_with_selected
-    opts = time_zone_options_for_select( "D" )
-    assert_dom_equal "<option value=\"A\">A</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\" selected=\"selected\">D</option>\n" +
-                 "<option value=\"E\">E</option>",
-                 opts
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      opts = time_zone_options_for_select( "D" )
+      assert_dom_equal "<option value=\"A\">A</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\" selected=\"selected\">D</option>\n" +
+                   "<option value=\"E\">E</option>",
+                   opts
+    end
   end
 
   def test_time_zone_options_with_unknown_selected
-    opts = time_zone_options_for_select( "K" )
-    assert_dom_equal "<option value=\"A\">A</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\">D</option>\n" +
-                 "<option value=\"E\">E</option>",
-                 opts
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      opts = time_zone_options_for_select( "K" )
+      assert_dom_equal "<option value=\"A\">A</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\">D</option>\n" +
+                   "<option value=\"E\">E</option>",
+                   opts
+    end
   end
 
   def test_time_zone_options_with_priority_zones
-    zones = [ ActiveSupport::TimeZone.new( "B" ), ActiveSupport::TimeZone.new( "E" ) ]
-    opts = time_zone_options_for_select( nil, zones )
-    assert_dom_equal "<option value=\"B\">B</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\">D</option>",
-                 opts
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      zones = [ TimeZoneStruct.new( "B", "B" ), TimeZoneStruct.new( "E", "E" ) ]
+      opts = time_zone_options_for_select( nil, zones )
+      assert_dom_equal "<option value=\"B\">B</option>\n" +
+                   "<option value=\"E\">E</option>" +
+                   "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\">D</option>",
+                   opts
+    end
   end
 
   def test_time_zone_options_with_selected_priority_zones
-    zones = [ ActiveSupport::TimeZone.new( "B" ), ActiveSupport::TimeZone.new( "E" ) ]
-    opts = time_zone_options_for_select( "E", zones )
-    assert_dom_equal "<option value=\"B\">B</option>\n" +
-                 "<option value=\"E\" selected=\"selected\">E</option>" +
-                 "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\">D</option>",
-                 opts
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      zones = [ TimeZoneStruct.new( "B", "B" ), TimeZoneStruct.new( "E", "E" ) ]
+      opts = time_zone_options_for_select( "E", zones )
+      assert_dom_equal "<option value=\"B\">B</option>\n" +
+                   "<option value=\"E\" selected=\"selected\">E</option>" +
+                   "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\">D</option>",
+                   opts
+    end
   end
 
   def test_time_zone_options_with_unselected_priority_zones
-    zones = [ ActiveSupport::TimeZone.new( "B" ), ActiveSupport::TimeZone.new( "E" ) ]
-    opts = time_zone_options_for_select( "C", zones )
-    assert_dom_equal "<option value=\"B\">B</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"C\" selected=\"selected\">C</option>\n" +
-                 "<option value=\"D\">D</option>",
-                 opts
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      zones = [ TimeZoneStruct.new( 'B', 'B' ), TimeZoneStruct.new( 'E', 'E' ) ]
+      opts = time_zone_options_for_select( "C", zones )
+      assert_dom_equal "<option value=\"B\">B</option>\n" +
+                   "<option value=\"E\">E</option>" +
+                   "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"C\" selected=\"selected\">C</option>\n" +
+                   "<option value=\"D\">D</option>",
+                   opts
+    end
   end
 
   def test_time_zone_options_with_priority_zones_does_not_mutate_time_zones
     original_zones = ActiveSupport::TimeZone.all.dup
-    zones = [ ActiveSupport::TimeZone.new( "B" ), ActiveSupport::TimeZone.new( "E" ) ]
+    zones = [ TimeZoneStruct.new( "B", "B" ), TimeZoneStruct.new( "E", "E" ) ]
     time_zone_options_for_select(nil, zones)
     assert_equal original_zones, ActiveSupport::TimeZone.all
   end
@@ -998,234 +1006,256 @@ class FormOptionsHelperTest < ActionView::TestCase
 
   def test_time_zone_select
     @firm = Firm.new("D")
-    html = time_zone_select( "firm", "time_zone" )
-    assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\" selected=\"selected\">D</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "</select>",
-                 html
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      html = time_zone_select( "firm", "time_zone" )
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\" selected=\"selected\">D</option>\n" +
+                   "<option value=\"E\">E</option>" +
+                   "</select>",
+                   html
+    end
   end
 
   def test_time_zone_select_under_fields_for
     @firm = Firm.new("D")
 
-    output_buffer = fields_for :firm, @firm do |f|
-      concat f.time_zone_select(:time_zone)
-    end
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      output_buffer = fields_for :firm, @firm do |f|
+        concat f.time_zone_select(:time_zone)
+      end
 
-    assert_dom_equal(
-      "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
-      "<option value=\"A\">A</option>\n" +
-      "<option value=\"B\">B</option>\n" +
-      "<option value=\"C\">C</option>\n" +
-      "<option value=\"D\" selected=\"selected\">D</option>\n" +
-      "<option value=\"E\">E</option>" +
-      "</select>",
-      output_buffer
-    )
+      assert_dom_equal(
+        "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
+        "<option value=\"A\">A</option>\n" +
+        "<option value=\"B\">B</option>\n" +
+        "<option value=\"C\">C</option>\n" +
+        "<option value=\"D\" selected=\"selected\">D</option>\n" +
+        "<option value=\"E\">E</option>" +
+        "</select>",
+        output_buffer
+      )
+    end
   end
 
   def test_time_zone_select_under_fields_for_with_index
     @firm = Firm.new("D")
 
-    output_buffer = fields_for :firm, @firm, :index => 305 do |f|
-      concat f.time_zone_select(:time_zone)
-    end
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      output_buffer = fields_for :firm, @firm, :index => 305 do |f|
+        concat f.time_zone_select(:time_zone)
+      end
 
-    assert_dom_equal(
-      "<select id=\"firm_305_time_zone\" name=\"firm[305][time_zone]\">" +
-      "<option value=\"A\">A</option>\n" +
-      "<option value=\"B\">B</option>\n" +
-      "<option value=\"C\">C</option>\n" +
-      "<option value=\"D\" selected=\"selected\">D</option>\n" +
-      "<option value=\"E\">E</option>" +
-      "</select>",
-      output_buffer
-    )
+      assert_dom_equal(
+        "<select id=\"firm_305_time_zone\" name=\"firm[305][time_zone]\">" +
+        "<option value=\"A\">A</option>\n" +
+        "<option value=\"B\">B</option>\n" +
+        "<option value=\"C\">C</option>\n" +
+        "<option value=\"D\" selected=\"selected\">D</option>\n" +
+        "<option value=\"E\">E</option>" +
+        "</select>",
+        output_buffer
+      )
+    end
   end
 
   def test_time_zone_select_under_fields_for_with_auto_index
     @firm = Firm.new("D")
     def @firm.to_param; 305; end
 
-    output_buffer = fields_for "firm[]", @firm do |f|
-      concat f.time_zone_select(:time_zone)
-    end
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      output_buffer = fields_for "firm[]", @firm do |f|
+        concat f.time_zone_select(:time_zone)
+      end
 
-    assert_dom_equal(
-      "<select id=\"firm_305_time_zone\" name=\"firm[305][time_zone]\">" +
-      "<option value=\"A\">A</option>\n" +
-      "<option value=\"B\">B</option>\n" +
-      "<option value=\"C\">C</option>\n" +
-      "<option value=\"D\" selected=\"selected\">D</option>\n" +
-      "<option value=\"E\">E</option>" +
-      "</select>",
-      output_buffer
-    )
+      assert_dom_equal(
+        "<select id=\"firm_305_time_zone\" name=\"firm[305][time_zone]\">" +
+        "<option value=\"A\">A</option>\n" +
+        "<option value=\"B\">B</option>\n" +
+        "<option value=\"C\">C</option>\n" +
+        "<option value=\"D\" selected=\"selected\">D</option>\n" +
+        "<option value=\"E\">E</option>" +
+        "</select>",
+        output_buffer
+      )
+    end
   end
 
   def test_time_zone_select_with_blank
     @firm = Firm.new("D")
-    html = time_zone_select("firm", "time_zone", nil, :include_blank => true)
-    assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
-                 "<option value=\"\"></option>\n" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\" selected=\"selected\">D</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "</select>",
-                 html
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      html = time_zone_select("firm", "time_zone", nil, :include_blank => true)
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
+                   "<option value=\"\"></option>\n" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\" selected=\"selected\">D</option>\n" +
+                   "<option value=\"E\">E</option>" +
+                   "</select>",
+                   html
+    end
   end
 
   def test_time_zone_select_with_blank_as_string
     @firm = Firm.new("D")
-    html = time_zone_select("firm", "time_zone", nil, :include_blank => 'No Zone')
-    assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
-                 "<option value=\"\">No Zone</option>\n" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\" selected=\"selected\">D</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "</select>",
-                 html
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      html = time_zone_select("firm", "time_zone", nil, :include_blank => 'No Zone')
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
+                   "<option value=\"\">No Zone</option>\n" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\" selected=\"selected\">D</option>\n" +
+                   "<option value=\"E\">E</option>" +
+                   "</select>",
+                   html
+    end
   end
 
   def test_time_zone_select_with_style
     @firm = Firm.new("D")
-    html = time_zone_select("firm", "time_zone", nil, {},
-      "style" => "color: red")
-    assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\" style=\"color: red\">" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\" selected=\"selected\">D</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "</select>",
-                 html
-    assert_dom_equal html, time_zone_select("firm", "time_zone", nil, {},
-      :style => "color: red")
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      html = time_zone_select("firm", "time_zone", nil, {},
+        "style" => "color: red")
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\" style=\"color: red\">" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\" selected=\"selected\">D</option>\n" +
+                   "<option value=\"E\">E</option>" +
+                   "</select>",
+                   html
+      assert_dom_equal html, time_zone_select("firm", "time_zone", nil, {},
+        :style => "color: red")
+    end
   end
 
   def test_time_zone_select_with_blank_and_style
     @firm = Firm.new("D")
-    html = time_zone_select("firm", "time_zone", nil,
-      { :include_blank => true }, "style" => "color: red")
-    assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\" style=\"color: red\">" +
-                 "<option value=\"\"></option>\n" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\" selected=\"selected\">D</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "</select>",
-                 html
-    assert_dom_equal html, time_zone_select("firm", "time_zone", nil,
-      { :include_blank => true }, :style => "color: red")
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      html = time_zone_select("firm", "time_zone", nil,
+        { :include_blank => true }, "style" => "color: red")
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\" style=\"color: red\">" +
+                   "<option value=\"\"></option>\n" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\" selected=\"selected\">D</option>\n" +
+                   "<option value=\"E\">E</option>" +
+                   "</select>",
+                   html
+      assert_dom_equal html, time_zone_select("firm", "time_zone", nil,
+        { :include_blank => true }, :style => "color: red")
+    end
   end
 
   def test_time_zone_select_with_blank_as_string_and_style
     @firm = Firm.new("D")
-    html = time_zone_select("firm", "time_zone", nil,
-      { :include_blank => 'No Zone' }, "style" => "color: red")
-    assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\" style=\"color: red\">" +
-                 "<option value=\"\">No Zone</option>\n" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\" selected=\"selected\">D</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "</select>",
-                 html
-    assert_dom_equal html, time_zone_select("firm", "time_zone", nil,
-      { :include_blank => 'No Zone' }, :style => "color: red")
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      html = time_zone_select("firm", "time_zone", nil,
+        { :include_blank => 'No Zone' }, "style" => "color: red")
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\" style=\"color: red\">" +
+                   "<option value=\"\">No Zone</option>\n" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"D\" selected=\"selected\">D</option>\n" +
+                   "<option value=\"E\">E</option>" +
+                   "</select>",
+                   html
+      assert_dom_equal html, time_zone_select("firm", "time_zone", nil,
+        { :include_blank => 'No Zone' }, :style => "color: red")
+    end
   end
 
   def test_time_zone_select_with_priority_zones
     @firm = Firm.new("D")
-    zones = [ ActiveSupport::TimeZone.new("A"), ActiveSupport::TimeZone.new("D") ]
-    html = time_zone_select("firm", "time_zone", zones )
-    assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"D\" selected=\"selected\">D</option>" +
-                 "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "</select>",
-                 html
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      zones = [ TimeZoneStruct.new("A", "A"), TimeZoneStruct.new("D", "D") ]
+      html = time_zone_select("firm", "time_zone", zones )
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"D\" selected=\"selected\">D</option>" +
+                   "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"E\">E</option>" +
+                   "</select>",
+                   html
+    end
   end
 
   def test_time_zone_select_with_priority_zones_as_regexp
     @firm = Firm.new("D")
 
     @fake_timezones.each_with_index do |tz, i|
-      tz.stubs(:=~).returns(i.zero? || i == 3)
+      def tz.=~(re); %(A D).include?(name) end
     end
 
-    html = time_zone_select("firm", "time_zone", /A|D/)
-    assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"D\" selected=\"selected\">D</option>" +
-                 "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "</select>",
-                 html
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      html = time_zone_select("firm", "time_zone", /A|D/)
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
+                   "<option value=\"A\">A</option>\n" +
+                   "<option value=\"D\" selected=\"selected\">D</option>" +
+                   "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
+                   "<option value=\"C\">C</option>\n" +
+                   "<option value=\"E\">E</option>" +
+                   "</select>",
+                   html
+    end
   end
 
   def test_time_zone_select_with_priority_zones_as_regexp_using_grep_finds_no_zones
     @firm = Firm.new("D")
 
-    priority_zones = /A|D/
-    @fake_timezones.each do |tz|
-      priority_zones.stubs(:===).with(tz).raises(Exception)
-    end
-
-    html = time_zone_select("firm", "time_zone", priority_zones)
-    assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
-                 "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
-                 "<option value=\"A\">A</option>\n" +
-                 "<option value=\"B\">B</option>\n" +
-                 "<option value=\"C\">C</option>\n" +
-                 "<option value=\"D\" selected=\"selected\">D</option>\n" +
-                 "<option value=\"E\">E</option>" +
-                 "</select>",
-                 html
-  end
-
-  def test_time_zone_select_with_default_time_zone_and_nil_value
-     @firm = Firm.new()
-     @firm.time_zone = nil
-
-     html = time_zone_select( "firm", "time_zone", nil, :default => 'B' )
-     assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      html = time_zone_select("firm", "time_zone", /A|D/)
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
+                   "<option value=\"\" disabled=\"disabled\">-------------</option>\n" +
                    "<option value=\"A\">A</option>\n" +
-                   "<option value=\"B\" selected=\"selected\">B</option>\n" +
+                   "<option value=\"B\">B</option>\n" +
                    "<option value=\"C\">C</option>\n" +
-                   "<option value=\"D\">D</option>\n" +
+                   "<option value=\"D\" selected=\"selected\">D</option>\n" +
                    "<option value=\"E\">E</option>" +
                    "</select>",
                    html
+    end
+  end
+
+  def test_time_zone_select_with_default_time_zone_and_nil_value
+    @firm = Firm.new()
+    @firm.time_zone = nil
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      html = time_zone_select( "firm", "time_zone", nil, :default => 'B' )
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
+                    "<option value=\"A\">A</option>\n" +
+                    "<option value=\"B\" selected=\"selected\">B</option>\n" +
+                    "<option value=\"C\">C</option>\n" +
+                    "<option value=\"D\">D</option>\n" +
+                    "<option value=\"E\">E</option>" +
+                    "</select>",
+                    html
+    end
   end
 
   def test_time_zone_select_with_default_time_zone_and_value
     @firm = Firm.new('D')
 
-    html = time_zone_select( "firm", "time_zone", nil, :default => 'B' )
-    assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
-                  "<option value=\"A\">A</option>\n" +
-                  "<option value=\"B\">B</option>\n" +
-                  "<option value=\"C\">C</option>\n" +
-                  "<option value=\"D\" selected=\"selected\">D</option>\n" +
-                  "<option value=\"E\">E</option>" +
-                  "</select>",
-                  html
+    ActiveSupport::TimeZone.stub(:all, @fake_timezones) do
+      html = time_zone_select( "firm", "time_zone", nil, :default => 'B' )
+      assert_dom_equal "<select id=\"firm_time_zone\" name=\"firm[time_zone]\">" +
+                    "<option value=\"A\">A</option>\n" +
+                    "<option value=\"B\">B</option>\n" +
+                    "<option value=\"C\">C</option>\n" +
+                    "<option value=\"D\" selected=\"selected\">D</option>\n" +
+                    "<option value=\"E\">E</option>" +
+                    "</select>",
+                    html
+    end
   end
 
   def test_options_for_select_with_element_attributes

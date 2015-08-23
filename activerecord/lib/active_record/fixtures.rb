@@ -734,11 +734,23 @@ module ActiveRecord
           column_type = association.primary_key_type
           lhs_key     = association.lhs_key
           rhs_key     = association.rhs_key
+          join_class  = table_name.classify.constantize if Module.const_defined?(table_name.classify)
 
           targets = targets.is_a?(Array) ? targets : targets.split(/\s*,\s*/)
+
           rows[table_name].concat targets.map { |target|
-            { lhs_key => row[primary_key_name],
-              rhs_key => ActiveRecord::FixtureSet.identify(target, column_type) }
+            join_row = {
+              lhs_key => row[primary_key_name],
+              rhs_key => ActiveRecord::FixtureSet.identify(target, column_type)
+            }
+            if join_class && join_class.record_timestamps
+              now = config.default_timezone == :utc ? Time.now.utc : Time.now
+              now = now.to_s(:db)
+              timestamp_column_names.each do |c_name|
+                join_row[c_name] = now unless join_row.key?(c_name)
+              end
+            end
+            join_row
           }
         end
       end

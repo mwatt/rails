@@ -245,7 +245,7 @@ module ActionDispatch
           end
 
           def split_constraints(path_params, constraints)
-            constraints.partition do |key, requirement|
+            constraints.partition do |key|
               path_params.include?(key) || key == :controller
             end
           end

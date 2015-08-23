@@ -171,9 +171,9 @@ module ActionDispatch
             private
 
             def optimized_helper(args)
-              params = parameterize_args(args) { |k|
+              params = parameterize_args(args) do
                 raise_generation_error(args)
-              }
+              end
 
               @route.format params
             end
@@ -198,7 +198,7 @@ module ActionDispatch
               params = parameterize_args(args) { |missing_key|
                 missing_keys << missing_key
               }
-              constraints = Hash[@route.requirements.merge(params).sort_by{|k,v| k.to_s}]
+              constraints = Hash[@route.requirements.merge(params).sort_by(&:to_s)]
               message = "No route matches #{constraints.inspect}"
               message << " missing required keys: #{missing_keys.sort.inspect}"
 

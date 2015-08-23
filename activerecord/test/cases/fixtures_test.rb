@@ -12,6 +12,9 @@ require 'models/computer'
 require 'models/course'
 require 'models/developer'
 require 'models/computer'
+require 'models/hmt_course'
+require 'models/hmt_enrollment'
+require 'models/hmt_student'
 require 'models/joke'
 require 'models/matey'
 require 'models/parrot'
@@ -918,5 +921,13 @@ class FixturesWithAbstractBelongsTo < ActiveRecord::TestCase
   test "creates fixtures with belongs_to associations defined in abstract base classes" do
     assert_not_nil doubloons(:blackbeards_doubloon)
     assert_equal pirates(:blackbeard), doubloons(:blackbeards_doubloon).pirate
+  end
+end
+
+class HmtAutoTimestampTest < ActiveRecord::TestCase
+  fixtures :hmt_students, :hmt_courses
+
+  def test_populates_hmt_join_timestamp_columns
+    assert true # => NOT NULL constraint exception should not be raised
   end
 end

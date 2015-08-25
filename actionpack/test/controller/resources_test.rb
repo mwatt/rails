@@ -373,7 +373,7 @@ class ResourcesTest < ActionController::TestCase
         assert_recognizes(options.merge(preview_options), :path => preview_path, :method => :post)
       end
 
-      assert_restful_named_routes_for :messages, :path_prefix => 'threads/1/', :name_prefix => 'thread_', :options => { :thread_id => '1' } do |options|
+      assert_restful_named_routes_for :messages, :path_prefix => 'threads/1/', :name_prefix => 'thread_', :options => { :thread_id => '1' } do
         assert_named_route preview_path, :preview_new_thread_message_path, preview_options
       end
     end
@@ -395,7 +395,7 @@ class ResourcesTest < ActionController::TestCase
         assert_recognizes(options.merge(preview_options), :path => preview_path, :method => :post)
       end
 
-      assert_restful_named_routes_for :messages, :path_prefix => 'threads/1/', :name_prefix => 'thread_', :options => { :thread_id => '1' } do |options|
+      assert_restful_named_routes_for :messages, :path_prefix => 'threads/1/', :name_prefix => 'thread_', :options => { :thread_id => '1' } do
         assert_named_route preview_path, :preview_new_thread_message_path, preview_options
       end
     end
@@ -553,7 +553,7 @@ class ResourcesTest < ActionController::TestCase
           assert_recognizes(options.merge(reset_options), :path => reset_path, :method => method)
         end
 
-        assert_singleton_named_routes_for :account do |options|
+        assert_singleton_named_routes_for :account do
           assert_named_route reset_path, :reset_account_path, reset_options
         end
       end
@@ -577,7 +577,7 @@ class ResourcesTest < ActionController::TestCase
             assert_recognizes(options.merge(action_options), :path => action_path, :method => method)
           end
 
-          assert_singleton_named_routes_for :account do |options|
+          assert_singleton_named_routes_for :account do
             assert_named_route action_path, "#{action}_account_path".to_sym, action_options
           end
         end

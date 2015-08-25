@@ -103,7 +103,7 @@ class ShowExceptionsTest < ActionDispatch::IntegrationTest
   end
 
   test "returns an empty response if custom exceptions app returns X-Cascade pass" do
-    exceptions_app = lambda do |env|
+    exceptions_app = lambda do
       [404, { "X-Cascade" => "pass" }, []]
     end
 

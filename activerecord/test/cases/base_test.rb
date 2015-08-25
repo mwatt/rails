@@ -446,6 +446,7 @@ class BasicsTest < ActiveRecord::TestCase
     assert_equal "posts", Post.undecorated_table_name
   ensure
     ActiveRecord::Base.table_name_prefix = ""
+    Post.reset_table_name
   end
 
   def test_undecorated_table_name_with_singular_table_names

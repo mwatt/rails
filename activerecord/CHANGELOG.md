@@ -1,3 +1,26 @@
+*   Fix polymorphic true with inheritance.
+    
+    Example: 
+
+        class Asset < ActiveRecord::Base
+          belongs_to :attachable, polymorphic: true
+        end
+    
+        class Post < ActiveRecord::Base
+          # Post doesn't have a type column
+          has_many :assets, as: :attachable, dependent: :destroy
+        end
+     
+        class GuestPost < Post
+        end
+     
+        class MemberPost < Post
+        end
+
+    Now attachable_type can be Post, GuestPost or MemberPost
+
+    *Dilpreet Singh*
+
 *   Only try to nullify has_one target association if the record is persisted.
 
     Fixes #21223.

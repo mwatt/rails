@@ -240,8 +240,7 @@ module ActiveRecord
       assert !revert.connection.table_exists?("horses")
     end
 
-    def test_migrate_revert_change_column_default
-      index_definition = ["horses", [:name, :color]]
+    def test_migrate_revert_change_column_default      
       migration1 = ChangeColumnDefault1.new
       migration1.migrate(:up)
       assert_equal "Sekitoba", Horse.new.name

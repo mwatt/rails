@@ -463,7 +463,7 @@ module ActionView
         }.compact
         extras = extras.empty? ? '' : '?' + extras.join('&')
 
-        encoded_email_address = ERB::Util.url_encode(email_address).gsub("%40", "@")
+        encoded_email_address = url_encode(email_address).gsub("%40", "@")
         html_options["href"] = "mailto:#{encoded_email_address}#{extras}"
 
         content_tag(:a, name || email_address, html_options, &block)
@@ -615,6 +615,12 @@ module ActionView
 
         def method_tag(method)
           tag('input', type: 'hidden', name: '_method', value: method.to_s)
+        end
+
+        def url_encode(s)
+          s.to_s.b.gsub(/[^a-zA-Z0-9_\-.]/n) { |m|
+            sprintf("%%%02X", m.unpack("C")[0])
+          }
         end
     end
   end

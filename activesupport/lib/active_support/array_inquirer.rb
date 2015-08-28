@@ -23,7 +23,7 @@ module ActiveSupport
         super
       else
         candidates.any? do |candidate|
-          include?(candidate) || include?(candidate.to_sym)
+          include?(candidate) || include?(toggle_string_symbol(candidate))
         end
       end
     end
@@ -38,6 +38,14 @@ module ActiveSupport
           any?(name[0..-2])
         else
           super
+        end
+      end
+
+      def toggle_string_symbol(value)
+        if value.is_a?(String)
+          value.to_sym
+        else
+          value.to_s
         end
       end
   end

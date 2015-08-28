@@ -265,7 +265,7 @@ module ActionController
       if value.present? || value == false
         value
       else
-        raise(ParameterMissing.new(key))
+        raise ParameterMissing.new(key)
       end
     end
 

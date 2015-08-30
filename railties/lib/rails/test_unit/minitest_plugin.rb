@@ -14,6 +14,8 @@ module Minitest
     opts.separator ""
     opts.separator "    bin/rails test test/controllers test/integration/login_test.rb"
     opts.separator ""
+    opts.separator "By default test failures and errors are reported inline during a run."
+    opts.separator ""
 
     opts.separator "Rails options:"
     opts.on("-e", "--environment ENV",
@@ -26,7 +28,13 @@ module Minitest
       options[:full_backtrace] = true
     end
 
-    options[:patterns] = opts.order!
+    opts.on("-F", "--fail-slow",
+            "Output test failures and errors after the test run") do
+      options[:fail_fast] = false
+    end
+
+    options[:fail_fast] = true
+    options[:patterns]  = opts.order!
   end
 
   def self.plugin_rails_init(options)

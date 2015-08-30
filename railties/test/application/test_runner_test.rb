@@ -340,6 +340,21 @@ module ApplicationTests
       assert_match '0 runs, 0 assertions', run_test_command('')
     end
 
+    def test_fail_fast_by_default
+      app_file 'test/models/post_test.rb', <<-RUBY
+        require 'test_helper'
+
+        class PostTest < ActiveSupport::TestCase
+          def test_post
+            assert false, 'wups!'
+          end
+        end
+      RUBY
+
+      output = run_test_command('test/models/post_test.rb')
+      assert_match %r{Running:\n\nF\n\nwups!\n\nbin/rails test test/models/post_test.rb:4}, output
+    end
+
     private
       def run_test_command(arguments = 'test/unit/test_test.rb')
         Dir.chdir(app_path) { `bin/rails t #{arguments}` }

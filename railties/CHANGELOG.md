@@ -1,3 +1,31 @@
+*   Add fail fast output to `bin/rails test`
+
+    Any failures or errors (and skips if running in verbose mode) are output
+    during a test run:
+    
+    ```
+    # Running:
+    
+    .....S..........................................F
+    
+    This failed
+    
+    bin/rails test test/models/bunny_test.rb:14
+    
+    .................................E
+    
+    ArgumentError: Wups! Bet you didn't expect this!
+        test/models/bunny_test.rb:19:in `block in <class:BunnyTest>'
+    
+    bin/rails test test/models/bunny_test.rb:18
+    
+    ....................
+    
+    Finished in 0.069708s, 1477.6019 runs/s, 1448.9106 assertions/s.
+    ```
+
+    *Kasper Timm Hansen*
+
 *   `rails server` will now honour the `PORT` environment variable
 
     *David Cornu*

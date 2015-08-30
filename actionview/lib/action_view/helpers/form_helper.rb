@@ -1604,6 +1604,9 @@ module ActionView
         when String, Symbol
           if nested_attributes_association?(record_name)
             return fields_for_with_nested_attributes(record_name, record_object, fields_options, block)
+          elsif !defined?(@auto_index) && !options[:index] && record_name.to_s.end_with?('[]')
+            record_name = record_name.to_s.sub(/(.*)\[\]$/, "[\\1][#{record_object.id}]")
+            nested = true
           end
         else
           record_object = record_name.is_a?(Array) ? record_name.last : record_name
@@ -1617,7 +1620,13 @@ module ActionView
           @auto_index
         end
 
-        record_name = index ? "#{object_name}[#{index}][#{record_name}]" : "#{object_name}[#{record_name}]"
+        record_name = if nested
+                        "#{object_name}#{record_name}"
+                      elsif index
+                        "#{object_name}[#{index}][#{record_name}]"
+                      else
+                        "#{object_name}[#{record_name}]"
+                      end
         fields_options[:child_index] = index
 
         @template.fields_for(record_name, record_object, fields_options, &block)

@@ -1604,6 +1604,8 @@ module ActionView
         when String, Symbol
           if nested_attributes_association?(record_name)
             return fields_for_with_nested_attributes(record_name, record_object, fields_options, block)
+          elsif !defined?(@auto_index) && !options[:index] && record_name.to_s.end_with?('[]')
+            record_name = record_name.to_s.sub(/\[\]$/, "[#{record_object.id}]")
           end
         else
           record_object = record_name.is_a?(Array) ? record_name.last : record_name

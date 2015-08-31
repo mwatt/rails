@@ -1,5 +1,3 @@
-require 'byebug'
-
 module Rails
   module Commands
     class Command
@@ -33,11 +31,12 @@ module Rails
           @@command_wrappers << command
         end
 
-        def command_instance_for(task_name)
-          command_name = command_name_for(task_name)
-          klass = @@command_wrappers.find do |command| 
-            command.method_defined?(command_name)
+        def command_instance_for(command_name)
+          klass = @@command_wrappers.find do |command_wrapper|
+            command_instance_methods = command_wrapper.public_instance_methods
+            command_instance_methods.include?(command_name.to_sym)
           end
+
           klass.new(@argv)
         end
 

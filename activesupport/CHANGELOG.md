@@ -1,3 +1,7 @@
+*   Updated Unicode version to 8.0.0
+
+    *Anshul Sharma*
+
 *   Deprecate `:prefix` option of `number_to_human_size` with no replacement.
 
     *Jean Boussier*

@@ -18,4 +18,8 @@
 
     *Andrey Nering*
 
+*   Updated Unicode version to 8.0.0
+
+    *Anshul Sharma*
+
 Please check [4-2-stable](https://github.com/rails/rails/blob/4-2-stable/guides/CHANGELOG.md) for previous changes.

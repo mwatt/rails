@@ -1,3 +1,22 @@
+*   Add `ignore_dashes` option to
+    - `ActiveSupport::Inflector#underscore`
+    - `ActiveSupport::Inflector#titleize`
+    - `String#underscore`
+    - `String#titleize`
+
+    This allows for:
+        ActiveSupport::Inflector.underscore('e-mail')                      # => "e_mail"
+        ActiveSupport::Inflector.underscore('e-mail', ignore_dashes: true) # => "e-mail"
+        ActiveSupport::Inflector.titleize(  'e-mail')                      # => "E Mail"
+        ActiveSupport::Inflector.titleize(  'e-mail', ignore_dashes: true) # => "E-Mail"
+
+        'DANIEL DAY-LEWIS'.underscore                                      # => "daniel day_lewis"
+        'DANIEL DAY-LEWIS'.underscore(                ignore_dashes: true) # => "daniel day-lewis"
+        'DANIEL DAY-LEWIS'.titleize                                        # => "Daniel Day Lewis"
+        'DANIEL DAY-LEWIS'.titleize(                  ignore_dashes: true) # => 'Daniel Day-Lewis"
+
+    *Sam Bostock*
+
 *   `number_to_currency` and `number_with_delimiter` now accept custom `delimiter_pattern` option
      to handle placement of delimiter, to support currency formats like INR
 

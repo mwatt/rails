@@ -78,6 +78,8 @@ module ActiveSupport
     end
 
     # Makes an underscored, lowercase form from the expression in the string.
+    # If the +ignore_dashes+ parameter is set to true, then dashes will not be
+    # converted to underscores.
     #
     # Changes '::' to '/' to convert namespaces to paths.
     #
@@ -88,13 +90,13 @@ module ActiveSupport
     # #camelize, though there are cases where that does not hold:
     #
     #   camelize(underscore('SSLError'))  # => "SslError"
-    def underscore(camel_cased_word)
+    def underscore(camel_cased_word, ignore_dashes:false)
       return camel_cased_word unless camel_cased_word =~ /[A-Z-]|::/
       word = camel_cased_word.to_s.gsub('::'.freeze, '/'.freeze)
       word.gsub!(/(?:(?<=([A-Za-z\d]))|\b)(#{inflections.acronym_regex})(?=\b|[^a-z])/) { "#{$1 && '_'.freeze }#{$2.downcase}" }
       word.gsub!(/([A-Z\d]+)([A-Z][a-z])/, '\1_\2'.freeze)
       word.gsub!(/([a-z\d])([A-Z])/, '\1_\2'.freeze)
-      word.tr!("-".freeze, "_".freeze)
+      word.tr!('-'.freeze, '_'.freeze) unless ignore_dashes
       word.downcase!
       word
     end
@@ -145,6 +147,8 @@ module ActiveSupport
     # Capitalizes all the words and replaces some characters in the string to
     # create a nicer looking title. +titleize+ is meant for creating pretty
     # output. It is not used in the Rails internals.
+    # If the +ignore_dashes+ parameter is set to true, then dashes will not be
+    # converted to underscores.
     #
     # +titleize+ is also aliased as +titlecase+.
     #
@@ -152,8 +156,9 @@ module ActiveSupport
     #   titleize('x-men: the last stand')    # => "X Men: The Last Stand"
     #   titleize('TheManWithoutAPast')       # => "The Man Without A Past"
     #   titleize('raiders_of_the_lost_ark')  # => "Raiders Of The Lost Ark"
-    def titleize(word)
-      humanize(underscore(word)).gsub(/\b(?<!['’`])[a-z]/) { |match| match.capitalize }
+    def titleize(word, ignore_dashes:false)
+      humanize(underscore(word, ignore_dashes: ignore_dashes))
+        .gsub(/\b(?<!['’`])[a-z]/) { |match| match.capitalize }
     end
 
     # Creates the name of a table like Rails does for models to table names.

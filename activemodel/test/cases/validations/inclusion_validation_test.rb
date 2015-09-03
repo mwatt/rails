@@ -2,7 +2,6 @@ require 'cases/helper'
 require 'active_support/all'
 
 require 'models/topic'
-require 'models/person'
 
 class InclusionValidationTest < ActiveModel::TestCase
 
@@ -93,18 +92,18 @@ class InclusionValidationTest < ActiveModel::TestCase
   end
 
   def test_validates_inclusion_of_for_ruby_class
-    Person.validates_inclusion_of :karma, in: %w( abe monkey )
+    Topic.validates_inclusion_of :title, in: %w( abe monkey )
 
-    p = Person.new
-    p.karma = "Lifo"
-    assert p.invalid?
+    t = Topic.new
+    t.title = "Lifo"
+    assert t.invalid?
 
-    assert_equal ["is not included in the list"], p.errors[:karma]
+    assert_equal ["is not included in the list"], t.errors[:title]
 
-    p.karma = "monkey"
-    assert p.valid?
+    t.title = "monkey"
+    assert t.valid?
   ensure
-    Person.clear_validators!
+    Topic.clear_validators!
   end
 
   def test_validates_inclusion_of_with_lambda
@@ -120,27 +119,27 @@ class InclusionValidationTest < ActiveModel::TestCase
   end
 
   def test_validates_inclusion_of_with_symbol
-    Person.validates_inclusion_of :karma, in: :available_karmas
+    Topic.validates_inclusion_of :title, in: :available_title
 
-    p = Person.new
-    p.karma = "Lifo"
+    t = Topic.new
+    t.title = "Lifo"
 
-    def p.available_karmas
+    def t.available_title
       %w()
     end
 
-    assert p.invalid?
-    assert_equal ["is not included in the list"], p.errors[:karma]
+    assert t.invalid?
+    assert_equal ["is not included in the list"], t.errors[:title]
 
-    p = Person.new
-    p.karma = "Lifo"
+    t = Topic.new
+    t.title = "Lifo"
 
-    def p.available_karmas
+    def t.available_title
       %w(Lifo)
     end
 
-    assert p.valid?
+    assert t.valid?
   ensure
-    Person.clear_validators!
+    Topic.clear_validators!
   end
 end

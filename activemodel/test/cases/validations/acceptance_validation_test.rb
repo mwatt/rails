@@ -1,8 +1,6 @@
 require 'cases/helper'
 
 require 'models/topic'
-require 'models/reply'
-require 'models/person'
 
 class AcceptanceValidationTest < ActiveModel::TestCase
 
@@ -65,18 +63,18 @@ class AcceptanceValidationTest < ActiveModel::TestCase
   end
 
   def test_validates_acceptance_of_for_ruby_class
-    Person.validates_acceptance_of :karma
+    Topic.validates_acceptance_of :title
 
-    p = Person.new
-    p.karma = ""
+    t = Topic.new
+    t.title = ""
 
-    assert p.invalid?
-    assert_equal ["must be accepted"], p.errors[:karma]
+    assert t.invalid?
+    assert_equal ["must be accepted"], t.errors[:title]
 
-    p.karma = "1"
-    assert p.valid?
+    t.title = "1"
+    assert t.valid?
   ensure
-    Person.clear_validators!
+    Topic.clear_validators!
   end
 
   def test_validates_acceptance_of_true

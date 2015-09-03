@@ -1,7 +1,6 @@
 require 'cases/helper'
 
 require 'models/topic'
-require 'models/person'
 
 class ConfirmationValidationTest < ActiveModel::TestCase
 
@@ -37,18 +36,18 @@ class ConfirmationValidationTest < ActiveModel::TestCase
   end
 
   def test_validates_confirmation_of_for_ruby_class
-    Person.validates_confirmation_of :karma
+    Topic.validates_confirmation_of :title
 
-    p = Person.new
-    p.karma_confirmation = "None"
-    assert p.invalid?
+    t = Topic.new
+    t.title_confirmation = "None"
+    assert t.invalid?
 
-    assert_equal ["doesn't match Karma"], p.errors[:karma_confirmation]
+    assert_equal ["doesn't match Title"], t.errors[:title_confirmation]
 
-    p.karma = "None"
-    assert p.valid?
+    t.title = "None"
+    assert t.valid?
   ensure
-    Person.clear_validators!
+    Topic.clear_validators!
   end
 
   def test_title_confirmation_with_i18n_attribute

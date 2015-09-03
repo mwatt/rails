@@ -1,8 +1,6 @@
 require 'cases/helper'
 
 require 'models/topic'
-require 'models/person'
-
 require 'bigdecimal'
 
 class NumericalityValidationTest < ActiveModel::TestCase
@@ -162,18 +160,18 @@ class NumericalityValidationTest < ActiveModel::TestCase
   end
 
   def test_validates_numericality_of_for_ruby_class
-    Person.validates_numericality_of :karma, allow_nil: false
+    Topic.validates_numericality_of :author_name, allow_nil: false
 
-    p = Person.new
-    p.karma = "Pix"
-    assert p.invalid?
+    t = Topic.new
+    t.author_name = "Pix"
+    assert t.invalid?
 
-    assert_equal ["is not a number"], p.errors[:karma]
+    assert_equal ["is not a number"], t.errors[:author_name]
 
-    p.karma = "1234"
-    assert p.valid?
+    t.author_name = "1234"
+    assert t.valid?
   ensure
-    Person.clear_validators!
+    Topic.clear_validators!
   end
 
   def test_validates_numericality_with_invalid_args

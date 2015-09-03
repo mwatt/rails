@@ -1,7 +1,6 @@
 require 'cases/helper'
 
 require 'models/topic'
-require 'models/person'
 
 class LengthValidationTest < ActiveModel::TestCase
   def teardown
@@ -367,18 +366,18 @@ class LengthValidationTest < ActiveModel::TestCase
   end
 
   def test_validates_length_of_for_ruby_class
-    Person.validates_length_of :karma, minimum: 5
+    Topic.validates_length_of :author_name, minimum: 5
 
-    p = Person.new
-    p.karma = "Pix"
-    assert p.invalid?
+    t = Topic.new
+    t.author_name = "Pix"
+    assert t.invalid?
 
-    assert_equal ["is too short (minimum is 5 characters)"], p.errors[:karma]
+    assert_equal ["is too short (minimum is 5 characters)"], t.errors[:author_name]
 
-    p.karma = "The Smiths"
-    assert p.valid?
+    t.author_name = "The Smiths"
+    assert t.valid?
   ensure
-    Person.clear_validators!
+    Topic.clear_validators!
   end
 
   def test_validates_length_of_for_infinite_maxima

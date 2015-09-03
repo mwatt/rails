@@ -1,14 +1,12 @@
 require 'cases/helper'
 
 require 'models/topic'
-require 'models/person'
 require 'models/custom_reader'
 
 class PresenceValidationTest < ActiveModel::TestCase
 
   teardown do
     Topic.clear_validators!
-    Person.clear_validators!
     CustomReader.clear_validators!
   end
 
@@ -40,34 +38,34 @@ class PresenceValidationTest < ActiveModel::TestCase
   end
 
   def test_validates_acceptance_of_with_custom_error_using_quotes
-    Person.validates_presence_of :karma, message: "This string contains 'single' and \"double\" quotes"
-    p = Person.new
-    assert p.invalid?
-    assert_equal "This string contains 'single' and \"double\" quotes", p.errors[:karma].last
+    Topic.validates_presence_of :author_name, message: "This string contains 'single' and \"double\" quotes"
+    t = Topic.new
+    assert t.invalid?
+    assert_equal "This string contains 'single' and \"double\" quotes", t.errors[:author_name].last
   end
 
   def test_validates_presence_of_for_ruby_class
-    Person.validates_presence_of :karma
+    Topic.validates_presence_of :author_name
 
-    p = Person.new
-    assert p.invalid?
+    t = Topic.new
+    assert t.invalid?
 
-    assert_equal ["can't be blank"], p.errors[:karma]
+    assert_equal ["can't be blank"], t.errors[:author_name]
 
-    p.karma = "Cold"
-    assert p.valid?
+    t.author_name = "Cold"
+    assert t.valid?
   end
 
   def test_validates_presence_of_for_ruby_class_with_custom_reader
-    CustomReader.validates_presence_of :karma
+    CustomReader.validates_presence_of :author_name
 
-    p = CustomReader.new
-    assert p.invalid?
+    t = CustomReader.new
+    assert t.invalid?
 
-    assert_equal ["can't be blank"], p.errors[:karma]
+    assert_equal ["can't be blank"], t.errors[:author_name]
 
-    p[:karma] = "Cold"
-    assert p.valid?
+    t[:author_name] = "Cold"
+    assert t.valid?
   end
 
   def test_validates_presence_of_with_allow_nil_option

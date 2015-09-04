@@ -17,6 +17,86 @@ module ActionController
     end
   end
 
+  # See <tt>Serializers.add_serializer</tt>
+  def self.add_serializer(key, &block)
+    Serializers.add_serializer(key, &block)
+  end
+
+  # See <tt>Serializers.remove_serializer</tt>
+  def self.remove_serializer(key)
+    Serializers.remove_serializer(key)
+  end
+
+  class MissingSerializer < LoadError
+    def initialize(format)
+      super "No serializer defined for format: #{format}"
+    end
+  end
+
+  # Serializers define a method called within a renderer specific to
+  # transforming the object into a mime-compatible type.
+  #
+  # The separation of serialization from rendering allows
+  # composing the Renderer behavior of two methods, e.g.
+  # +_render_with_renderer_json+ and +_serialize_with_serializer_json+,
+  # rather than requiring one to define a method +_render_with_renderer_json+
+  # in a subclass and optionally call super on it.
+  #
+  # A principal benefit of this approach is that it promotes serialization on an object
+  # to a clearly-defined public interface, rather than requiring one to understand that
+  # calling, e.g. +render json: object+ calls +_render_to_body_with_renderer(options)+
+  # which calls +_render_with_renderer_#{key}+ where key is +json+, which is the method
+  # defined by calling +ActionController::Renderers.add :json+.
+  #
+  # ActiveModel::Serializers, for example, which has relied upon defining
+  # +_render_option_json+ and +_render_with_renderer_json+ in the controller, and calling +super+
+  # on the serialized object, now only needs to call
+  # +ActionController::Serializers.remove_serializer :json+ and define a new serializer with
+  # +ActionController::Serializers.add_serializer json do |json, options|+.
+  #
+  # See https://groups.google.com/forum/#!topic/rubyonrails-core/K8t4-DZ_DkQ/discussion for
+  # more background information.
+  module Serializers
+    extend ActiveSupport::Concern
+
+    included do
+      class_attribute :_serializers
+      self._serializers = Set.new.freeze
+    end
+
+    module ClassMethods
+      def use_serializers(*args)
+        serializers = _serializers + args
+        self._serializers = serializers.freeze
+      end
+      alias use_serializer use_serializers
+    end
+
+    # A Set containing serializer names that correspond to available serializer procs.
+    # Default values are <tt>:json</tt>, <tt>:js</tt>, <tt>:xml</tt>.
+    SERIALIZERS = Set.new
+
+    def self._serialize_with_serializer_method_name(key)
+      "_serialize_with_serializer_#{key}"
+    end
+
+    def self.add_serializer(key, &block)
+      define_method(_serialize_with_serializer_method_name(key), &block)
+      SERIALIZERS << key.to_sym
+    end
+
+    # This method is the opposite of add_serializer method.
+    #
+    # To remove a csv serializer:
+    #
+    #   ActionController::Serializers.remove_serializer(:csv)
+    def self.remove_serializer(key)
+      SERIALIZERS.delete(key.to_sym)
+      method_name = _serialize_with_serializer_method_name(key)
+      remove_method(method_name) if method_defined?(method_name)
+    end
+  end
+
   module Renderers
     extend ActiveSupport::Concern
 
@@ -62,12 +142,16 @@ module ActionController
     # pass it a name and a block. The block takes two arguments, the first
     # is the value paired with its key and the second is the remaining
     # hash of options passed to +render+.
+    # A renderer must have an associated serializer.
     #
     # Create a csv renderer:
     #
+    #   ActionController::Serializers.add :csv do |obj, options|
+    #     obj.respond_to?(:to_csv) ? obj.to_csv : obj.to_s
+    #   end
     #   ActionController::Renderers.add :csv do |obj, options|
     #     filename = options[:filename] || 'data'
-    #     str = obj.respond_to?(:to_csv) ? obj.to_csv : obj.to_s
+    #     str = _serialize_with_serializer_csv(obj, options)
     #     send_data str, type: Mime::CSV,
     #       disposition: "attachment; filename=#{filename}.csv"
     #   end
@@ -106,14 +190,20 @@ module ActionController
     module All
       extend ActiveSupport::Concern
       include Renderers
+      include Serializers
 
       included do
         self._renderers = RENDERERS
+        self._serializers = SERIALIZERS
       end
     end
 
+    add_serializer :json do |json, options|
+      json.kind_of?(String) ? json : json.to_json(options)
+    end
+
     add :json do |json, options|
-      json = json.to_json(options) unless json.kind_of?(String)
+      json = _serialize_with_serializer_json(json, options)
 
       if options[:callback].present?
         if content_type.nil? || content_type == Mime::JSON
@@ -127,14 +217,22 @@ module ActionController
       end
     end
 
+    add_serializer :js do |js, options|
+      js.respond_to?(:to_js) ? js.to_js(options) : js
+    end
+
     add :js do |js, options|
       self.content_type ||= Mime::JS
-      js.respond_to?(:to_js) ? js.to_js(options) : js
+      _serialize_with_serializer_js(js, options)
+    end
+
+    add_serializer :xml do |xml, options|
+      xml.respond_to?(:to_xml) ? xml.to_xml(options) : xml
     end
 
     add :xml do |xml, options|
       self.content_type ||= Mime::XML
-      xml.respond_to?(:to_xml) ? xml.to_xml(options) : xml
+      _serialize_with_serializer_xml(xml, options)
     end
   end
 end

@@ -26,7 +26,11 @@ module Minitest
       options[:full_backtrace] = true
     end
 
-    options[:patterns] = opts.order!
+    if self.test_patterns
+      options[:patterns] = self.test_patterns
+    else
+      options[:patterns] = opts.order!
+    end
   end
 
   def self.plugin_rails_init(options)
@@ -46,6 +50,7 @@ module Minitest
 
   mattr_accessor(:run_with_autorun)         { false }
   mattr_accessor(:run_with_rails_extension) { false }
+  mattr_accessor(:test_patterns) { nil }
 end
 
 Minitest.load_plugins

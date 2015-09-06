@@ -7,7 +7,8 @@ task default: :test
 desc "Runs all tests in test folder"
 task :test do
   $: << "test"
-  Minitest.run(['test'])
+  Minitest.test_patterns = ["test"]
+  Minitest.run
 end
 
 namespace :test do
@@ -24,22 +25,26 @@ namespace :test do
   ["models", "helpers", "controllers", "mailers", "integration", "jobs"].each do |name|
     task name => "test:prepare" do
       $: << "test"
-      Minitest.run(["test/#{name}"])
+      Minitest.test_patterns = ["test/#{name}"]
+      Minitest.run
     end
   end
 
   task :generators => "test:prepare" do
     $: << "test"
-    Minitest.run(["test/lib/generators"])
+    Minitest.test_patterns = ["test/lib/generators"]
+    Minitest.run
   end
 
   task :units => "test:prepare" do
     $: << "test"
-    Minitest.run(["test/models", "test/helpers", "test/unit"])
+    Minitest.test_patterns = ["test/models", "test/helpers", "test/unit"]
+    Minitest.run
   end
 
   task :functionals => "test:prepare" do
     $: << "test"
-    Minitest.run(["test/controllers", "test/mailers", "test/functional"])
+    Minitest.test_patterns = ["test/controllers", "test/mailers", "test/functional"]
+    Minitest.run
   end
 end

@@ -87,9 +87,22 @@ module ActiveJob
         def args_info(job)
           if job.arguments.any?
             ' with arguments: ' +
-              job.arguments.map { |arg| arg.try(:to_global_id).try(:to_s) || arg.inspect }.join(', ')
+              job.arguments.map { |arg| serialize_arg(arg).inspect }.join(', ')
           else
             ''
+          end
+        end
+
+        def serialize_arg(arg)
+          case arg
+          when Hash
+            arg.each_with_object({}) { |(key, value), hash| hash[key] = serialize_arg(value)}
+          when Array
+            arg.map { |value| serialize_arg(value) }
+          when GlobalID::Identification
+            arg.to_global_id.to_s
+          else
+            arg
           end
         end
 

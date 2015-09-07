@@ -280,7 +280,10 @@ module ActiveRecord
       ENV['VERBOSE'] = 'false'
       ENV['VERSION'] = '4'
 
-      ActiveRecord::Migrator.expects(:migrate).with(ActiveRecord::Migrator.migrations_paths, 4)
+      ActiveRecord::Tasks::DatabaseTasks.expects(:migrations_paths).
+        returns('custom/path')
+
+      ActiveRecord::Migrator.expects(:migrate).with('custom/path', 4)
       ActiveRecord::Tasks::DatabaseTasks.migrate
     ensure
       ENV['VERBOSE'], ENV['VERSION'] = verbose, version

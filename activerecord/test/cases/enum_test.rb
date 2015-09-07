@@ -260,9 +260,9 @@ class EnumTest < ActiveRecord::TestCase
     end
 
     conflicts = [
-      :column,     # generates class method .columns, which conflicts with an AR method
-      :logger,     # generates #logger, which conflicts with an AR method
-      :attributes, # generates #attributes=, which conflicts with an AR method
+      :column,     # generates class method .columns, which conflicts with an ActiveRecord method
+      :logger,     # generates #logger, which conflicts with an ActiveRecord method
+      :attributes, # generates #attributes=, which conflicts with an ActiveRecord method
     ]
 
     conflicts.each_with_index do |name, i|
@@ -280,9 +280,9 @@ class EnumTest < ActiveRecord::TestCase
     end
 
     conflicts = [
-      :new,      # generates a scope that conflicts with an AR class method
-      :valid,    # generates #valid?, which conflicts with an AR method
-      :save,     # generates #save!, which conflicts with an AR method
+      :new,      # generates a scope that conflicts with an ActiveRecord class method
+      :valid,    # generates #valid?, which conflicts with an ActiveRecord method
+      :save,     # generates #save!, which conflicts with an ActiveRecord method
       :proposed, # same value as an existing enum
       :public, :private, :protected, # some important methods on Module and Class
       :name, :parent, :superclass

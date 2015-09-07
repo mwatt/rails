@@ -10,7 +10,7 @@ class ActiveRecordTestConnector
   self.able_to_connect = true
 end
 
-# Try to grab AR
+# Try to grab ActiveRecord
 unless defined?(ActiveRecord) && defined?(FixtureSet)
   begin
     PATH_TO_AR = "#{File.dirname(__FILE__)}/../../activerecord/lib"

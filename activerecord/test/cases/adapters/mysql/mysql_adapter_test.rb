@@ -56,7 +56,7 @@ module ActiveRecord
 
           value = result.rows.last.last
 
-          # FIXME: this should probably be inside the mysql AR adapter?
+          # FIXME: this should probably be inside the mysql ActiveRecord adapter?
           value.force_encoding(@conn.client_encoding)
 
           # The strings in this file are utf-8, so transcode to utf-8

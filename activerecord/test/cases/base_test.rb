@@ -1219,19 +1219,19 @@ class BasicsTest < ActiveRecord::TestCase
   def test_descends_from_active_record
     assert !ActiveRecord::Base.descends_from_active_record?
 
-    # Abstract subclass of AR::Base.
+    # Abstract subclass of ActiveRecord::Base.
     assert LoosePerson.descends_from_active_record?
 
     # Concrete subclass of an abstract class.
     assert LooseDescendant.descends_from_active_record?
 
-    # Concrete subclass of AR::Base.
+    # Concrete subclass of ActiveRecord::Base.
     assert TightPerson.descends_from_active_record?
 
     # Concrete subclass of a concrete class but has no type column.
     assert TightDescendant.descends_from_active_record?
 
-    # Concrete subclass of AR::Base.
+    # Concrete subclass of ActiveRecord::Base.
     assert Post.descends_from_active_record?
 
     # Abstract subclass of a concrete class which has a type column.
@@ -1555,7 +1555,7 @@ class BasicsTest < ActiveRecord::TestCase
   end
 
   # Note: This is a performance optimization for Array#uniq and Hash#[] with
-  # AR::Base objects. If the future has made this irrelevant, feel free to
+  # ActiveRecord::Base objects. If the future has made this irrelevant, feel free to
   # delete this.
   test "records without an id have unique hashes" do
     assert_not_equal Post.new.hash, Post.new.hash

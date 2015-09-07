@@ -467,7 +467,7 @@ module ActiveRecord
         @class_names = class_names.stringify_keys
         @config      = config
 
-        # Remove string values that aren't constants or subclasses of AR
+        # Remove string values that aren't constants or subclasses of ActiveRecord
         @class_names.delete_if { |klass_name, klass| !insert_class(@class_names, klass_name, klass) }
       end
 
@@ -481,7 +481,7 @@ module ActiveRecord
       private
 
       def insert_class(class_names, name, klass)
-        # We only want to deal with AR objects.
+        # We only want to deal with ActiveRecord objects.
         if klass && klass < ActiveRecord::Base
           class_names[name] = klass
         else
@@ -580,7 +580,7 @@ module ActiveRecord
       @config   = config
       @model_class = nil
 
-      if class_name.is_a?(Class) # TODO: Should be an AR::Base type class, or any?
+      if class_name.is_a?(Class) # TODO: Should be an ActiveRecord::Base type class, or any?
         @model_class = class_name
       else
         @model_class = class_name.safe_constantize if class_name

@@ -19,7 +19,7 @@ module ActiveRecord
       end
 
       # Collects attributes from scopes that should be applied when creating
-      # an AR instance for the particular class this is called on.
+      # an ActiveRecord instance for the particular class this is called on.
       def scope_attributes # :nodoc:
         all.scope_for_create
       end

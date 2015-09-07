@@ -40,7 +40,7 @@ class AttributeAliasingTest < ActiveSupport::TestCase
   end
 
   def test_aliasing_to_uppercase_attributes
-    # Although it's very un-Ruby, some people's AR-mapped tables have
+    # Although it's very un-Ruby, some people's ActiveRecord-mapped tables have
     # upper-case attributes, and when people want to alias those names
     # to more sensible ones, everything goes *foof*.
     e = AttributeAliasing::Email.new

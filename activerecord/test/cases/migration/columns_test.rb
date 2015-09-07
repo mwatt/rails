@@ -7,7 +7,7 @@ module ActiveRecord
 
       self.use_transactional_tests = false
 
-      # FIXME: this is more of an integration test with AR::Base and the
+      # FIXME: this is more of an integration test with ActiveRecord::Base and the
       # schema modifications.  Maybe we should move this?
       def test_add_rename
         add_column "test_models", "girlfriend", :string
@@ -24,7 +24,7 @@ module ActiveRecord
       end
 
       # FIXME: another integration test.  We should decouple this from the
-      # AR::Base implementation.
+      # ActiveRecord::Base implementation.
       def test_rename_column_using_symbol_arguments
         add_column :test_models, :first_name, :string
 
@@ -37,7 +37,7 @@ module ActiveRecord
       end
 
       # FIXME: another integration test.  We should decouple this from the
-      # AR::Base implementation.
+      # ActiveRecord::Base implementation.
       def test_rename_column
         add_column "test_models", "first_name", "string"
 

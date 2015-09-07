@@ -275,14 +275,17 @@ module ActiveRecord
 
   class DatabaseTasksMigrateTest < ActiveRecord::TestCase
     def test_migrate_receives_correct_env_vars
+      original_migrations_path = ActiveRecord::Tasks::DatabaseTasks.migrations_paths
       verbose, version = ENV['VERBOSE'], ENV['VERSION']
 
+      ActiveRecord::Tasks::DatabaseTasks.migrations_paths = "custom/path"
       ENV['VERBOSE'] = 'false'
       ENV['VERSION'] = '4'
 
-      ActiveRecord::Migrator.expects(:migrate).with(ActiveRecord::Migrator.migrations_paths, 4)
+      ActiveRecord::Migrator.expects(:migrate).with('custom/path', 4)
       ActiveRecord::Tasks::DatabaseTasks.migrate
     ensure
+      ActiveRecord::Tasks::DatabaseTasks.migrations_paths = original_migrations_path
       ENV['VERBOSE'], ENV['VERSION'] = verbose, version
     end
   end

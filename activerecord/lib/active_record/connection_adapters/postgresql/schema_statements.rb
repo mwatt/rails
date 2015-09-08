@@ -372,7 +372,7 @@ module ActiveRecord
         #
         # Example:
         #   rename_table('octopuses', 'octopi')
-        def rename_table(table_name, new_name)
+        def rename_table(table_name, new_name, rename_indexes: true)
           clear_cache!
           execute "ALTER TABLE #{quote_table_name(table_name)} RENAME TO #{quote_table_name(new_name)}"
           pk, seq = pk_and_sequence_for(new_name)
@@ -381,10 +381,14 @@ module ActiveRecord
             idx = "#{table_name}_pkey"
             new_idx = "#{new_name}_pkey"
             execute "ALTER TABLE #{seq.quoted} RENAME TO #{quote_table_name(new_seq)}"
-            execute "ALTER INDEX #{quote_table_name(idx)} RENAME TO #{quote_table_name(new_idx)}"
+            if rename_indexes
+              execute "ALTER INDEX #{quote_table_name(idx)} RENAME TO #{quote_table_name(new_idx)}"
+            end
           end
 
-          rename_table_indexes(table_name, new_name)
+          if rename_indexes
+            rename_table_indexes(table_name, new_name)
+          end
         end
 
         def add_column(table_name, column_name, type, options = {}) #:nodoc:
@@ -440,10 +444,12 @@ module ActiveRecord
         end
 
         # Renames a column in a table.
-        def rename_column(table_name, column_name, new_column_name) #:nodoc:
+        def rename_column(table_name, column_name, new_column_name, rename_indexes: true) #:nodoc:
           clear_cache!
           execute "ALTER TABLE #{quote_table_name(table_name)} RENAME COLUMN #{quote_column_name(column_name)} TO #{quote_column_name(new_column_name)}"
-          rename_column_indexes(table_name, column_name, new_column_name)
+          if rename_indexes
+            rename_column_indexes(table_name, column_name, new_column_name)
+          end
         end
 
         def add_index(table_name, column_name, options = {}) #:nodoc:

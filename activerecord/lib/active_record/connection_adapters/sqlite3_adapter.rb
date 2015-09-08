@@ -384,9 +384,9 @@ module ActiveRecord
       #
       # Example:
       #   rename_table('octopuses', 'octopi')
-      def rename_table(table_name, new_name)
+      def rename_table(table_name, new_name, rename_indexes: true)
         exec_query "ALTER TABLE #{quote_table_name(table_name)} RENAME TO #{quote_table_name(new_name)}"
-        rename_table_indexes(table_name, new_name)
+        rename_table_indexes(table_name, new_name) if rename_indexes
       end
 
       # See: http://www.sqlite.org/lang_altertable.html
@@ -443,10 +443,10 @@ module ActiveRecord
         end
       end
 
-      def rename_column(table_name, column_name, new_column_name) #:nodoc:
+      def rename_column(table_name, column_name, new_column_name, rename_indexes: true) #:nodoc:
         column = column_for(table_name, column_name)
         alter_table(table_name, rename: {column.name => new_column_name.to_s})
-        rename_column_indexes(table_name, column.name, new_column_name)
+        rename_column_indexes(table_name, column.name, new_column_name) if rename_indexes
       end
 
       protected

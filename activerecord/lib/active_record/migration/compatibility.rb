@@ -1,0 +1,79 @@
+module ActiveRecord
+  class Migration
+    module Compatibility # :nodoc: all
+      V5_0 = Current
+
+      module FourTwoShared
+        module TableDefinition
+          def references(*, **options)
+            options[:index] ||= false
+            super
+          end
+          alias :belongs_to :references
+
+          def timestamps(*, **options)
+            options[:null] = true if options[:null].nil?
+            super
+          end
+        end
+
+        def create_table(*args)
+          if block_given?
+            super(*args) do |t|
+              class << t
+                prepend TableDefinition
+              end
+              yield t
+            end
+          else
+            super
+          end
+        end
+
+        def add_reference(table_name, column_name, **options)
+          options[:index] ||= false
+          super
+        end
+        alias :add_belongs_to :add_reference
+
+        def add_timestamps(table_name, options = {})
+          options[:null] = true if options[:null].nil?
+          super
+        end
+      end
+
+      class V4_2 < V5_0
+        # 4.2 is defined as a module because it needs to be shared with
+        # Legacy. When the time comes, V5_0 should be defined straight
+        # in its class.
+        include FourTwoShared
+      end
+
+      V4_1 = V4_2
+      V4_0 = V4_1
+
+      class V3_2 < V4_0
+        def rename_column(table_name, new_name)
+          super(table_name, new_name, rename_indexes: false)
+        end
+
+        def rename_table(table_name, new_name)
+          super(table_name, new_name, rename_indexes: false)
+        end
+      end
+
+      module Legacy
+        include FourTwoShared
+
+        def run(*)
+          ActiveSupport::Deprecation.warn \
+            "Directly inheriting from ActiveRecord::Migration is deprecated. " \
+            "Please specify the Rails release the migration was written for:\n" \
+            "\n" \
+            "  class #{self.class.name} < ActiveRecord::Migration[4.2]"
+          super
+        end
+      end
+    end
+  end
+end

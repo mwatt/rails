@@ -50,7 +50,7 @@ module ActiveRecord
           raise NotImplementedError, "#{self} is an abstract class and cannot be instantiated."
         end
 
-        attrs = args.first
+        attrs = args.first.to_h
         if subclass_from_attributes?(attrs)
           subclass = subclass_from_attributes(attrs)
         end

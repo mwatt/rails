@@ -42,6 +42,7 @@ module ActiveRecord
       #    User.where.not(name: "Jon", role: "admin")
       #    # SELECT * FROM users WHERE name != 'Jon' AND role != 'admin'
       def not(opts, *rest)
+        opts = @scope.send(:sanitize_opts, opts)
         where_clause = @scope.send(:where_clause_factory).build(opts, rest)
 
         @scope.references!(PredicateBuilder.references(opts)) if Hash === opts
@@ -558,11 +559,8 @@ module ActiveRecord
     end
 
     def where!(opts, *rest) # :nodoc:
-      if Hash === opts
-        opts = sanitize_forbidden_attributes(opts)
-        references!(PredicateBuilder.references(opts))
-      end
-
+      opts = sanitize_opts(opts)
+      references!(PredicateBuilder.references(opts)) if Hash === opts
       self.where_clause += where_clause_factory.build(opts, rest)
       self
     end
@@ -619,6 +617,7 @@ module ActiveRecord
     end
 
     def having!(opts, *rest) # :nodoc:
+      opts = sanitize_opts(opts)
       references!(PredicateBuilder.references(opts)) if Hash === opts
 
       self.having_clause += having_clause_factory.build(opts, rest)
@@ -1106,6 +1105,14 @@ module ActiveRecord
 
     def new_from_clause
       Relation::FromClause.empty
+    end
+
+    def sanitize_opts(opts)
+      if opts.is_a?(ActionController::Parameters)
+        sanitize_forbidden_attributes(opts).to_h
+      else
+        opts
+      end
     end
   end
 end

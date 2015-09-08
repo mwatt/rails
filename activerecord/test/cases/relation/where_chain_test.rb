@@ -24,6 +24,12 @@ module ActiveRecord
       end
     end
 
+    def test_not_with_strong_parameters
+      params = ActionController::Parameters.new(type: 'Post')
+      assert_raises(ActiveModel::ForbiddenAttributesError) { Post.where.not(params) }
+      assert_equal Post.where.not(params.permit(:type)).length, 2
+    end
+
     def test_association_not_eq
       expected = Arel::Nodes::Grouping.new(Comment.arel_table[@name].not_eq(Arel::Nodes::BindParam.new))
       relation = Post.joins(:comments).where.not(comments: {title: 'hello'})

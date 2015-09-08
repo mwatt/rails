@@ -1,39 +1,17 @@
 require 'cases/helper'
-require 'active_support/core_ext/hash/indifferent_access'
 require 'models/person'
 require 'models/company'
 
-class ProtectedParams < ActiveSupport::HashWithIndifferentAccess
-  attr_accessor :permitted
-  alias :permitted? :permitted
-
-  def initialize(attributes)
-    super(attributes)
-    @permitted = false
-  end
-
-  def permit!
-    @permitted = true
-    self
-  end
-
-  def dup
-    super.tap do |duplicate|
-      duplicate.instance_variable_set :@permitted, @permitted
-    end
-  end
-end
-
 class ForbiddenAttributesProtectionTest < ActiveRecord::TestCase
   def test_forbidden_attributes_cannot_be_used_for_mass_assignment
-    params = ProtectedParams.new(first_name: 'Guille', gender: 'm')
+    params = ActionController::Parameters.new(first_name: 'Guille', gender: 'm')
     assert_raises(ActiveModel::ForbiddenAttributesError) do
       Person.new(params)
     end
   end
 
   def test_permitted_attributes_can_be_used_for_mass_assignment
-    params = ProtectedParams.new(first_name: 'Guille', gender: 'm')
+    params = ActionController::Parameters.new(first_name: 'Guille', gender: 'm')
     params.permit!
     person = Person.new(params)
 
@@ -42,14 +20,15 @@ class ForbiddenAttributesProtectionTest < ActiveRecord::TestCase
   end
 
   def test_forbidden_attributes_cannot_be_used_for_sti_inheritance_column
-    params = ProtectedParams.new(type: 'Client')
+    params = ActionController::Parameters.new(type: 'Client')
     assert_raises(ActiveModel::ForbiddenAttributesError) do
       Company.new(params)
     end
   end
 
   def test_permitted_attributes_can_be_used_for_sti_inheritance_column
-    params = ProtectedParams.new(type: 'Client')
+    require 'byebug'
+    params = ActionController::Parameters.new(type: 'Client')
     params.permit!
     person = Company.new(params)
     assert_equal person.class, Client
@@ -64,11 +43,11 @@ class ForbiddenAttributesProtectionTest < ActiveRecord::TestCase
 
   def test_blank_attributes_should_not_raise
     person = Person.new
-    assert_nil person.assign_attributes(ProtectedParams.new({}))
+    assert_nil person.assign_attributes(ActionController::Parameters.new({}))
   end
 
   def test_create_with_checks_permitted
-    params = ProtectedParams.new(first_name: 'Guille', gender: 'm')
+    params = ActionController::Parameters.new(first_name: 'Guille', gender: 'm')
 
     assert_raises(ActiveModel::ForbiddenAttributesError) do
       Person.create_with(params).create!
@@ -76,14 +55,14 @@ class ForbiddenAttributesProtectionTest < ActiveRecord::TestCase
   end
 
   def test_create_with_works_with_params_values
-    params = ProtectedParams.new(first_name: 'Guille')
+    params = ActionController::Parameters.new(first_name: 'Guille')
 
     person = Person.create_with(first_name: params[:first_name]).create!
     assert_equal 'Guille', person.first_name
   end
 
   def test_where_checks_permitted
-    params = ProtectedParams.new(first_name: 'Guille', gender: 'm')
+    params = ActionController::Parameters.new(first_name: 'Guille', gender: 'm')
 
     assert_raises(ActiveModel::ForbiddenAttributesError) do
       Person.where(params).create!
@@ -91,7 +70,7 @@ class ForbiddenAttributesProtectionTest < ActiveRecord::TestCase
   end
 
   def test_where_works_with_params_values
-    params = ProtectedParams.new(first_name: 'Guille')
+    params = ActionController::Parameters.new(first_name: 'Guille')
 
     person = Person.where(first_name: params[:first_name]).create!
     assert_equal 'Guille', person.first_name

@@ -276,5 +276,12 @@ module ActiveRecord
 
       assert_equal essays(:david_modest_proposal), essay
     end
+
+    def test_where_with_strong_parameters
+      author = authors(:david)
+      params = ActionController::Parameters.new(name: author.name)
+      assert_raises(ActiveModel::ForbiddenAttributesError) { Author.where(params) }
+      Author.where(params.permit(:name))
+    end
   end
 end

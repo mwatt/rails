@@ -1,5 +1,7 @@
 require 'active_support/test_case'
 require 'active_support/testing/stream'
+require "rack/test"
+require "action_controller/metal/strong_parameters"
 
 module ActiveRecord
   # = Active Record Test Case

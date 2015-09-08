@@ -681,4 +681,17 @@ class CalculationsTest < ActiveRecord::TestCase
     end
     assert block_called
   end
+
+  def test_having_with_strong_parameters
+    params = ActionController::Parameters.new(credit_limit: '50')
+
+    assert_raises(ActiveModel::ForbiddenAttributesError) do
+      Account.group(:id).having(params)
+    end
+
+    result = Account.group(:id).having(params.permit(:credit_limit))
+    assert_equal 50, result[0].credit_limit
+    assert_equal 50, result[1].credit_limit
+    assert_equal 50, result[2].credit_limit
+  end
 end

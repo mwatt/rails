@@ -609,9 +609,9 @@ module ActiveRecord
       #
       # Example:
       #   rename_table('octopuses', 'octopi')
-      def rename_table(table_name, new_name)
+      def rename_table(table_name, new_name, rename_indexes: true)
         execute "RENAME TABLE #{quote_table_name(table_name)} TO #{quote_table_name(new_name)}"
-        rename_table_indexes(table_name, new_name)
+        rename_table_indexes(table_name, new_name) if rename_indexes
       end
 
       # Drops a table from the database.
@@ -663,9 +663,9 @@ module ActiveRecord
         execute("ALTER TABLE #{quote_table_name(table_name)} #{change_column_sql(table_name, column_name, type, options)}")
       end
 
-      def rename_column(table_name, column_name, new_column_name) #:nodoc:
+      def rename_column(table_name, column_name, new_column_name, rename_indexes: true) #:nodoc:
         execute("ALTER TABLE #{quote_table_name(table_name)} #{rename_column_sql(table_name, column_name, new_column_name)}")
-        rename_column_indexes(table_name, column_name, new_column_name)
+        rename_column_indexes(table_name, column_name, new_column_name) if rename_indexes
       end
 
       def add_index(table_name, column_name, options = {}) #:nodoc:

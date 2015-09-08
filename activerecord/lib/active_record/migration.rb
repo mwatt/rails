@@ -414,6 +414,28 @@ module ActiveRecord
   # are in a Migration with <tt>self.disable_ddl_transaction!</tt>.
   class Migration
     autoload :CommandRecorder, 'active_record/migration/command_recorder'
+    autoload :Compatibility, 'active_record/migration/compatibility'
+
+    # This must be defined before the inherited hook, below
+    class Current < Migration # :nodoc:
+    end
+
+    def self.inherited(subclass) # :nodoc:
+      super
+      if subclass.superclass == Migration
+        subclass.send :include, Compatibility::Legacy
+      end
+    end
+
+    def self.[](version)
+      version = version.to_s
+      name = "V#{version.tr('.', '_')}"
+      unless Compatibility.const_defined?(name)
+        versions = Compatibility.constants.grep(/\AV[0-9_]+\z/).map { |s| s.to_s.delete('V').tr('_', '.').inspect }
+        raise "Unknown migration version #{version.inspect}; expected one of #{versions.sort.join(', ')}"
+      end
+      Compatibility.const_get(name)
+    end
 
 
     # This class is used to verify that all migrations have been run before

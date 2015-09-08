@@ -1,3 +1,4 @@
+require 'active_support/core_ext/hash/transform_values'
 require 'active_support/core_ext/string/filters'
 require 'active_support/tagged_logging'
 require 'active_support/logger'
@@ -87,20 +88,20 @@ module ActiveJob
         def args_info(job)
           if job.arguments.any?
             ' with arguments: ' +
-              job.arguments.map { |arg| serialize_arg(arg).inspect }.join(', ')
+              job.arguments.map { |arg| format(arg).inspect }.join(', ')
           else
             ''
           end
         end
 
-        def serialize_arg(arg)
+        def format(arg)
           case arg
           when Hash
-            arg.each_with_object({}) { |(key, value), hash| hash[key] = serialize_arg(value)}
+            arg.transform_values { |value| format(value) }
           when Array
-            arg.map { |value| serialize_arg(value) }
+            arg.map { |value| format(value) }
           when GlobalID::Identification
-            arg.to_global_id.to_s
+            begin arg.to_global_id rescue arg end
           else
             arg
           end

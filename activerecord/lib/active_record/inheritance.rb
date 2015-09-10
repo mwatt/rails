@@ -50,8 +50,10 @@ module ActiveRecord
           raise NotImplementedError, "#{self} is an abstract class and cannot be instantiated."
         end
 
-        attrs = args.first
+        attrs = args.first || {}
         if subclass_from_attributes?(attrs)
+          attrs = attrs.with_indifferent_access
+          attrs[inheritance_column] ||= columns_hash[inheritance_column].default
           subclass = subclass_from_attributes(attrs)
         end
 
@@ -196,7 +198,7 @@ module ActiveRecord
       end
 
       def subclass_from_attributes(attrs)
-        subclass_name = attrs.with_indifferent_access[inheritance_column]
+        subclass_name = attrs[inheritance_column]
 
         if subclass_name.present?
           subclass = find_sti_class(subclass_name)

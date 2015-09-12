@@ -125,6 +125,7 @@ class ViewWithoutPrimaryKeyTest < ActiveRecord::TestCase
 
   def test_table_exists
     view_name = Paperback.table_name
+    # TODO: switch this assertion around once we changed #tables to not return views.
     assert @connection.table_exists?(view_name), "'#{view_name}' table should exist"
   end
 

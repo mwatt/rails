@@ -1,3 +1,11 @@
+*   Deprecate `connection.tables` and passing arguments to `#talbes`.
+
+    Reported on #21509, how views is treated by `#tables` are differ
+    by each adapters. To fix this different behavior, after Rails 5.0
+    is released, deprecate `#tables`.
+
+    *Yuichiro Kaneko*
+
 *   Fixed taking precision into count when assigning a value to timestamp attribute
 
     Timestamp column can have less precision than ruby timestamp

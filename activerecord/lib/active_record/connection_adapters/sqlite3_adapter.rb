@@ -1,6 +1,7 @@
 require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/connection_adapters/statement_pool'
 require 'active_record/connection_adapters/sqlite3/schema_creation'
+require "active_support/deprecation"
 
 gem 'sqlite3', '~> 1.3.6'
 require 'sqlite3'
@@ -308,6 +309,13 @@ module ActiveRecord
       # SCHEMA STATEMENTS ========================================
 
       def tables(name = nil, table_name = nil) #:nodoc:
+        ActiveSupport::Deprecation.warn(<<-MSG.squish)
+          #tables of sqlite3 adapter returns tables and views,
+          in Rails 5.1 this method will be changed to return only tables.
+          If you need tables and views, please use #data_sources.
+          #{"And passing arguments to #tables is deprecated." if name || table_name }
+        MSG
+
         sql = <<-SQL
           SELECT name
           FROM sqlite_master
@@ -319,7 +327,18 @@ module ActiveRecord
           row['name']
         end
       end
-      alias data_sources tables
+
+      def data_sources
+        sql = <<-SQL
+          SELECT name
+          FROM sqlite_master
+          WHERE (type = 'table' OR type = 'view') AND NOT name = 'sqlite_sequence'
+        SQL
+
+        exec_query(sql, 'SCHEMA').map do |row|
+          row['name']
+        end
+      end
 
       def table_exists?(table_name)
         table_name && tables(nil, table_name).any?

@@ -1,3 +1,5 @@
+require "active_support/deprecation"
+
 module ActiveRecord
   module ConnectionAdapters
     module PostgreSQL
@@ -70,6 +72,10 @@ module ActiveRecord
 
         # Returns the list of all tables in the schema search path.
         def tables(name = nil)
+          ActiveSupport::Deprecation.warn(<<-MSG.squish) if name
+            Passing arguments to #tables is deprecated.
+          MSG
+
           select_values("SELECT tablename FROM pg_tables WHERE schemaname = ANY(current_schemas(false))", 'SCHEMA')
         end
 

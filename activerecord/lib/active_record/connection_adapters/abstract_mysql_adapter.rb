@@ -1,4 +1,5 @@
 require 'active_support/core_ext/string/strip'
+require "active_support/deprecation"
 
 module ActiveRecord
   module ConnectionAdapters
@@ -626,9 +627,19 @@ module ActiveRecord
       end
 
       def tables(name = nil) # :nodoc:
+        ActiveSupport::Deprecation.warn(<<-MSG.squish)
+          #tables of mysql adapter returns tables and views,
+          in Rails 5.1 this method will be changed to return only tables.
+          If you need tables and views, please use #data_sources.
+          #{"And passing arguments to #tables is deprecated." if name }
+        MSG
+
+        data_sources
+      end
+
+      def data_sources
         select_values("SHOW FULL TABLES", 'SCHEMA')
       end
-      alias data_sources tables
 
       def truncate(table_name, name = nil)
         execute "TRUNCATE TABLE #{quote_table_name(table_name)}", name

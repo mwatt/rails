@@ -238,6 +238,14 @@ module ActiveRecord
         end
       end
     end
+
+    def test_tables_is_deprecated
+      if current_adapter?(:MysqlAdapter, :Mysql2Adapter, :SQLite3Adapter)
+        assert_deprecated { @connection.tables }
+      elsif current_adapter?(:PostgreSQLAdapter)
+        assert_deprecated { @connection.tables(:books) }
+      end
+    end
   end
 
   class AdapterTestWithoutTransaction < ActiveRecord::TestCase

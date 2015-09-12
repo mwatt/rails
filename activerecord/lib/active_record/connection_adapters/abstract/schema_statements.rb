@@ -23,8 +23,8 @@ module ActiveRecord
         table_name[0...table_alias_length].tr('.', '_')
       end
 
-      # Returns an array of table names defined in the database.
-      def tables(name = nil)
+      # Returns an array of table names defined in the database (excluding view names).
+      def tables
         raise NotImplementedError, "#tables is not implemented"
       end
 

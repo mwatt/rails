@@ -37,7 +37,7 @@ module ActiveRecord
       end
 
       def test_tables_quoting
-        @connection.tables(nil, "foo-bar", nil)
+        @connection.tables_and_views(nil, "foo-bar", nil)
         flunk
       rescue => e
         # assertion for *quoted* database properly

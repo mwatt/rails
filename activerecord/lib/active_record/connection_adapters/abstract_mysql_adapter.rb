@@ -520,7 +520,15 @@ module ActiveRecord
         show_variable 'collation_database'
       end
 
-      def tables(name = nil, database = nil, like = nil) #:nodoc:
+      def tables #:nodoc:
+        sql = "SHOW FULL TABLES WHERE table_type = 'BASE TABLE'"
+
+        execute_and_free(sql, 'SCHEMA') do |result|
+          result.collect(&:first)
+        end
+      end
+
+      def tables_and_views(name = nil, database = nil, like = nil) #:nodoc:
         sql = "SHOW TABLES "
         sql << "IN #{quote_table_name(database)} " if database
         sql << "LIKE #{quote(like)}" if like
@@ -536,7 +544,7 @@ module ActiveRecord
 
       def table_exists?(name)
         return false unless name.present?
-        return true if tables(nil, nil, name).any?
+        return true if tables_and_views(nil, nil, name).any?
 
         name          = name.to_s
         schema, table = name.split('.', 2)
@@ -546,7 +554,7 @@ module ActiveRecord
           schema = nil
         end
 
-        tables(nil, schema, table).any?
+        tables_and_views(nil, schema, table).any?
       end
 
       # Returns an array of indexes for the given table.

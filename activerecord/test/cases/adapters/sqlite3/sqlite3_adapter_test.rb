@@ -294,10 +294,10 @@ module ActiveRecord
       def test_tables_logs_name
         sql = <<-SQL
           SELECT name FROM sqlite_master
-          WHERE (type = 'table' OR type = 'view') AND NOT name = 'sqlite_sequence'
+          WHERE type = 'table' AND NOT name = 'sqlite_sequence'
         SQL
         assert_logged [[sql.squish, 'SCHEMA', []]] do
-          @conn.tables('hello')
+          @conn.tables
         end
       end
 

@@ -31,6 +31,11 @@ module ViewBehavior
     assert_equal ["Ruby for Rails"], books.map(&:name)
   end
 
+  def test_tables_excludes_view_names
+    tables = @connection.tables
+    assert !tables.include?("ebooks")
+  end
+
   def test_table_exists
     view_name = Ebook.table_name
     assert @connection.table_exists?(view_name), "'#{view_name}' table should exist"
@@ -89,6 +94,11 @@ class ViewWithoutPrimaryKeyTest < ActiveRecord::TestCase
   def test_reading
     books = Paperback.all
     assert_equal ["Agile Web Development with Rails"], books.map(&:name)
+  end
+
+  def test_tables_excludes_view_names
+    tables = @connection.tables
+    assert !tables.include?("paperbacks")
   end
 
   def test_table_exists

@@ -90,7 +90,7 @@ module ActiveRecord
     end
 
     def test_tables_logs_name
-      @connection.tables('hello')
+      @connection.tables
       assert_equal 'SCHEMA', @subscriber.logged[0][1]
     end
 

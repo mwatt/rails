@@ -312,6 +312,19 @@ module ActiveRecord
         sql = <<-SQL
           SELECT name
           FROM sqlite_master
+          WHERE type = 'table' AND NOT name = 'sqlite_sequence'
+        SQL
+        sql << " AND name = #{quote_table_name(table_name)}" if table_name
+
+        exec_query(sql, 'SCHEMA').map do |row|
+          row['name']
+        end
+      end
+
+      def tables_and_views(name = nil, table_name = nil) #:nodoc:
+        sql = <<-SQL
+          SELECT name
+          FROM sqlite_master
           WHERE (type = 'table' OR type = 'view') AND NOT name = 'sqlite_sequence'
         SQL
         sql << " AND name = #{quote_table_name(table_name)}" if table_name
@@ -322,7 +335,7 @@ module ActiveRecord
       end
 
       def table_exists?(table_name)
-        table_name && tables(nil, table_name).any?
+        table_name && tables_and_views(nil, table_name).any?
       end
 
       # Returns an array of +Column+ objects for the table specified by +table_name+.

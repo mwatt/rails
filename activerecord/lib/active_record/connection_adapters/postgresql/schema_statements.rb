@@ -69,7 +69,7 @@ module ActiveRecord
         end
 
         # Returns the list of all tables in the schema search path.
-        def tables(name = nil)
+        def tables
           select_values("SELECT tablename FROM pg_tables WHERE schemaname = ANY(current_schemas(false))", 'SCHEMA')
         end
 

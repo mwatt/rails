@@ -1,3 +1,37 @@
+*   Add short-hand methods for text and blob types in MySQL.
+
+    In Pg and Sqlite3, `:text` and `:binary` have variable unlimited length.
+    But in MySQL, these have limited length for each types (see also #21591, #21619).
+    This change adds short-hand methods for each text and blob types.
+
+    Before:
+
+        ```
+        create_table :foos do |t|
+          t.column :tiny_blob, 'tinyblob'
+          t.binary :medium_blob, limit: 16777215
+          t.binary :long_blob,   limit: 2147483647
+          t.text   :tiny_text,   limit: 255
+          t.text   :medium_text, limit: 16777215
+          t.text   :long_text,   limit: 2147483647
+        end
+        ```
+
+    Short-hand methods:
+
+        ```
+        create_table :foos do |t|
+          t.tinyblob   :tiny_blob
+          t.mediumblob :medium_blob
+          t.longblob   :long_blob
+          t.tinytext   :tiny_text
+          t.mediumtext :medium_text
+          t.longtext   :long_text
+        end
+        ```
+
+    *Ryuta Kamizono*
+
 *   Ensure `select` quotes aliased attributes, even when using `from`.
 
     Fixes #21488

@@ -15,6 +15,30 @@ module ActiveRecord
           args.each { |name| column(name, :json, options) }
         end
 
+        def tinyblob(*args, **options)
+          args.each { |name| column(name, :tinyblob, options) }
+        end
+
+        def mediumblob(*args, **options)
+          args.each { |name| column(name, :mediumblob, options) }
+        end
+
+        def longblob(*args, **options)
+          args.each { |name| column(name, :longblob, options) }
+        end
+
+        def tinytext(*args, **options)
+          args.each { |name| column(name, :tinytext, options) }
+        end
+
+        def mediumtext(*args, **options)
+          args.each { |name| column(name, :mediumtext, options) }
+        end
+
+        def longtext(*args, **options)
+          args.each { |name| column(name, :longtext, options) }
+        end
+
         def unsigned_integer(*args, **options)
           args.each { |name| column(name, :unsigned_integer, options) }
         end
@@ -1163,8 +1187,9 @@ module ActiveRecord
       def binary_to_sql(limit) # :nodoc:
         case limit
         when 0..0xfff;           "varbinary(#{limit})"
-        when nil;                "blob"
-        when 0x1000..0xffffffff; "blob(#{limit})"
+        when nil, 0x1000..0xffff;   'blob'
+        when 0x10000..0xffffff;     'mediumblob'
+        when 0x1000000..0xffffffff; 'longblob'
         else raise(ActiveRecordError, "No binary type has byte length #{limit}")
         end
       end

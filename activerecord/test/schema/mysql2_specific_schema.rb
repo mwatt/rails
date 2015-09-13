@@ -10,6 +10,12 @@ ActiveRecord::Schema.define do
     t.text   :normal_text, limit: 65535
     t.text   :medium_text, limit: 16777215
     t.text   :long_text, limit: 2147483647
+    t.tinyblob   :tiny_blob2
+    t.mediumblob :medium_blob2
+    t.longblob   :long_blob2
+    t.tinytext   :tiny_text2
+    t.mediumtext :medium_text2
+    t.longtext   :long_text2
   end
 
   add_index :binary_fields, :var_binary

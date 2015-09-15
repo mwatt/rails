@@ -88,7 +88,12 @@ module ActionView
           raise e if raise_error
 
           keys = I18n.normalize_keys(e.locale, e.key, e.options[:scope])
-          content_tag('span', keys.last.to_s.titleize, :class => 'translation_missing', :title => "translation missing: #{keys.join('.')}")
+          title = "translation missing: #{keys.join('.')}"
+          interpolation_options = options.except(:default)
+          if interpolation_options.present?
+            title << ", #{options.map{|k,v| "#{k}: #{ERB::Util.html_escape(v.to_s)}"}.join(', ')}"
+          end
+          content_tag('span', keys.last.to_s.titleize, class: 'translation_missing', title: title)
         end
       end
       alias :t :translate

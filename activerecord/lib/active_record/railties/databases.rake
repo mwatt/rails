@@ -93,30 +93,32 @@ db_namespace = namespace :db do
 
     desc 'Display status of migrations'
     task :status => [:environment, :load_config] do
-      unless ActiveRecord::SchemaMigration.table_exists?
-        abort 'Schema migrations table does not exist yet.'
+      unless ActiveRecord::Base.connection.table_exists?(ActiveRecord::Migrator.schema_migrations_table_name)
+        puts 'Schema migrations table does not exist yet.'
+        next  # means "return" for rake task
       end
-      db_list = ActiveRecord::SchemaMigration.normalized_versions
-
-      file_list =
-          ActiveRecord::Tasks::DatabaseTasks.migrations_paths.flat_map do |path|
-            # match "20091231235959_some_name.rb" and "001_some_name.rb" pattern
-            Dir.foreach(path).grep(/^(\d{3,})_(.+)\.rb$/) do
-              version = ActiveRecord::SchemaMigration.normalize_migration_number($1)
-              status = db_list.delete(version) ? 'up' : 'down'
-              [status, version, $2.humanize]
-            end
+      all_migrations = ActiveRecord::SchemaMigration.all
+      by_versions = all_migrations.index_by(&:version)
+      db_list = all_migrations.map { |record| "%.3d" % record.version }
+      file_list = []
+      ActiveRecord::Migrator.migrations_paths.each do |path|
+        Dir.foreach(path) do |file|
+          # match "20091231235959_some_name.rb" and "001_some_name.rb" pattern
+          if match_data = /^(\d{3,})_(.+)\.rb$/.match(file)
+            status = db_list.delete(match_data[1]) ? 'up' : 'down'
+            file_list << [status, match_data[1], match_data[2].humanize]
           end
-
+        end
+      end
       db_list.map! do |version|
         ['up', version, '********** NO FILE **********']
       end
       # output
       puts "\ndatabase: #{ActiveRecord::Base.connection_config[:database]}\n\n"
-      puts "#{'Status'.center(8)}  #{'Migration ID'.ljust(14)}  Migration Name"
-      puts "-" * 50
-      (db_list + file_list).sort_by { |_, version, _| version }.each do |status, version, name|
-        puts "#{status.center(8)}  #{version.ljust(14)}  #{name}"
+      puts "#{'Status'.center(8)}  #{'Migration ID'.ljust(14)}  #{'Migration Run'.ljust(24)}  Migration Name"
+      puts "-" * 75
+      (db_list + file_list).sort_by {|migration| migration[1]}.each do |migration|
+        puts "#{migration[0].center(8)}  #{migration[1].ljust(14)}  #{by_versions[migration[1].to_i].try(:created_at).to_s.ljust(24)}  #{migration[2]}"
       end
       puts
     end

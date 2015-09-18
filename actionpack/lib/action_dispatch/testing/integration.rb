@@ -321,7 +321,9 @@ module ActionDispatch
         end
 
         # Performs the actual request.
-        def process(method, path, params: nil, headers: nil, env: nil, xhr: false)
+        def process(method, path, params: nil, headers: nil, env: nil, xhr: false, as: :www_form)
+          request_encoder = RequestEncoder.encoder(as)
+
           if path =~ %r{://}
             location = URI.parse(path)
             https! URI::HTTPS === location if location.scheme
@@ -333,11 +335,13 @@ module ActionDispatch
             path = location.query ? "#{location.path}?#{location.query}" : location.path
           end
 
+          path << request_encoder.format
+
           hostname, port = host.split(':')
 
           request_env = {
             :method => method,
-            :params => params,
+            :params => request_encoder.encode_params(params),
 
             "SERVER_NAME"     => hostname,
             "SERVER_PORT"     => port || (https? ? "443" : "80"),
@@ -347,7 +351,7 @@ module ActionDispatch
             "REQUEST_URI"    => path,
             "HTTP_HOST"      => host,
             "REMOTE_ADDR"    => remote_addr,
-            "CONTENT_TYPE"   => "application/x-www-form-urlencoded",
+            "CONTENT_TYPE"   => request_encoder.content_type,
             "HTTP_ACCEPT"    => accept
           }
 
@@ -385,6 +389,35 @@ module ActionDispatch
 
         def build_full_uri(path, env)
           "#{env['rack.url_scheme']}://#{env['SERVER_NAME']}:#{env['SERVER_PORT']}#{path}"
+        end
+
+        class RequestEncoder # :nodoc:
+          @encoders = {}
+
+          attr_reader :format, :content_type
+
+          def initialize(format, content_type, param_encoder)
+            @format = format.to_s
+            @content_type  = content_type  || "application/#{format}"
+            @param_encoder = param_encoder || -> params { params }
+          end
+
+          def encode_params(params)
+            @param_encoder.call params
+          end
+
+          def self.encoder(name)
+            @encoders[name] || raise(ArgumentError, "Can't encode request as " \
+              "#{name.inspect}. Can only encode as: #{@encoders.keys.inspect}.")
+          end
+
+          def self.define_encoder(name, param_encoder = nil, format: name, content_type: nil)
+            @encoders[name] = new(format, content_type, param_encoder)
+          end
+
+          define_encoder(:www_form, format: nil, content_type: 'application/x-www-form-urlencoded')
+          define_encoder(:json, &:to_json)
+          define_encoder(:xml,  &:to_xml)
         end
     end
 

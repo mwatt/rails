@@ -873,7 +873,7 @@ module ActiveRecord
 
         ActiveRecord::SchemaMigration.order('version').map { |sm|
           quoted_values_cs = column_names.map do |column_name|
-            "'" + ActiveRecord::SchemaMigration.connection.quote(sm.attributes(column_name)) + "'"
+            ActiveRecord::SchemaMigration.connection.quote(sm.attributes[column_name])
           end.join(', ')
           "INSERT INTO #{sm_table} (#{column_names_cs}) VALUES (#{quoted_values_cs});"
         }.join "\n\n"

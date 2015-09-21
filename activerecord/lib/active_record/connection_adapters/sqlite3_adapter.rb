@@ -81,8 +81,7 @@ module ActiveRecord
         super(connection, logger)
 
         @active     = nil
-        @statements = StatementPool.new(@connection,
-                                        self.class.type_cast_config_to_integer(config.fetch(:statement_limit) { 1000 }))
+        @statements = StatementPool.new(self.class.type_cast_config_to_integer(config.fetch(:statement_limit) { 1000 }))
         @config = config
 
         @visitor = Arel::Visitors::SQLite.new self
@@ -325,6 +324,19 @@ module ActiveRecord
         table_name && tables(nil, table_name).any?
       end
 
+      def views # :nodoc:
+        select_values("SELECT name FROM sqlite_master WHERE type = 'view' AND name <> 'sqlite_sequence'", 'SCHEMA')
+      end
+
+      def view_exists?(view_name) # :nodoc:
+        return false unless view_name.present?
+
+        sql = "SELECT name FROM sqlite_master WHERE type = 'view' AND name <> 'sqlite_sequence'"
+        sql << " AND name = #{quote(view_name)}"
+
+        select_values(sql, 'SCHEMA').any?
+      end
+
       # Returns an array of +Column+ objects for the table specified by +table_name+.
       def columns(table_name) #:nodoc:
         table_structure(table_name).map do |field|
@@ -369,10 +381,9 @@ module ActiveRecord
         end
       end
 
-      def primary_key(table_name) #:nodoc:
+      def primary_keys(table_name) # :nodoc:
         pks = table_structure(table_name).select { |f| f['pk'] > 0 }
-        return nil unless pks.count == 1
-        pks[0]['name']
+        pks.sort_by { |f| f['pk'] }.map { |f| f['name'] }
       end
 
       def remove_index(table_name, options = {}) #:nodoc:

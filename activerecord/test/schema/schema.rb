@@ -1,4 +1,3 @@
-
 ActiveRecord::Schema.define do
   def except(adapter_names_to_exclude)
     unless [adapter_names_to_exclude].flatten.include?(adapter_name)
@@ -943,6 +942,10 @@ ActiveRecord::Schema.define do
   create_table :users, force: true do |t|
     t.string :token
     t.string :auth_token
+  end
+
+  create_table :test_with_keyword_column_name, force: true do |t|
+    t.string :desc
   end
 end
 

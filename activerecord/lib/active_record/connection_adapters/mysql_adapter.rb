@@ -80,8 +80,7 @@ module ActiveRecord
 
       def initialize(connection, logger, connection_options, config)
         super
-        @statements = StatementPool.new(@connection,
-                                        self.class.type_cast_config_to_integer(config.fetch(:statement_limit) { 1000 }))
+        @statements = StatementPool.new(self.class.type_cast_config_to_integer(config.fetch(:statement_limit) { 1000 }))
         @client_encoding = nil
         connect
       end
@@ -161,6 +160,14 @@ module ActiveRecord
       #--
       # DATABASE STATEMENTS ======================================
       #++
+
+      def select_all(arel, name = nil, binds = [])
+        if ExplainRegistry.collect? && prepared_statements
+          unprepared_statement { super }
+        else
+          super
+        end
+      end
 
       def select_rows(sql, name = nil, binds = [])
         @connection.query_with_result = true

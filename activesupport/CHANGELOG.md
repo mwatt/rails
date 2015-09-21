@@ -1,3 +1,14 @@
+*   Short-circuit `blank?` on date and time values since they are never blank.
+
+    Fixes #21657
+
+    *Andrew White*
+
+*   Replaced deprecated `ThreadSafe::Cache` with its successor `Concurrent::Map` now that
+    the thread_safe gem has been merged into concurrent-ruby.
+
+    *Jerry D'Antonio*
+
 *   Updated Unicode version to 8.0.0
 
     *Anshul Sharma*

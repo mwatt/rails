@@ -1,3 +1,43 @@
+*   Ensure `select` quotes aliased attributes, even when using `from`.
+
+    Fixes #21488
+
+    *Sean Griffin & @johanlunds*
+
+*   MySQL: support `unsigned` numeric data types.
+
+    Example:
+
+        create_table :foos do |t|
+          t.unsigned_integer :quantity
+          t.unsigned_bigint  :total
+          t.unsigned_float   :percentage
+          t.unsigned_decimal :price, precision: 10, scale: 2
+        end
+
+    The `unsigned: true` option may be used for the primary key:
+
+        create_table :foos, id: :bigint, unsigned: true do |t|
+          …
+        end
+
+    *Ryuta Kamizono*
+
+*   Add `#views` and `#view_exists?` methods on connection adapters.
+
+    *Ryuta Kamizono*
+
+*   Correctly dump composite primary key.
+
+    Example:
+
+        create_table :barcodes, primary_key: ["region", "code"] do |t|
+          t.string :region
+          t.integer :code
+        end
+
+    *Ryuta Kamizono*
+
 *   Lookup the attribute name for `restrict_with_error` messages on the
     model class that defines the association.
 

@@ -83,30 +83,28 @@ module ApplicationTests
         end
       end
 
-      if current_adapter?(:PostgreSQLAdapter)
-        test 'test migration rollback when using invocation time' do
-          ActiveRecord::Base.schema_migrations_by_invocation_time = true
-          Dir.chdir(app_path) do
-            `bin/rails generate model user username:string password:string;
-             bin/rails generate migration add_email_to_users email:string;
-             bin/rake db:migrate`
+      test 'test migration rollback when using invocation time' do
+        ActiveRecord::Base.schema_migrations_by_invocation_time = true
+        Dir.chdir(app_path) do
+          `bin/rails generate model user username:string password:string;
+           bin/rails generate migration add_email_to_users email:string;
+           bin/rake db:migrate`
 
-            # change the migration time...
+          # change the migration time...
 
-            version = ActiveRecord::SchemaMigration.all.order(:version).first.version
-            ActiveRecord::SchemaMigration.where(version: version).update_all(created_at: Time.zone.now)
+          version = ActiveRecord::SchemaMigration.all.order(:version).first.version
+          ActiveRecord::SchemaMigration.where(version: version).update_all(created_at: Time.zone.now)
 
-            output = `bin/rake db:migrate:status`
+          output = `bin/rake db:migrate:status`
 
-            assert_match(/up\s+\d{14}\s+.{24}\s+Create users/, output)
-            assert_match(/up\s+\d{14}\s+.{24}\s+Add email to users/, output)
+          assert_match(/up\s+\d{14}\s+.{24}\s+Create users/, output)
+          assert_match(/up\s+\d{14}\s+.{24}\s+Add email to users/, output)
 
-            `bin/rake db:rollback STEP=1`
-            output = `bin/rake db:migrate:status`
+          `bin/rake db:rollback STEP=1`
+          output = `bin/rake db:migrate:status`
 
-            assert_match(/down\s+\d{14}\s+.{24}\s+Create users/, output)
-            assert_match(/up\s+\d{14}\s+.{24}\s+Add email to users/, output)
-          end
+          assert_match(/down\s+\d{14}\s+.{24}\s+Create users/, output)
+          assert_match(/up\s+\d{14}\s+.{24}\s+Add email to users/, output)
         end
       end
 

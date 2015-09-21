@@ -379,7 +379,8 @@ module ActiveRecord
   #
   #    config.active_record.timestamped_migrations = false
   #
-  # Migrations can now default to sorting by time they were invoked:
+  # Migrations can now, by default, be sorted by the time they were invoked:
+  #
   #    config.active_record.schema_migrations_by_invocation_time = true
   #
   # In application.rb.

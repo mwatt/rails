@@ -56,6 +56,34 @@ module ActiveRecord
       def normalized_versions
         pluck(:version).map { |v| normalize_migration_number v }
       end
+
+      def sorter(a, b)
+        if ActiveRecord::Base.schema_migrations_by_invocation_time
+          if a.created_at.nil?
+            if b.created_at.nil?
+              a.version <=> b.version
+            else
+              1
+            end
+          else
+            if b.created_at.nil?
+              -1
+            else
+              if a.created_at == b.created_at
+                a.version <=> b.version
+              else
+                a.created_at <=> b.created_at
+              end
+            end
+          end
+        else
+          a.version <=> b.version
+        end
+      end
+    end
+
+    def normalized_version
+      self.class.normalize_migration_number(version)
     end
 
     def version

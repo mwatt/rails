@@ -871,12 +871,14 @@ module ActiveRecord
         column_names = ActiveRecord::SchemaMigration.column_names
         column_names_cs = column_names.join(', ')
 
-        ActiveRecord::SchemaMigration.order('version').map { |sm|
+        ActiveRecord::SchemaMigration.all.sort do |a, b|
+          ActiveRecord::SchemaMigration.sorter(a, b)
+        end.map do |sm|
           quoted_values_cs = column_names.map do |column_name|
             ActiveRecord::SchemaMigration.connection.quote(sm.attributes[column_name])
           end.join(', ')
           "INSERT INTO #{sm_table} (#{column_names_cs}) VALUES (#{quoted_values_cs});"
-        }.join "\n\n"
+        end.join "\n\n"
       end
 
       # Should not be called normally, but this operation is non-destructive.

@@ -311,7 +311,7 @@ module ActiveRecord
         sql = <<-SQL
           SELECT name
           FROM sqlite_master
-          WHERE (type = 'table' OR type = 'view') AND NOT name = 'sqlite_sequence'
+          WHERE (type = 'table' OR type = 'view') AND NOT name = 'sqlite_sequence';
         SQL
         sql << " AND name = #{quote_table_name(table_name)}" if table_name
 
@@ -319,10 +319,12 @@ module ActiveRecord
           row['name']
         end
       end
+      alias data_sources tables
 
       def table_exists?(table_name)
         table_name && tables(nil, table_name).any?
       end
+      alias data_source_exists? table_exists?
 
       def views # :nodoc:
         select_values("SELECT name FROM sqlite_master WHERE type = 'view' AND name <> 'sqlite_sequence'", 'SCHEMA')

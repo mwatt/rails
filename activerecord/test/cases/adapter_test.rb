@@ -36,6 +36,21 @@ module ActiveRecord
       assert !@connection.table_exists?(nil)
     end
 
+    def test_data_sources
+      tables = @connection.data_sources
+      assert tables.include?("accounts")
+      assert tables.include?("authors")
+      assert tables.include?("tasks")
+      assert tables.include?("topics")
+    end
+
+    def test_data_source_exists?
+      assert @connection.data_source_exists?("accounts")
+      assert @connection.data_source_exists?(:accounts)
+      assert_not @connection.data_source_exists?("nonexistingtable")
+      assert_not @connection.data_source_exists?(nil)
+    end
+
     def test_indexes
       idx_name = "accounts_idx"
 

@@ -89,6 +89,7 @@ module ActiveRecord
               AND n.nspname = #{name.schema ? "'#{name.schema}'" : 'ANY (current_schemas(false))'}
           SQL
         end
+        alias data_source_exists? table_exists?
 
         def views # :nodoc:
           select_values(<<-SQL, 'SCHEMA')

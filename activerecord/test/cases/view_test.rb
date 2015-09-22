@@ -47,6 +47,11 @@ module ViewBehavior
     assert @connection.table_exists?(view_name), "'#{view_name}' table should exist"
   end
 
+  def test_views_ara_valid_data_sources
+    view_name = Ebook.table_name
+    assert @connection.view_exists?(view_name), "'#{view_name}' should be a data source"
+  end
+
   def test_column_definitions
     assert_equal([["id", :integer],
                   ["name", :string],

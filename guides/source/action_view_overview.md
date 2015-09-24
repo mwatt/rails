@@ -82,6 +82,12 @@ Hi, Mr. <% puts "Frodo" %>
 
 To suppress leading and trailing whitespaces, you can use `<%-` `-%>` interchangeably with `<%` and `%>`.
 
+TIP: If you see something like `#<Person:0x00000100ccb3b0>`,
+that means you're trying to output a Ruby object directly.
+Instead, you can call a method on that object (like `.inspect` when debugging)
+or you can override the `to_s` method in that object's class.
+
+
 #### Builder
 
 Builder templates are a more programmatic alternative to ERB. They are especially useful for generating XML content. An XmlMarkup object named `xml` is automatically made available to templates with a `.builder` extension.

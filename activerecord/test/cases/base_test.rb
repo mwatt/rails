@@ -204,7 +204,7 @@ class BasicsTest < ActiveRecord::TestCase
     )
 
     # For adapters which support microsecond resolution.
-    if current_adapter?(:PostgreSQLAdapter, :SQLite3Adapter) || mysql_56?
+    if subsecond_precision_supported?
       assert_equal 11, Topic.find(1).written_on.sec
       assert_equal 223300, Topic.find(1).written_on.usec
       assert_equal 9900, Topic.find(2).written_on.usec
@@ -1570,5 +1570,23 @@ class BasicsTest < ActiveRecord::TestCase
     Topic.reset_column_information
 
     assert_not topic.id_changed?
+  end
+
+  test "ignored columns are not present in columns_hash" do
+    cache_columns = Developer.connection.schema_cache.columns_hash(Developer.table_name)
+    assert_includes cache_columns.keys, 'first_name'
+    refute_includes Developer.columns_hash.keys, 'first_name'
+  end
+
+  test "ignored columns have no attirbute methods" do
+    refute Developer.new.respond_to?(:first_name)
+    refute Developer.new.respond_to?(:first_name=)
+    refute Developer.new.respond_to?(:first_name?)
+  end
+
+  test "ignored columns don't prevent explicit declaration of attribute methods" do
+    assert Developer.new.respond_to?(:last_name)
+    assert Developer.new.respond_to?(:last_name=)
+    assert Developer.new.respond_to?(:last_name?)
   end
 end

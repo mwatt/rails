@@ -257,7 +257,7 @@ db_namespace = namespace :db do
         filename = File.join(ActiveRecord::Tasks::DatabaseTasks.db_dir, "schema_cache.dump")
 
         con.schema_cache.clear!
-        con.tables.each { |table| con.schema_cache.add(table) }
+        con.data_sources.each { |table| con.schema_cache.add(table) }
         open(filename, 'wb') { |f| f.write(Marshal.dump(con.schema_cache)) }
       end
 
@@ -355,7 +355,7 @@ db_namespace = namespace :db do
       ActiveRecord::Tasks::DatabaseTasks.purge ActiveRecord::Base.configurations['test']
     end
 
-    # desc 'Check for pending migrations and load the test schema'
+    # desc 'Load the test schema'
     task :prepare => %w(environment load_config) do
       unless ActiveRecord::Base.configurations.blank?
         db_namespace['test:load'].invoke

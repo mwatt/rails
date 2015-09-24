@@ -4,7 +4,7 @@ require 'rack/content_length'
 
 class ResponseTest < ActiveSupport::TestCase
   def setup
-    @response = ActionDispatch::Response.new
+    @response = ActionDispatch::Response.create
   end
 
   def test_can_wait_until_commit
@@ -149,12 +149,19 @@ class ResponseTest < ActiveSupport::TestCase
     status, headers, body = @response.to_a
     assert_equal "user_name=david; path=/", headers["Set-Cookie"]
     assert_equal({"user_name" => "david"}, @response.cookies)
+  end
 
+  test "multiple cookies" do
+    @response.set_cookie("user_name", :value => "david", :path => "/")
     @response.set_cookie("login", :value => "foo&bar", :path => "/", :expires => Time.utc(2005, 10, 10,5))
     status, headers, body = @response.to_a
     assert_equal "user_name=david; path=/\nlogin=foo%26bar; path=/; expires=Mon, 10 Oct 2005 05:00:00 -0000", headers["Set-Cookie"]
     assert_equal({"login" => "foo&bar", "user_name" => "david"}, @response.cookies)
+  end
 
+  test "delete cookies" do
+    @response.set_cookie("user_name", :value => "david", :path => "/")
+    @response.set_cookie("login", :value => "foo&bar", :path => "/", :expires => Time.utc(2005, 10, 10,5))
     @response.delete_cookie("login")
     status, headers, body = @response.to_a
     assert_equal({"user_name" => "david", "login" => nil}, @response.cookies)
@@ -210,7 +217,7 @@ class ResponseTest < ActiveSupport::TestCase
         'X-Content-Type-Options' => 'nosniff',
         'X-XSS-Protection' => '1;'
       }
-      resp = ActionDispatch::Response.new.tap { |response|
+      resp = ActionDispatch::Response.create.tap { |response|
         response.body = 'Hello'
       }
       resp.to_a
@@ -229,7 +236,7 @@ class ResponseTest < ActiveSupport::TestCase
       ActionDispatch::Response.default_headers = {
         'X-XX-XXXX' => 'Here is my phone number'
       }
-      resp = ActionDispatch::Response.new.tap { |response|
+      resp = ActionDispatch::Response.create.tap { |response|
         response.body = 'Hello'
       }
       resp.to_a

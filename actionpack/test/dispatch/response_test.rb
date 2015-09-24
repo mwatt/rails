@@ -230,6 +230,27 @@ class ResponseTest < ActiveSupport::TestCase
     end
   end
 
+  test "read default x_frame_options for allow framing on same domain" do
+    original_default_headers = ActionDispatch::Response.default_headers
+    begin
+      ActionDispatch::Response.default_headers = {
+        'X-Frame-Options' => 'SAMEORIGIN',
+        'X-XSS-Protection' => '1; mode=block',
+        'X-Content-Type-Options' => 'nosniff'
+      }
+      resp = ActionDispatch::Response.create.tap { |response|
+        response.body = 'Welcome aboard'
+      }
+      resp.to_a
+
+      assert_equal('SAMEORIGIN', resp.headers['X-Frame-Options'])
+      assert_equal('nosniff', resp.headers['X-Content-Type-Options'])
+      assert_equal('1; mode=block', resp.headers['X-XSS-Protection'])
+    ensure
+      ActionDispatch::Response.default_headers = original_default_headers
+    end
+  end
+
   test "read custom default_header" do
     original_default_headers = ActionDispatch::Response.default_headers
     begin

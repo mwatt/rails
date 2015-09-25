@@ -50,12 +50,6 @@ module ActiveRecord
         end.to_sym
       end
 
-      def id_kind
-        if kind = Rails.application.config.active_record.fetch(:primary_key, nil)
-          ", id: :#{kind}"
-        end
-      end
-
       private
         def attributes_with_index
           attributes.select { |a| !a.reference? && a.has_index? }

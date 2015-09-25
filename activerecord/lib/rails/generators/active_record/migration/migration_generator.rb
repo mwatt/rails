@@ -51,7 +51,9 @@ module ActiveRecord
       end
 
       def id_kind
-        ", id: :uuid" if Rails.application.config.active_record.fetch(:primary_key, nil) == :uuid
+        if kind = Rails.application.config.active_record.fetch(:primary_key, nil)
+          ", id: :#{kind}"
+        end
       end
 
       private

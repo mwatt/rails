@@ -31,9 +31,8 @@ module Rails
       end
 
       def id_kind
-        if kind = Rails.application.config.active_record.fetch(:primary_key, nil)
-          ", id: :#{kind}"
-        end
+        kind = Rails.application.config.active_record.primary_key rescue nil
+        ", id: :#{kind}" if kind
       end
 
       def create_migration(destination, data, config = {}, &block)

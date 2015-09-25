@@ -50,6 +50,10 @@ module ActiveRecord
         end.to_sym
       end
 
+      def id_kind
+        ", id: :uuid" if Rails.application.config.active_record.fetch(:primary_key, nil) == :uuid
+      end
+
       private
         def attributes_with_index
           attributes.select { |a| !a.reference? && a.has_index? }

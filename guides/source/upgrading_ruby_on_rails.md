@@ -55,10 +55,10 @@ Upgrading from Rails 4.2 to Rails 5.0
 
 ### Halting callback chains by returning `false`
 
-In Rails 4.2, when a 'before' callback returns `false` in ActiveRecord,
-ActiveModel and ActiveModel::Validations, then the entire callback chain
-is halted. In other words, successive 'before' callbacks are not executed,
-and neither is the action wrapped in callbacks.
+In Rails 4.2, when a 'before' callback returns `false` in Active Record
+and Active Model, then the entire callback chain is halted. In other words,
+successive 'before' callbacks are not executed, and neither is the action wrapped
+in callbacks.
 
 In Rails 5.0, returning `false` in a callback will not have this side effect
 of halting the callback chain. Instead, callback chains must be explicitly
@@ -71,7 +71,7 @@ about this upcoming change.
 When you are ready, you can opt into the new behavior and remove the deprecation
 warning by adding the following configuration to your `config/application.rb`:
 
-    config.active_support.halt_callback_chains_on_return_false = false
+    ActiveSupport.halt_callback_chains_on_return_false = false
 
 See [#17227](https://github.com/rails/rails/pull/17227) for more details.
 

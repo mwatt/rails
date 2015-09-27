@@ -154,6 +154,11 @@ PATH
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
 
+PATH
+  remote: ~/source/concurrent-ruby
+  specs:
+    concurrent-ruby (1.0.0.pre2)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -179,7 +184,6 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.9.1.1)
-    concurrent-ruby (1.0.0.pre2)
     connection_pool (2.2.0)
     dalli (2.7.4)
     dante (0.2.0)
@@ -309,6 +313,7 @@ DEPENDENCIES
   benchmark-ips
   byebug
   coffee-rails (~> 4.1.0)
+  concurrent-ruby!
   dalli (>= 2.2.1)
   delayed_job
   delayed_job_active_record

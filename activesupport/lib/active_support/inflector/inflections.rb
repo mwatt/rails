@@ -1,4 +1,6 @@
-require 'concurrent'
+# FIXME: clean up warning spam from concurrent lib
+require 'active_support/core_ext/kernel/reporting'
+Kernel.silence_warnings { require 'concurrent' }
 require 'active_support/core_ext/array/prepend_and_append'
 require 'active_support/i18n'
 

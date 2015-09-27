@@ -3,6 +3,8 @@ require "rails/test_unit/reporter"
 require "rails/test_unit/test_requirer"
 
 module Minitest
+  @rake_patterns = nil
+
   def self.plugin_rails_options(opts, options)
     opts.separator ""
     opts.separator "Usage: bin/rails test [options] [files or directories]"

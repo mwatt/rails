@@ -1,3 +1,67 @@
+*   Add fail fast to `bin/rails test`
+
+    Adding `--fail-fast` or `-f` when running tests will interrupt the run on
+    the first failure.
+
+    Minitest 5.6.0 is recommended, as it captures Interrupt so you don't see a
+    backtrace like:
+
+    ```
+    /Users/kasperhansen/Documents/code/rails/railties/lib/rails/test_unit/reporter.rb:22:in `record': Interrupt (Interrupt)
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:613:in `block in record'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:612:in `each'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:612:in `record'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:293:in `run_one_method'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:287:in `block (2 levels) in run'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:286:in `each'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:286:in `block in run'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:317:in `on_signal'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:306:in `with_info_handler'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:285:in `run'
+    from /Users/kasperhansen/Documents/code/rails/activesupport/lib/active_support/test_case.rb:49:in `run'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:149:in `block in __run'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:149:in `map'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:149:in `__run'
+    from /Users/kasperhansen/.rbenv/versions/2.2.3/lib/ruby/gems/2.2.0/gems/minitest-5.1.0/lib/minitest.rb:126:in `run'
+    from /Users/kasperhansen/Documents/code/rails/railties/lib/rails/commands/test.rb:9:in `<top (required)>'
+    from /Users/kasperhansen/Documents/code/rails/railties/lib/rails/commands/commands_tasks.rb:128:in `require'
+    from /Users/kasperhansen/Documents/code/rails/railties/lib/rails/commands/commands_tasks.rb:128:in `require_command!'
+    from /Users/kasperhansen/Documents/code/rails/railties/lib/rails/commands/commands_tasks.rb:86:in `test'
+    from /Users/kasperhansen/Documents/code/rails/railties/lib/rails/commands/commands_tasks.rb:40:in `run_command!'
+    from /Users/kasperhansen/Documents/code/rails/railties/lib/rails/commands.rb:18:in `<top (required)>'
+    from bin/rails:4:in `require'
+    from bin/rails:4:in `<main>'
+    ```
+
+    Here's what that looks like:
+
+    ```
+    # Running:
+
+    ................................................S......E
+
+    ArgumentError: Wups! Bet you didn't expect this!
+        test/models/bunny_test.rb:19:in `block in <class:BunnyTest>'
+
+    bin/rails test test/models/bunny_test.rb:18
+
+    ....................................F
+
+    This failed
+
+    bin/rails test test/models/bunny_test.rb:14
+
+    Interrupted. Exiting...
+
+
+    Finished in 0.051427s, 1808.3872 runs/s, 1769.4972 assertions/s.
+
+    ```
+
+    Note that any unexpected errors don't abort the run.
+
+    *Kasper Timm Hansen*
+
 *   Add inline output to `bin/rails test`
 
     Any failures or errors (and skips if running in verbose mode) are output

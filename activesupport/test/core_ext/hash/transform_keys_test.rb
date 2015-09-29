@@ -21,12 +21,14 @@ class TransformKeysTest < ActiveSupport::TestCase
   test "transform_keys returns an Enumerator if no block is given" do
     original = { a: 'a', b: 'b' }
     enumerator = original.transform_keys
+    assert_nil enumerator.size
     assert_equal Enumerator, enumerator.class
   end
 
   test "transform_keys! returns an Enumerator if no block is given" do
     original = { a: 'a', b: 'b' }
     enumerator = original.transform_keys!
+    assert_nil enumerator.size
     assert_equal Enumerator, enumerator.class
   end
 

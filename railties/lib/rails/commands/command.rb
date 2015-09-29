@@ -10,8 +10,8 @@ module Rails
       def run(task_name)
         command_name = Command.name_for(task_name)
 
-        if command = command_instance_for(command_name)
-          command.public_send(command_name)
+        if command_instance = command_instance_for(command_name)
+          command_instance.public_send(command_name)
           true
         else
           # Print help or some other documentation
@@ -37,15 +37,15 @@ module Rails
       end
 
       private
-        @@command_wrappers = []
+        @@commands = []
 
         def self.inherited(command)
-          @@command_wrappers << command
+          @@commands << command
         end
 
         def command_instance_for(command_name)
-          klass = @@command_wrappers.find do |command_wrapper|
-            command_instance_methods = command_wrapper.public_instance_methods
+          klass = @@commands.find do |command|
+            command_instance_methods = command.public_instance_methods
             command_instance_methods.include?(command_name.to_sym)
           end
 

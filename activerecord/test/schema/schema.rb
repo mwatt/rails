@@ -253,17 +253,10 @@ ActiveRecord::Schema.define do
     t.string   :first_name
     t.integer  :salary, default: 70000
     t.integer :firm_id
-    if subsecond_precision_supported?
-      t.datetime :created_at, precision: 6
-      t.datetime :updated_at, precision: 6
-      t.datetime :created_on, precision: 6
-      t.datetime :updated_on, precision: 6
-    else
-      t.datetime :created_at
-      t.datetime :updated_at
-      t.datetime :created_on
-      t.datetime :updated_on
-    end
+    t.datetime :created_at
+    t.datetime :updated_at
+    t.datetime :created_on
+    t.datetime :updated_on
   end
 
   create_table :developers_projects, force: true, id: false do |t|

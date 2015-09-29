@@ -7,13 +7,7 @@ module Rails
     #   rails test
     #   rails test:db
     class Test < Command
-      def test
-        system("bin/rake test")
-      end
-
-      def test_db
-        system("bin/rake test:db")
-      end
+      rake_delegate 'test', 'test:db'
     end
   end
 end

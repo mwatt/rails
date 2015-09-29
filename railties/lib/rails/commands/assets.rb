@@ -9,21 +9,8 @@ module Rails
     #   rails assets:environment
     #   rails assets:precompile
     class Assets < Command
-      def assets_clean
-        system("bin/rake assets:clean")
-      end
-
-      def assets_clobber
-        system("bin/rake assets:clobber")
-      end
-
-      def assets_environment
-        system("bin/rake assets:environment")
-      end
-
-      def assets_precompile
-        system("bin/rake assets:precompile")
-      end
+      rake_delegate 'assets:clean', 'assets:clobber', 'assets:environment',
+        'assets:precompile'
     end
   end
 end

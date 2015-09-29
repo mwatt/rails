@@ -4,13 +4,7 @@ module Rails
     #   rails tmp:clear
     #   rails tmp:create
     class Tmp < Command
-      def tmp_clear
-        system("bin/rake tmp:clear")
-      end
-
-      def tmp_create
-        system("bin/rake tmp:create")
-      end
+      rake_delegate 'tmp:clear', 'tmp:create'
     end
   end
 end

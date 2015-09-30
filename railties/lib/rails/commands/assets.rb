@@ -3,12 +3,12 @@ require 'rake'
 
 module Rails
   module Commands
-    # This is a wrapper around all Rails assets tasks, including:
-    #   rails assets:clean
-    #   rails assets:clobber
-    #   rails assets:environment
-    #   rails assets:precompile
     class Assets < Command
+      set_banner :assets_clean, ''
+      set_banner :assets_clobber, ''
+      set_banner :assets_environment, ''
+      set_banner :assets_precompile, ''
+
       rake_delegate 'assets:clean', 'assets:clobber', 'assets:environment',
         'assets:precompile'
     end

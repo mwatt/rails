@@ -1,10 +1,7 @@
 module Rails
   module Commands
     class Db < Command
-      options_for :db_migrate do |opts, _|
-        opts.banner = 'Run pending migrations for database'
-      end
-
+      set_banner :db_migrate 'Run pending migrations for database'
       rake_delegate 'db:migrate'
     end
   end

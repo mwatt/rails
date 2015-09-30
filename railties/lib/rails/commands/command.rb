@@ -43,6 +43,10 @@ module Rails
         task_name.gsub(':', '_')
       end
 
+      def self.set_banner(command_name, banner)
+        options_for(command_name) { |opts, _| opts.banner banner }
+      end
+
       private
         @@commands = []
         @@command_options = {}

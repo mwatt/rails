@@ -108,7 +108,7 @@ class CookieStoreTest < ActionDispatch::IntegrationTest
     with_test_route_set(:secure => true) do
       get '/set_session_value'
       assert_response :success
-      assert_equal nil, headers['Set-Cookie']
+      assert_equal '', headers['Set-Cookie']
     end
   end
 
@@ -222,7 +222,7 @@ class CookieStoreTest < ActionDispatch::IntegrationTest
       get '/get_session_value'
       assert_response :success
       assert_equal 'foo: nil', response.body
-      assert_nil headers['Set-Cookie'], "should only create session on write, not read"
+      assert_equal '', headers['Set-Cookie'], "should only create session on write, not read"
     end
   end
 

@@ -100,11 +100,13 @@ db_namespace = namespace :db do
 
       file_list =
           ActiveRecord::Tasks::DatabaseTasks.migrations_paths.flat_map do |path|
-            # match "20091231235959_some_name.rb" and "001_some_name.rb" pattern
-            Dir.foreach(path).grep(/^(\d{3,})_(.+)\.rb$/) do
-              version = ActiveRecord::SchemaMigration.normalize_migration_number($1)
+            Dir.foreach(path).select do |file|
+              ActiveRecord::Migrator.match_to_migration_filename?(File.basename(file))
+            end.map do |file|
+              version, name, scope = ActiveRecord::Migrator.parse_migration_filename(File.basename(file))
+              version = ActiveRecord::SchemaMigration.normalize_migration_number(version)
               status = db_list.delete(version) ? 'up' : 'down'
-              [status, version, $2.humanize]
+              [status, version, (name + scope).humanize]
             end
           end
 

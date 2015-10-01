@@ -2,7 +2,7 @@ require "active_support/core_ext/module/attribute_accessors"
 require 'set'
 
 module ActiveRecord
-  class MigrationError < ActiveRecordError#:nodoc:
+  class MigrationError < ActiveRecordError # :nodoc:
     def initialize(message = nil)
       message = "\n\n#{message}\n\n" if message
       super
@@ -83,7 +83,7 @@ module ActiveRecord
   class IrreversibleMigration < MigrationError
   end
 
-  class DuplicateMigrationVersionError < MigrationError#:nodoc:
+  class DuplicateMigrationVersionError < MigrationError # :nodoc:
     def initialize(version = nil)
       if version
         super("Multiple migrations have the version number #{version}.")
@@ -93,7 +93,7 @@ module ActiveRecord
     end
   end
 
-  class DuplicateMigrationNameError < MigrationError#:nodoc:
+  class DuplicateMigrationNameError < MigrationError # :nodoc:
     def initialize(name = nil)
       if name
         super("Multiple migrations have the name #{name}.")
@@ -103,7 +103,7 @@ module ActiveRecord
     end
   end
 
-  class UnknownMigrationVersionError < MigrationError #:nodoc:
+  class UnknownMigrationVersionError < MigrationError # :nodoc:
     def initialize(version = nil)
       if version
         super("No migration with version number #{version}.")
@@ -113,7 +113,7 @@ module ActiveRecord
     end
   end
 
-  class IllegalMigrationNameError < MigrationError#:nodoc:
+  class IllegalMigrationNameError < MigrationError # :nodoc:
     def initialize(name = nil)
       if name
         super("Illegal name for migration file: #{name}\n\t(only lower case letters, numbers, and '_' allowed).")
@@ -123,7 +123,7 @@ module ActiveRecord
     end
   end
 
-  class PendingMigrationError < MigrationError#:nodoc:
+  class PendingMigrationError < MigrationError # :nodoc:
     def initialize(message = nil)
       if !message && defined?(Rails.env)
         super("Migrations are pending. To resolve this issue, run:\n\n\tbin/rake db:migrate RAILS_ENV=#{::Rails.env}.")
@@ -433,6 +433,7 @@ module ActiveRecord
   class Migration
     autoload :CommandRecorder, 'active_record/migration/command_recorder'
 
+    MigrationFilenameRegexp = /\A([0-9]+)_([_a-z0-9]*)\.?([_a-z0-9]*)?\.rb\z/ # :nodoc:
 
     # This class is used to verify that all migrations have been run before
     # loading a web page if config.active_record.migration_error is set to :page_load
@@ -810,7 +811,7 @@ module ActiveRecord
 
     # Builds a hash for use in ActiveRecord::Migration#proper_table_name using
     # the Active Record object's table_name prefix and suffix
-    def table_name_options(config = ActiveRecord::Base) #:nodoc:
+    def table_name_options(config = ActiveRecord::Base) # :nodoc:
       {
         table_name_prefix: config.table_name_prefix,
         table_name_suffix: config.table_name_suffix
@@ -859,7 +860,7 @@ module ActiveRecord
 
   end
 
-  class NullMigration < MigrationProxy #:nodoc:
+  class NullMigration < MigrationProxy # :nodoc:
     def initialize
       super(nil, 0, nil, nil)
     end
@@ -869,7 +870,7 @@ module ActiveRecord
     end
   end
 
-  class Migrator#:nodoc:
+  class Migrator # :nodoc:
     class << self
       attr_writer :migrations_paths
       alias :migrations_path= :migrations_paths=
@@ -941,7 +942,7 @@ module ActiveRecord
         migrations(migrations_paths).any?
       end
 
-      def last_migration #:nodoc:
+      def last_migration # :nodoc:
         migrations(migrations_paths).last || NullMigration.new
       end
 
@@ -951,15 +952,24 @@ module ActiveRecord
         Array(@migrations_paths)
       end
 
+      def match_to_migration_filename?(filename) # :nodoc:
+        filename =~ Migration::MigrationFilenameRegexp
+      end
+
+      def parse_migration_filename(filename) # :nodoc:
+        filename.scan(Migration::MigrationFilenameRegexp).first
+      end
+
       def migrations(paths)
         paths = Array(paths)
 
         files = Dir[*paths.map { |p| "#{p}/**/[0-9]*_*.rb" }]
 
         migrations = files.map do |file|
-          version, name, scope = file.scan(/([0-9]+)_([_a-z0-9]*)\.?([_a-z0-9]*)?\.rb\z/).first
+          basename = File.basename(file)
+          raise IllegalMigrationNameError.new(file) unless match_to_migration_filename?(basename)
 
-          raise IllegalMigrationNameError.new(file) unless version
+          version, name, scope = parse_migration_filename(basename)
           version = version.to_i
           name = name.camelize
 

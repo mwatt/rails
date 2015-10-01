@@ -142,7 +142,7 @@ class CacheStoreTest < ActionDispatch::IntegrationTest
 
       get '/get_session_value'
       assert_response :success
-      assert_equal nil, headers['Set-Cookie'], "should not resend the cookie again if session_id cookie is already exists"
+      assert_equal '', headers['Set-Cookie'], "should not resend the cookie again if session_id cookie is already exists"
     end
   end
 

@@ -281,7 +281,7 @@ class FlashIntegrationTest < ActionDispatch::IntegrationTest
     with_test_route_set do
       get '/use_flash'
       assert_response :success
-      assert_nil @response.headers["Set-Cookie"]
+      assert_equal '', @response.headers["Set-Cookie"]
       assert_equal "flash: ", @response.body
     end
   end

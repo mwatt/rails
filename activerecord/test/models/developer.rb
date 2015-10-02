@@ -122,8 +122,6 @@ end
 class DeveloperOrderedBySalary < ActiveRecord::Base
   self.table_name = 'developers'
   default_scope { order('salary DESC') }
-
-  scope :by_name, -> { order('name DESC') }
 end
 
 class DeveloperCalledDavid < ActiveRecord::Base

@@ -66,7 +66,7 @@ namespace :rails do
     end
 
     task :schema_migrations => :environment do
-      if ActiveRecord::SchemaMigration.table_exists?
+      if defined?(ActiveRecord) && ActiveRecord::SchemaMigration.table_exists?
         table_name = ActiveRecord::SchemaMigration.table_name
         unless ActiveRecord::SchemaMigration.connection.column_exists?(table_name, :created_at)
           ActiveRecord::SchemaMigration.connection.add_column(table_name, :created_at, :datetime, null: true)

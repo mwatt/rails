@@ -102,7 +102,7 @@ module ActionController
       end
 
       def user_name_or_password_blank?(request)
-        user_name_and_password(request).reject(&:blank?).empty?
+        user_name_and_password(request).all?(&:blank?)
       end
 
       def decode_credentials(request)

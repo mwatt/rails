@@ -7,7 +7,7 @@ gem 'rake', '>= 10.3'
 
 # Active Job depends on the URI::GID::MissingModelIDError, which isn't released yet.
 gem 'globalid', github: 'rails/globalid', branch: 'master'
-gem 'rack', github: 'rack/rack', branch: 'master'
+gem 'rack', github: 'jeremy/rack', branch: 'add-multivalued-header'
 
 # This needs to be with require false as it is
 # loaded after loading the test library to

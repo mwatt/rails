@@ -20,20 +20,20 @@ GIT
       redis-namespace
 
 GIT
+  remote: git://github.com/jeremy/rack.git
+  revision: df86b3828efea86a204fccf412d85bca24f71c38
+  branch: add-multivalued-header
+  specs:
+    rack (2.0.0.alpha)
+      json
+
+GIT
   remote: git://github.com/mikel/mail.git
   revision: 64ef1a12efcdda53fd63e1456c2c564044bf82ce
   branch: master
   specs:
     mail (2.6.3.edge)
       mime-types (>= 1.16, < 3)
-
-GIT
-  remote: git://github.com/rack/rack.git
-  revision: c28f271d0c91f45e13bfa8f07bed445ef91f41de
-  branch: master
-  specs:
-    rack (2.0.0.alpha)
-      json
 
 GIT
   remote: git://github.com/rails/arel.git

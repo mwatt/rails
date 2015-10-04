@@ -3,28 +3,28 @@ require 'active_support/values/time_zone'
 
 class Time
   DATE_FORMATS = {
-    :db           => '%Y-%m-%d %H:%M:%S',
-    :number       => '%Y%m%d%H%M%S',
-    :nsec         => '%Y%m%d%H%M%S%9N',
-    :time         => '%H:%M',
-    :short        => '%d %b %H:%M',
-    :long         => '%B %d, %Y %H:%M',
-    :long_ordinal => lambda { |time|
+    db:            '%Y-%m-%d %H:%M:%S',
+    number:        '%Y%m%d%H%M%S',
+    nsec:          '%Y%m%d%H%M%S%9N',
+    time:          '%H:%M',
+    short:         '%d %b %H:%M',
+    long:          '%B %d, %Y %H:%M',
+    long_ordinal:  lambda { |time|
       day_format = ActiveSupport::Inflector.ordinalize(time.day)
       time.strftime("%B #{day_format}, %Y %H:%M")
     },
-    :rfc822       => lambda { |time|
+    rfc822:        lambda { |time|
       offset_format = time.formatted_offset(false)
       time.strftime("%a, %d %b %Y %H:%M:%S #{offset_format}")
     },
-    :iso8601      => lambda { |time| time.iso8601 }
+    iso8601:       lambda { |time| time.iso8601 }
   }
 
   # Converts to a formatted string. See DATE_FORMATS for built-in formats.
   #
   # This method is aliased to <tt>to_s</tt>.
   #
-  #   time = Time.now                    # => Thu Jan 18 06:10:17 CST 2007
+  #   time = Time.now                    # => 2007-01-18 06:10:17 -06:00
   #
   #   time.to_formatted_s(:time)         # => "06:10"
   #   time.to_s(:time)                   # => "06:10"

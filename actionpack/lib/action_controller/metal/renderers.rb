@@ -11,7 +11,17 @@ module ActionController
     Renderers.remove(key)
   end
 
-  # RFC: Where is this used?
+  # See <tt>Responder#api_behavior</tt>
+  #
+  #   # This is the common behavior for formats associated with APIs, such as :xml and :json.
+  #   def api_behavior
+  #     raise MissingRenderer.new(format) unless has_renderer?
+  #   end
+  #
+  #   # Check whether the necessary Renderer is available
+  #   def has_renderer?
+  #     Renderers::RENDERERS.include?(format)
+  #   end
   class MissingRenderer < LoadError
     def initialize(format)
       super "No renderer defined for format: #{format}"
@@ -28,7 +38,7 @@ module ActionController
     Renderers.remove_serializer(key)
   end
 
-  # RFC: Where is this used?
+  # See <tt>Renderers::MissingRenderer</tt>
   class MissingSerializer < LoadError
     def initialize(format)
       super "No serializer defined for format: #{format}"
@@ -46,14 +56,15 @@ module ActionController
     end
 
     module ClassMethods
-      # RFC: Where is this used?
+      # TODO: Add test where this is used when controller does not
+      # +include Renderers::All+.
       def use_renderers(*args)
         renderers = _renderers + args
         self._renderers = renderers.freeze
       end
       alias use_renderer use_renderers
 
-      # RFC: Where is this used?
+      # See <tt>Renderers.use_renderers</tt>
       def use_serializers(*args)
         serializers = _serializers + args
         self._serializers = serializers.freeze
@@ -168,10 +179,10 @@ module ActionController
     #
     # Example usage:
     #
-    # Prior to the introduction of SERIALIZERS, the ActiveModel::Serializers gem,
-    # for example, has relied upon defining  +_render_option_json+ ( pre-4.2 )
+    # Prior to the introduction of SERIALIZERS, customizing serialization would
+    # have relied upon defining +_render_option_json+ ( pre-4.2 )
     # and +_render_with_renderer_json+ in the controller, and calling +super+ on
-    # the serialized object. Now, ActiveModel::Serializers need only call
+    # the serialized object. Now, one need only call
     # +ActionController.remove_serializer :json+ and define a new serializer with
     # +ActionController.add_serializer json do |json, options| end+. There's
     # no longer a need to add controller methods to define custom serializers.
@@ -184,28 +195,6 @@ module ActionController
     #
     #     json = json.as_json(options) if json.respond_to?(:as_json)
     #     json = JSON.pretty_generate(json, options)
-    #   end
-    #
-    # The JSON serializer could be extended by overriding it:
-    #
-    #   def _serialize_with_serializer_json(json, options)
-    #     json = CustomSerializer.new(json, options)
-    #     super
-    #   end
-    #
-    # The JSON serializer could be extended by overriding the renderer:
-    #
-    #   def _serialize_with_renderer_json(json, options)
-    #     json = CustomSerializer.new(json, options)
-    #     super
-    #   end
-    #
-    # The JSON serializer could be extended by re-using the existing serializer:
-    #
-    #   alias_method :_original_serializer_with_serializer_json, :_serialize_with_serializer_json
-    #   def _serialize_with_serializer_json(json, options)
-    #     json = CustomSerializer.new(json, options)
-    #     _original_serializer_with_serializer_json(json, options)
     #   end
     #
     # See https://groups.google.com/forum/#!topic/rubyonrails-core/K8t4-DZ_DkQ/discussion for

@@ -117,10 +117,10 @@
     var part_name = form.options[form.selectedIndex].value
     document.getElementsByName('messageBody')[0].src = part_name;
 
-    if (history.pushState) {
+    if (history.replaceState) {
       var url    = location.pathname.replace(/\.(txt|html)$/, '');
       var format = /html/.test(part_name) ? '.html' : '.txt';
-      window.history.pushState({}, '', url + format);
+      window.history.replaceState({}, '', url + format);
     }
   }
 </script>

@@ -94,7 +94,6 @@
 
     <% if @email.multipart? %>
       <dd>
-
         <select onchange="formatChanged(this);">
           <option <%= request.format == Mime::Type[:HTML] ? 'selected' : '' %> value="?part=text%2Fhtml">View as HTML email</option>
           <option <%= request.format == Mime::Type[:TEXT] ? 'selected' : '' %> value="?part=text%2Fplain">View as plain-text email</option>

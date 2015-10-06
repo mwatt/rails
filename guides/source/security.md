@@ -226,7 +226,7 @@ The HTTP protocol basically provides two main types of requests - GET and POST (
 
 If your web application is RESTful, you might be used to additional HTTP verbs, such as PATCH, PUT or DELETE. Most of today's web browsers, however, do not support them - only GET and POST. Rails uses a hidden `_method` field to handle this barrier.
 
-_POST requests can be sent automatically, too_. Here is an example for a link which displays `www.harmless.com` as destination in the browser's status bar. In fact it dynamically creates a new form that sends a POST request.
+_POST requests can be sent automatically, too_. In this example, the link www.harmless.com is shown as the destination in the browser's status bar. But it has actually dynamically creates a new form that sends a POST request.
 
 ```html
 <a href="http://www.harmless.com/" onclick="

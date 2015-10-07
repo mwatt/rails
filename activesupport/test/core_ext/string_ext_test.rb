@@ -143,69 +143,33 @@ class StringInflectionsTest < ActiveSupport::TestCase
     end
   end
 
-  def test_string_parameterized_withcase_normal
-    StringToParameterizedWithcase.each do |normal, slugged|
-      assert_equal(normal.parameterized_withcase, slugged)
-    end
-  end
-
-  def test_string_parameterized_upcase_normal
-    StringToParameterizedWithcase.each do |normal, slugged|
-      assert_equal(normal.parameterized_upcase, slugged)
-    end
-  end
-
-  def test_string_parameterized_downcase_normal
-    StringToParameterized.each do |normal, slugged|
-      assert_equal(normal.parameterized_downcase, slugged)
+  def test_string_parameterized_normal_preserve_case
+    StringToParameterizedPreserveCase.each do |normal, slugged|
+      assert_equal(normal.parameterize(preserve_case: true), slugged)
     end
   end
 
   def test_string_parameterized_no_separator
     StringToParameterizeWithNoSeparator.each do |normal, slugged|
-      assert_equal(normal.parameterized(''), slugged)
+      assert_equal(normal.parameterized(separator: ''), slugged)
     end
   end
 
-  def test_string_parameterized_withcase_no_separator
-    StringToParameterizeWithcaseWithNoSeperator.each do |normal, slugged|
-      assert_equal(normal.parameterized_withcase(''), slugged)
-    end
-  end
-
-  def test_string_parameterized_upcase_no_separator
-    StringToParameterizeUpcaseWithNoSeperator.each do |normal, slugged|
-      assert_equal(normal.parameterized_upcase(''), slugged)
-    end
-  end
-
-  def test_string_parameterized_downcase_no_separator
-    StringToParameterizeWithNoSeparator.each do |normal, slugged|
-      assert_equal(normal.parameterized_downcase(''), slugged)
+  def test_string_parameterized_no_separator_preserve_case
+    StringToParameterizePreserveCaseWithNoSeperator.each do |normal, slugged|
+      assert_equal(normal.parameterize(separator: '', preserve_case: true), slugged)
     end
   end
 
   def test_string_parameterized_underscore
     StringToParameterizeWithUnderscore.each do |normal, slugged|
-      assert_equal(normal.parameterize('_'), slugged)
+      assert_equal(normal.parameterize(separator: '_'), slugged)
     end
   end
 
-  def test_string_parameterized_withcase_underscore
-    StringToParameterizeWithcaseWithUnderscore.each do |normal, slugged|
-      assert_equal(normal.parameterized_withcase('_'), slugged)
-    end
-  end
-
-  def test_string_parameterized_upcase_underscore
-    StringToParameterizeUpcaseWithUnderscore.each do |normal, slugged|
-      assert_equal(normal.parameterized_upcase('_'), slugged)
-    end
-  end
-
-  def test_string_parameterized_downcase_underscore
-    StringToParameterizeWithUnderscore.each do |normal, slugged|
-      assert_equal(normal.parameterized_downcase('_'), slugged)
+  def test_string_parameterized_underscore_preserve_case
+    StringToParameterizePreserceCaseWithUnderscore.each do |normal, slugged|
+      assert_equal(normal.parameterize(separator: '_', preserve_case: true), slugged)
     end
   end
 

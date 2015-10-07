@@ -177,14 +177,14 @@ class String
 
   # Forces string to upcase after replacing all special characters
   #
-  # "Donald E. Knuth".parameterize_downcase => DONALD-E-KNUTH
+  # "Donald E. Knuth".parameterize_upcase => DONALD-E-KNUTH
   def parameterize_upcase(sep = '-'.freeze, cas = :upcase)
     ActiveSupport::Inflector.parameterize(self, sep, cas)
   end
 
   # Retains character case after replacing all special characters
   #
-  # "Donald E. Knuth".parameterize_downcase => Donald-E-Knuth
+  # "Donald E. Knuth".parameterize_withcase => Donald-E-Knuth
   def parameterize_withcase(sep = '-'.freeze, cas = :withcase)
     ActiveSupport::Inflector.parameterize(self, sep, cas)
   end

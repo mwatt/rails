@@ -5,6 +5,14 @@ module Rails
     # This is a wrapper around all base Rails tasks, including but not
     # limited to: generate, console, server, test, dbconsole, new, etc.
     class Core < Command
+      rake_delegate 'stats', 'secret', 'time:zones:all', 'routes', 'about'
+
+      set_banner :stats, ''
+      set_banner :secret, ''
+      set_banner :time_zones_all, ''
+      set_banner :routes, ''
+      set_banner :about, ''
+
       def require_command!(command)
         require "rails/commands/#{command}"
       end

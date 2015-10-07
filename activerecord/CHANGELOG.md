@@ -1,3 +1,8 @@
+*   Add environment & load_config dependency to `bin/rake db:seed` to enable
+    seed load in environments without Rails and custom DB configuration
+
+    *Tobias Bielohlawek*
+
 *   Allow fixtures files to set the model class in the YAML file itself.
 
     To load the fixtures file `accounts.yml` as the `User` model, use:

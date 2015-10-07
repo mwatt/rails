@@ -164,8 +164,29 @@ class String
   #
   #   <%= link_to(@person.name, person_path) %>
   #   # => <a href="/person/1-donald-e-knuth">Donald E. Knuth</a>
-  def parameterize(sep = '-'.freeze)
-    ActiveSupport::Inflector.parameterize(self, sep)
+  def parameterize(sep = '-'.freeze, cas = :downcase)
+    ActiveSupport::Inflector.parameterize(self, sep, cas)
+  end
+
+  # Forces string to downcase after replacing all special characters
+  #
+  # "Donald E. Knuth".parameterize_downcase => donald-e-knuth
+  def parameterize_downcase(sep = '-'.freeze, cas = :downcase)
+    ActiveSupport::Inflector.parameterize(self, sep, cas)
+  end
+
+  # Forces string to upcase after replacing all special characters
+  #
+  # "Donald E. Knuth".parameterize_downcase => DONALD-E-KNUTH
+  def parameterize_upcase(sep = '-'.freeze, cas = :upcase)
+    ActiveSupport::Inflector.parameterize(self, sep, cas)
+  end
+
+  # Retains character case after replacing all special characters
+  #
+  # "Donald E. Knuth".parameterize_downcase => Donald-E-Knuth
+  def parameterize_withcase(sep = '-'.freeze, cas = :withcase)
+    ActiveSupport::Inflector.parameterize(self, sep, cas)
   end
 
   # Creates the name of a table like Rails does for models to table names. This method

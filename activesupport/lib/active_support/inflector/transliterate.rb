@@ -68,7 +68,7 @@ module ActiveSupport
     #
     #   parameterize("Donald E. Knuth") # => "donald-e-knuth"
     #   parameterize("^trés|Jolie-- ")  # => "tres-jolie"
-    def parameterize(string, sep = '-')
+    def parameterize(string, sep = '-', cas = :downcase)
       # replace accented chars with their ascii equivalents
       parameterized_string = transliterate(string)
       # Turn unwanted chars into the separator
@@ -87,8 +87,14 @@ module ActiveSupport
         # Remove leading/trailing separator.
         parameterized_string.gsub!(re_leading_trailing_separator, ''.freeze)
       end
-      parameterized_string.downcase!
-      parameterized_string
+      
+      if cas == :downcase
+        parameterized_string.downcase
+      elsif cas == :upcase
+        parameterized_string.upcase
+      elsif cas == :withcase
+        parameterized_string
+      end
     end
   end
 end

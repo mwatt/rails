@@ -673,7 +673,13 @@ module ActiveRecord
     end
 
     def inspect
-      entries = to_a.take([limit_value, 11].compact.min).map!(&:inspect)
+      num_to_take = [limit_value, 11].compact.min
+      if size.nonzero?
+        taken = to_a.take(num_to_take)
+      else
+        taken = limit(num_to_take).to_a
+      end
+      entries = taken.map!(&:inspect)
       entries[10] = '...' if entries.size == 11
 
       "#<#{self.class.name} [#{entries.join(', ')}]>"
